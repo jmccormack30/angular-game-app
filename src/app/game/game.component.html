@@ -1,0 +1,24 @@
+<div class="board">
+    <!-- Loop through each row -->
+    <div
+      class="row"
+      *ngFor="let row of tileMap; let rowIndex = index">
+      <!-- Loop through each tile in the current row -->
+      <div
+        class="tile"
+        *ngFor="let tile of row; let colIndex = index"
+        [ngClass]="{
+          'land': tile.type === 'land',
+          'water': tile.type === 'water',
+        }"
+        [style.top.px]="rowIndex * tileSize"
+        [style.left.px]="colIndex * tileSize">
+      </div>
+    </div>
+    <!-- Player element -->
+    <div
+      class="player"
+      [style.top.px]="playerRow * tileSize"
+      [style.left.px]="playerCol * tileSize">
+    </div>
+  </div>

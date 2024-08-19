@@ -1,0 +1,31 @@
+.board {
+    position: relative;
+    width: 500px; /* Adjust based on number of columns and tileSize */
+    height: 500px; /* Adjust based on number of rows and tileSize */
+  }
+  
+  .tile {
+    position: absolute;
+    width: 50px;
+    height: 50px;
+    box-sizing: border-box;
+  }
+  
+  .land {
+    background-color: green;
+  }
+  
+  .water {
+    background-color: blue;
+  }
+  
+  .wall {
+    background-color: gray;
+  }
+  
+  .player {
+    position: absolute;
+    width: 50px;
+    height: 50px;
+    background-color: red;
+  }
