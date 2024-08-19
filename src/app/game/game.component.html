@@ -18,7 +18,8 @@
     <!-- Player element -->
     <div
       class="player"
-      [style.top.px]="playerRow * tileSize"
-      [style.left.px]="playerCol * tileSize">
+      [style.top.px]="playerY"
+      [style.left.px]="playerX">
+      <img [src]="playerImage" alt="Player" class="player-image" />
     </div>
   </div>
