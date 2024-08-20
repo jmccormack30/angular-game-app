@@ -18,7 +18,7 @@ export class Player {
 
     private keyState: { [key: string]: boolean } = {};
   
-    constructor(xPos: number, yPos: number, row: number, col: number, speed: number, direction: string, private cdr: ChangeDetectorRef) {
+    constructor(xPos: number, yPos: number, col: number, row: number, speed: number, direction: string, private cdr: ChangeDetectorRef) {
       this.xPos = xPos;
       this.yPos = yPos;
       this.row = row;
@@ -36,7 +36,13 @@ export class Player {
         'assets/player_up.png',
         'assets/player_down.png',
         'assets/player_down_walk_1.png',
-        'assets/player_down_walk_2.png'
+        'assets/player_down_walk_2.png',
+        'assets/player_up_walk_3.png',
+        'assets/player_up_walk_4.png',
+        'assets/player_left_walk_1.png',
+        'assets/player_left_walk_2.png',
+        'assets/player_right_walk_1.png',
+        'assets/player_right_walk_2.png'
       ]
 
       const promises = imageSources.map(src => this.loadImage(src));
@@ -55,30 +61,11 @@ export class Player {
       });
     }
 
-    // preloadImages() {
-    //     const imageUrls = {
-    //         'right': 'assets/player_right.png',
-    //         'left': 'assets/player_left.png',
-    //         'up': 'assets/player_up.png',
-    //         'down': 'assets/player_down.png',
-    //         'down_walk_1': 'assets/player_down_walk_1.png',
-    //         'down_walk_2': 'assets/player_down_walk_2.png'
-    //     };
-        
-    //     for (const [key, url] of Object.entries(imageUrls)) {
-    //         const img = new Image();
-    //         img.src = url;
-    //         this.playerImages[key] = url;
-    //     }
-    
-    //     this.image = this.playerImages['facingRight'];
-    // }
-
     update(keyState: {[key: string]: boolean }) {
         const isMoving: boolean = !this.isAtPosition();
 
         if (isMoving) {
-            //this.updatePlayerPosition(this.direction);
+            this.updatePlayerPosition(this.direction);
         }
         else {
             // get the current directional input of the player
@@ -91,7 +78,7 @@ export class Player {
                 this.updatePlayerPosition(this.direction);
 
                 if (this.animation === undefined) {
-                    this.updateAnimation(this.direction);
+                    this.animation = new PlayerWalkAnimation();
                 }
             }
         }
@@ -128,12 +115,6 @@ export class Player {
 
     isAtPosition() {
         return ((this.xPos === this.col * GameComponent.tileSize) && (this.yPos === this.row * GameComponent.tileSize));
-    }
-
-    updateAnimation(direction: string) {
-        if (direction === "down") {
-            this.animation = new PlayerWalkAnimation();
-        }
     }
 
     getDefaultImageSrc(direction: string | undefined) {

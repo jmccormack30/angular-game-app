@@ -43,7 +43,7 @@ export class GameComponent implements AfterViewInit, OnDestroy {
 
     this.initializeTileMap();
     console.log("3");
-    this.player = new Player(0, 0, 0, 0, 1.75, "down", this.cdr);
+    this.player = new Player(50, 250, 1, 5, 1.75, "down", this.cdr);
     console.log("4");
     this.startGameLoop();
     console.log("end");

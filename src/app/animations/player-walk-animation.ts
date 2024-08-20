@@ -25,6 +25,15 @@ export class PlayerWalkAnimation {
 
     this.actionImageMapDown.set(Action.WALK1, "assets/player_down_walk_1.png");
     this.actionImageMapDown.set(Action.WALK2, "assets/player_down_walk_2.png");
+
+    this.actionImageMapUp.set(Action.WALK1, "assets/player_up_walk_3.png");
+    this.actionImageMapUp.set(Action.WALK2, "assets/player_up_walk_4.png");
+
+    this.actionImageMapLeft.set(Action.WALK1, "assets/player_left_walk_1.png");
+    this.actionImageMapLeft.set(Action.WALK2, "assets/player_left.png");
+
+    this.actionImageMapRight.set(Action.WALK1, "assets/player_right_walk_1.png");
+    this.actionImageMapRight.set(Action.WALK2, "assets/player_right.png");
   }
 
   getImage(direction: string | undefined) {
@@ -34,16 +43,16 @@ export class PlayerWalkAnimation {
 
     if (action !== undefined) {
       if (direction === "up") {
-        // TODO
+        image = this.actionImageMapUp.get(action) as Action;
       }
       else if (direction === "down") {
         image = this.actionImageMapDown.get(action) as Action;
       }
       else if (direction === "left") {
-        // TODO
+        image = this.actionImageMapLeft.get(action) as Action;
       }
       else if (direction === "right") {
-        // TODO
+        image = this.actionImageMapRight.get(action) as Action;
       }
 
       this.frameIndex++;
