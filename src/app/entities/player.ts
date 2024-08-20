@@ -10,8 +10,9 @@ export class Player {
     speed: number;
     direction: string | undefined;
 
-    image: string | undefined;
+    image: HTMLImageElement | undefined;
     playerImages: { [key: string]: string } = {};
+    private imageCache: { [key: string]: HTMLImageElement } = {};
 
     animation : PlayerWalkAnimation | undefined;
 
@@ -25,35 +26,59 @@ export class Player {
       this.speed = speed;
       this.direction = direction;
 
-      this.preloadImages();
+      this.preloadImages(); 
     }
 
-    preloadImages() {
-        const imageUrls = {
-            'right': 'assets/player_right.png',
-            'left': 'assets/player_left.png',
-            'up': 'assets/player_up.png',
-            'down': 'assets/player_down.png',
-            'down_walk_1': 'assets/player_down_walk_1.png',
-            'down_walk_2': 'assets/player_down_walk_2.png'
-        };
-        
-        // Preload images
-        for (const [key, url] of Object.entries(imageUrls)) {
-            const img = new Image();
-            img.src = url;
-            this.playerImages[key] = url;
-        }
-    
-        // Set initial image
-        this.image = this.playerImages['facingRight'];
+    preloadImages(): Promise<void[]> {
+      const imageSources = [
+        'assets/player_right.png',
+        'assets/player_left.png',
+        'assets/player_up.png',
+        'assets/player_down.png',
+        'assets/player_down_walk_1.png',
+        'assets/player_down_walk_2.png'
+      ]
+
+      const promises = imageSources.map(src => this.loadImage(src));
+      return Promise.all(promises);
     }
+
+    private loadImage(src: string): Promise<void> {
+      return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => {
+          this.imageCache[src] = img;
+          resolve();
+        };
+        img.onerror = reject;
+        img.src = src;
+      });
+    }
+
+    // preloadImages() {
+    //     const imageUrls = {
+    //         'right': 'assets/player_right.png',
+    //         'left': 'assets/player_left.png',
+    //         'up': 'assets/player_up.png',
+    //         'down': 'assets/player_down.png',
+    //         'down_walk_1': 'assets/player_down_walk_1.png',
+    //         'down_walk_2': 'assets/player_down_walk_2.png'
+    //     };
+        
+    //     for (const [key, url] of Object.entries(imageUrls)) {
+    //         const img = new Image();
+    //         img.src = url;
+    //         this.playerImages[key] = url;
+    //     }
+    
+    //     this.image = this.playerImages['facingRight'];
+    // }
 
     update(keyState: {[key: string]: boolean }) {
         const isMoving: boolean = !this.isAtPosition();
 
         if (isMoving) {
-            this.updatePlayerPosition(this.direction);
+            //this.updatePlayerPosition(this.direction);
         }
         else {
             // get the current directional input of the player
@@ -72,11 +97,12 @@ export class Player {
         }
     }
 
-    draw() {
+    draw(ctx: CanvasRenderingContext2D) {
+        console.log("Draw!");
         if (this.animation !== undefined) {
             if (!this.isAtPosition()) {
-                const imageAction = this.animation.getImage();
-                this.updateImage(this.playerImages[imageAction]);
+                const src = this.animation.getImage(this.direction);
+                this.image = this.getImage(src);
             }
             else {
                 this.animation = undefined;
@@ -84,8 +110,8 @@ export class Player {
         }
         else {
             //const imageAction = this.getDefaultImage(this.direction);
-            const imageAction = this.direction ?? "";
-            this.updateImage(this.playerImages[imageAction]);
+            const src = this.getDefaultImageSrc(this.direction);
+            this.image = this.getImage(src);
 
             const isMoving: boolean = !this.isAtPosition();
             if (isMoving) {
@@ -93,9 +119,11 @@ export class Player {
                 console.log("Draw, image: " + this.image);
             }
         }
-        setTimeout(() => {
-            this.cdr.markForCheck(); // Marks the component for check
-        }, 0);
+        
+        if (this.image) {
+            console.log("Image drawing!");
+            ctx.drawImage(this.image, this.xPos, this.yPos);
+        }
     }
 
     isAtPosition() {
@@ -108,7 +136,7 @@ export class Player {
         }
     }
 
-    getDefaultImage(direction: string | undefined) {
+    getDefaultImageSrc(direction: string | undefined) {
         if (direction === "up") {
             return "assets/player_up.png";
         }
@@ -194,8 +222,12 @@ export class Player {
         }
     }
 
-    updateImage(url: string) {
-        const uniqueUrl = `${url}?timestamp=${new Date().getTime()}`;
-        this.image = uniqueUrl;
+    getImage(src: string): HTMLImageElement | undefined {
+        return this.imageCache[src];
     }
+
+    // updateImage(url: string) {
+    //     const uniqueUrl = `${url}?timestamp=${new Date().getTime()}`;
+    //     this.image = uniqueUrl;
+    // }
 }

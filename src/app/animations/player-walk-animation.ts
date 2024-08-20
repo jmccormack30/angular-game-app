@@ -27,33 +27,30 @@ export class PlayerWalkAnimation {
     this.actionImageMapDown.set(Action.WALK2, "assets/player_down_walk_2.png");
   }
 
-  getImage() {
-    const defaultAction: string = 'Default Action';
-    const action: string = this.actionFrameMap.get(this.frameIndex) ?? defaultAction;
-    this.frameIndex++;
-    if (this.frameIndex >= this.totalFrames) this.frameIndex = 0;
-    return action;
-    // let image = "assets/player_down.png";
+  getImage(direction: string | undefined) {
+    const defaultAction: Action = Action.WALK1;
+    const action: Action = this.actionFrameMap.get(this.frameIndex) ?? defaultAction;
+    let image = "assets/player_down.png";
 
-    // if (action !== undefined) {
-    //   if (direction === "up") {
-    //     // TODO
-    //   }
-    //   else if (direction === "down") {
-    //     image = this.actionImageMapDown.get(action) as string;
-    //   }
-    //   else if (direction === "left") {
-    //     // TODO
-    //   }
-    //   else if (direction === "right") {
-    //     // TODO
-    //   }
+    if (action !== undefined) {
+      if (direction === "up") {
+        // TODO
+      }
+      else if (direction === "down") {
+        image = this.actionImageMapDown.get(action) as Action;
+      }
+      else if (direction === "left") {
+        // TODO
+      }
+      else if (direction === "right") {
+        // TODO
+      }
 
-    //   this.frameIndex++;
-    //   if (this.frameIndex >= this.totalFrames) this.frameIndex = 0;
-    //   return image;
-    // }
+      this.frameIndex++;
+      if (this.frameIndex >= this.totalFrames) this.frameIndex = 0;
+      return image;
+    }
 
-    // throw new Error("Invalid action / frame during animation");
+    throw new Error("Invalid action / frame during animation");
   }
 }

@@ -1,9 +1,7 @@
-<div class="board">
-    <!-- Loop through each row -->
+<!-- <div class="board">
     <div
       class="row"
       *ngFor="let row of tileMap; let rowIndex = index">
-      <!-- Loop through each tile in the current row -->
       <div
         class="tile"
         *ngFor="let tile of row; let colIndex = index"
@@ -15,11 +13,11 @@
         [style.left.px]="colIndex * getTileSize()">
       </div>
     </div>
-    <!-- Player element -->
     <div
       class="player"
       [style.top.px]="player?.yPos"
       [style.left.px]="player?.xPos">
       <img [src]="player?.image" alt="Player" class="player-image" />
     </div>
-  </div>
+  </div> -->
+<canvas #gameCanvas width="500" height="500"></canvas>
