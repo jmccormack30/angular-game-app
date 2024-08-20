@@ -85,7 +85,6 @@ export class Player {
     }
 
     draw(ctx: CanvasRenderingContext2D) {
-        console.log("Draw!");
         if (this.animation !== undefined) {
             if (!this.isAtPosition()) {
                 const src = this.animation.getImage(this.direction);
@@ -100,15 +99,14 @@ export class Player {
             const src = this.getDefaultImageSrc(this.direction);
             this.image = this.getImage(src);
 
-            const isMoving: boolean = !this.isAtPosition();
-            if (isMoving) {
-                console.log("Draw, direction: " + this.direction);
-                console.log("Draw, image: " + this.image);
-            }
+            // const isMoving: boolean = !this.isAtPosition();
+            // if (isMoving) {
+            //     console.log("Draw, direction: " + this.direction);
+            //     console.log("Draw, image: " + this.image);
+            // }
         }
         
         if (this.image) {
-            console.log("Image drawing!");
             ctx.drawImage(this.image, this.xPos, this.yPos);
         }
     }

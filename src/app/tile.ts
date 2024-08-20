@@ -1,3 +1,3 @@
 export interface Tile {
-    type: 'land' | 'water'
+    type: 'land' | 'water' | 'melon' | 'fence';
 }
