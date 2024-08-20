@@ -11,15 +11,15 @@
           'land': tile.type === 'land',
           'water': tile.type === 'water',
         }"
-        [style.top.px]="rowIndex * tileSize"
-        [style.left.px]="colIndex * tileSize">
+        [style.top.px]="rowIndex * getTileSize()"
+        [style.left.px]="colIndex * getTileSize()">
       </div>
     </div>
     <!-- Player element -->
     <div
       class="player"
-      [style.top.px]="playerY"
-      [style.left.px]="playerX">
-      <img [src]="playerImage" alt="Player" class="player-image" />
+      [style.top.px]="player?.yPos"
+      [style.left.px]="player?.xPos">
+      <img [src]="player?.image" alt="Player" class="player-image" />
     </div>
   </div>
