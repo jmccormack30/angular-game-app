@@ -1,4 +1,4 @@
-import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, HostListener, OnDestroy, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, HostListener, OnDestroy, ViewChild } from '@angular/core';
 import { Tile } from '../tile';
 import { Player } from '../entities/player';
 
@@ -11,8 +11,8 @@ export class GameComponent implements AfterViewInit, OnDestroy {
   @ViewChild('gameCanvas') gameCanvas!: ElementRef<HTMLCanvasElement>;
   private ctx!: CanvasRenderingContext2D;
   
-  static rows: number = 10;
-  static cols: number = 10;
+  static rows: number = 19;
+  static cols: number = 25;
   static tileSize: number = 50;
   tileMap: Tile[][] = [];
 
@@ -32,9 +32,7 @@ export class GameComponent implements AfterViewInit, OnDestroy {
 
   private imageCache: { [key: string]: HTMLImageElement } = {};
 
-  constructor(private cdr: ChangeDetectorRef) {
-    
-  }
+  constructor() {}
 
   ngAfterViewInit(): void {
     const canvas = this.gameCanvas.nativeElement;
@@ -42,7 +40,7 @@ export class GameComponent implements AfterViewInit, OnDestroy {
 
     this.preloadImages();
     this.initializeTileMap();
-    this.player = new Player(50, 250, 1, 5, 1.75, "down", this.cdr);
+    this.player = new Player(600, 450, 12, 9, 1.75, "down");
     this.startGameLoop();
   }
 
@@ -53,7 +51,8 @@ export class GameComponent implements AfterViewInit, OnDestroy {
   preloadImages(): Promise<void[]> {
     const imageSources = [
       'assets/watermelon.png',
-      'assets/fence_vertical.png'
+      'assets/fence_vertical.png',
+      'assets/grass_2.jpg'
     ]
 
     const promises = imageSources.map(src => this.loadImage(src));
@@ -64,7 +63,6 @@ export class GameComponent implements AfterViewInit, OnDestroy {
     return new Promise((resolve, reject) => {
       const img = new Image();
       img.onload = () => {
-        console.log(img);
         this.imageCache[src] = img;
         resolve();
       };
@@ -96,82 +94,16 @@ export class GameComponent implements AfterViewInit, OnDestroy {
         };
       }
     }
-    this.tileMap[1][9] = {
-      type: 'fence'
-    }
-    this.tileMap[1][8] = {
-      type: 'fence'
-    }
-    this.tileMap[1][7] = {
-      type: 'fence'
-    }
-    this.tileMap[8][9] = {
-      type: 'fence'
-    }
-    this.tileMap[8][8] = {
-      type: 'fence'
-    }
-    this.tileMap[8][7] = {
-      type: 'fence'
-    }
 
-    this.tileMap[2][9] = {
+    this.tileMap[12][12] = {
       type: 'melon'
     }
-    this.tileMap[3][9] = {
+    this.tileMap[12][11] = {
       type: 'melon'
     }
-    this.tileMap[4][9] = {
+    this.tileMap[12][13] = {
       type: 'melon'
     }
-    this.tileMap[5][9] = {
-      type: 'melon'
-    }
-    this.tileMap[6][9] = {
-      type: 'melon'
-    }
-    this.tileMap[7][9] = {
-      type: 'melon'
-    }
-
-    this.tileMap[2][8] = {
-      type: 'melon'
-    }
-    this.tileMap[3][8] = {
-      type: 'melon'
-    }
-    this.tileMap[4][8] = {
-      type: 'melon'
-    }
-    this.tileMap[5][8] = {
-      type: 'melon'
-    }
-    this.tileMap[6][8] = {
-      type: 'melon'
-    }
-    this.tileMap[7][8] = {
-      type: 'melon'
-    }
-
-    this.tileMap[2][7] = {
-      type: 'melon'
-    }
-    this.tileMap[3][7] = {
-      type: 'melon'
-    }
-    this.tileMap[4][7] = {
-      type: 'melon'
-    }
-    this.tileMap[5][7] = {
-      type: 'melon'
-    }
-    this.tileMap[6][7] = {
-      type: 'melon'
-    }
-    this.tileMap[7][7] = {
-      type: 'melon'
-    }
-    
   }
 
   gameLoop() {
@@ -189,35 +121,27 @@ export class GameComponent implements AfterViewInit, OnDestroy {
   }
 
   update() {
-    this.ctx.clearRect(0, 0, this.width, this.height);  
+    this.ctx.clearRect(0, 0, this.width, this.height);
 
     for (let r = 0; r < this.tileMap.length; r++) {
       const row = this.tileMap[r];
       for (let c = 0; c < row.length; c++) {
         const tile = row[c];
         if (tile.type === 'land') {
-          this.ctx.fillStyle = 'green';
-          this.ctx.fillRect(r * this.tileSize, c * this.tileSize, this.tileSize, this.tileSize);
+          const grass = this.getImage('assets/grass_2.jpg');
+          if (grass) {
+            this.ctx.drawImage(grass, c * this.tileSize, r * this.tileSize, this.tileSize, this.tileSize);
+          }
+          // this.ctx.fillStyle = 'green';
+          // this.ctx.fillRect(c * this.tileSize, r * this.tileSize, this.tileSize, this.tileSize);
         }
         else if (tile.type === 'melon') {
-          const melonImg = this.getImage('assets/watermelon.png');
           this.ctx.fillStyle = 'green';
-          this.ctx.fillRect(r * this.tileSize, c * this.tileSize, this.tileSize, this.tileSize);
-          if (melonImg) {
-            this.ctx.drawImage(melonImg, r * this.tileSize, c * this.tileSize);
+          this.ctx.fillRect(c * this.tileSize, r * this.tileSize, this.tileSize, this.tileSize);
+          const melon = this.getImage('assets/watermelon.png');
+          if (melon) {
+            this.ctx.drawImage(melon, c * this.tileSize, r * this.tileSize, this.tileSize, this.tileSize);
           }
-        }
-        else if (tile.type === 'fence') {
-          const fenceImg = this.getImage('assets/fence_vertical.png');
-          this.ctx.fillStyle = 'green';
-          this.ctx.fillRect(r * this.tileSize, c * this.tileSize, this.tileSize, this.tileSize);
-          if (fenceImg) {
-            this.ctx.drawImage(fenceImg, r * this.tileSize, c * this.tileSize);
-          }
-        }
-        else {
-          this.ctx.fillStyle = 'black';
-          this.ctx.fillRect(r * this.tileSize, c * this.tileSize, this.tileSize, this.tileSize);
         }
       }
     }

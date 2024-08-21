@@ -1,4 +1,3 @@
-import { ChangeDetectorRef } from "@angular/core";
 import { PlayerWalkAnimation } from "../animations/player-walk-animation";
 import { GameComponent } from "../game/game.component";
 
@@ -18,14 +17,13 @@ export class Player {
 
     private keyState: { [key: string]: boolean } = {};
   
-    constructor(xPos: number, yPos: number, col: number, row: number, speed: number, direction: string, private cdr: ChangeDetectorRef) {
+    constructor(xPos: number, yPos: number, col: number, row: number, speed: number, direction: string) {
       this.xPos = xPos;
       this.yPos = yPos;
       this.row = row;
       this.col = col;
       this.speed = speed;
       this.direction = direction;
-
       this.preloadImages(); 
     }
 
@@ -64,6 +62,8 @@ export class Player {
     update(keyState: {[key: string]: boolean }) {
         const isMoving: boolean = !this.isAtPosition();
 
+        this.updateSpeed(keyState);
+
         if (isMoving) {
             this.updatePlayerPosition(this.direction);
         }
@@ -98,12 +98,6 @@ export class Player {
             //const imageAction = this.getDefaultImage(this.direction);
             const src = this.getDefaultImageSrc(this.direction);
             this.image = this.getImage(src);
-
-            // const isMoving: boolean = !this.isAtPosition();
-            // if (isMoving) {
-            //     console.log("Draw, direction: " + this.direction);
-            //     console.log("Draw, image: " + this.image);
-            // }
         }
         
         if (this.image) {
@@ -203,6 +197,19 @@ export class Player {
 
     getImage(src: string): HTMLImageElement | undefined {
         return this.imageCache[src];
+    }
+
+    isRunning(keyState: {[key: string]: boolean }) {
+        return keyState['Shift'];
+    }
+
+    updateSpeed(keyState: {[key: string]: boolean }) {
+        if (this.isRunning(keyState)) {
+            this.speed = 3;
+        }
+        else {
+            this.speed = 1.75;
+        }
     }
 
     // updateImage(url: string) {
