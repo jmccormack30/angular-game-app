@@ -52,7 +52,11 @@ export class GameComponent implements AfterViewInit, OnDestroy {
     const imageSources = [
       'assets/watermelon.png',
       'assets/fence_vertical.png',
-      'assets/grass_2.jpg'
+      'assets/grass_2.jpg',
+      'assets/wheat_grass.png',
+      'assets/wheat_dirt.png',
+      'assets/fence_dirt_grass_1.png',
+      'assets/fence_dirt_grass_2.png'
     ]
 
     const promises = imageSources.map(src => this.loadImage(src));
@@ -95,14 +99,68 @@ export class GameComponent implements AfterViewInit, OnDestroy {
       }
     }
 
-    this.tileMap[12][12] = {
-      type: 'melon'
+    this.tileMap[17][10] = {
+      type: 'wheat'
     }
-    this.tileMap[12][11] = {
-      type: 'melon'
+    this.tileMap[17][11] = {
+      type: 'wheat'
     }
-    this.tileMap[12][13] = {
-      type: 'melon'
+    this.tileMap[17][12] = {
+      type: 'wheat'
+    }
+    this.tileMap[17][13] = {
+      type: 'wheat'
+    }
+    this.tileMap[17][14] = {
+      type: 'wheat'
+    }
+    this.tileMap[16][10] = {
+      type: 'wheat'
+    }
+    this.tileMap[16][11] = {
+      type: 'wheat'
+    }
+    this.tileMap[16][12] = {
+      type: 'wheat'
+    }
+    this.tileMap[16][13] = {
+      type: 'wheat'
+    }
+    this.tileMap[16][14] = {
+      type: 'wheat'
+    }
+    this.tileMap[18][10] = {
+      type: 'wheat'
+    }
+    this.tileMap[18][11] = {
+      type: 'wheat'
+    }
+    this.tileMap[18][12] = {
+      type: 'wheat'
+    }
+    this.tileMap[18][13] = {
+      type: 'wheat'
+    }
+    this.tileMap[18][14] = {
+      type: 'wheat'
+    }
+    this.tileMap[16][9] = {
+      type: 'fence1'
+    }
+    this.tileMap[17][9] = {
+      type: 'fence1'
+    }
+    this.tileMap[18][9] = {
+      type: 'fence1'
+    }
+    this.tileMap[16][15] = {
+      type: 'fence2'
+    }
+    this.tileMap[17][15] = {
+      type: 'fence2'
+    }
+    this.tileMap[18][15] = {
+      type: 'fence2'
     }
   }
 
@@ -141,6 +199,24 @@ export class GameComponent implements AfterViewInit, OnDestroy {
           const melon = this.getImage('assets/watermelon.png');
           if (melon) {
             this.ctx.drawImage(melon, c * this.tileSize, r * this.tileSize, this.tileSize, this.tileSize);
+          }
+        }
+        else if (tile.type === 'wheat') {
+          const wheat = this.getImage('assets/wheat_dirt.png');
+          if (wheat) {
+            this.ctx.drawImage(wheat, c * this.tileSize, r * this.tileSize, this.tileSize, this.tileSize);
+          }
+        }
+        else if (tile.type === 'fence1') {
+          const fence = this.getImage('assets/fence_dirt_grass_1.png');
+          if (fence) {
+            this.ctx.drawImage(fence, c * this.tileSize, r * this.tileSize, this.tileSize, this.tileSize)
+          }
+        }
+        else if (tile.type === 'fence2') {
+          const fence = this.getImage('assets/fence_dirt_grass_2.png');
+          if (fence) {
+            this.ctx.drawImage(fence, c * this.tileSize, r * this.tileSize, this.tileSize, this.tileSize)
           }
         }
       }
