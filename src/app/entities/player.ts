@@ -4,8 +4,6 @@ import { GameComponent } from "../game/game.component";
 export class Player {
     xPos: number;
     yPos: number;
-    row: number;
-    col: number;
     speed: number;
     direction: string | undefined;
 
@@ -17,11 +15,9 @@ export class Player {
 
     private keyState: { [key: string]: boolean } = {};
   
-    constructor(xPos: number, yPos: number, col: number, row: number, speed: number, direction: string) {
+    constructor(xPos: number, yPos: number, speed: number, direction: string) {
       this.xPos = xPos;
       this.yPos = yPos;
-      this.row = row;
-      this.col = col;
       this.speed = speed;
       this.direction = direction;
       this.preloadImages(); 
@@ -30,11 +26,17 @@ export class Player {
     preloadImages(): Promise<void[]> {
       const imageSources = [
         'assets/player_right.png',
+        'assets/player_right_2.png',
         'assets/player_left.png',
+        'assets/player_left_2.png',
         'assets/player_up.png',
+        'assets/player_up_2.png',
         'assets/player_down.png',
+        'assets/player_down_2.png',
         'assets/player_down_walk_1.png',
         'assets/player_down_walk_2.png',
+        'assets/player_down_walk_3.png',
+        'assets/player_down_walk_4.png',
         'assets/player_up_walk_3.png',
         'assets/player_up_walk_4.png',
         'assets/player_left_walk_1.png',
@@ -60,42 +62,32 @@ export class Player {
     }
 
     update(keyState: {[key: string]: boolean }) {
-        const isMoving: boolean = !this.isAtPosition();
-
-        this.updateSpeed(keyState);
-
-        if (isMoving) {
-            this.updatePlayerPosition(this.direction);
+        const input = this.getDirection(keyState);
+        
+        if (input === undefined) {
+            this.animation = undefined;
+            return;
         }
-        else {
-            // get the current directional input of the player
-            const input = this.getDirection(keyState);
 
-            if (input !== undefined) {
-                this.direction = input;
+        if (this.direction !== input) {
+            this.animation = undefined;
+        }
 
-                this.updatePlayerTile(this.direction);
-                this.updatePlayerPosition(this.direction);
+        this.direction = input;
+        this.updateSpeed(keyState);
+        this.updatePlayerPosition(this.direction);
 
-                if (this.animation === undefined) {
-                    this.animation = new PlayerWalkAnimation();
-                }
-            }
+        if (this.animation === undefined) {
+            this.animation = new PlayerWalkAnimation();
         }
     }
 
     draw(ctx: CanvasRenderingContext2D) {
         if (this.animation !== undefined) {
-            if (!this.isAtPosition()) {
-                const src = this.animation.getImage(this.direction);
-                this.image = this.getImage(src);
-            }
-            else {
-                this.animation = undefined;
-            }
+            const src = this.animation.getImage(this.direction);
+            this.image = this.getImage(src);
         }
         else {
-            //const imageAction = this.getDefaultImage(this.direction);
             const src = this.getDefaultImageSrc(this.direction);
             this.image = this.getImage(src);
         }
@@ -105,63 +97,48 @@ export class Player {
         }
     }
 
-    isAtPosition() {
-        return ((this.xPos === this.col * GameComponent.tileSize) && (this.yPos === this.row * GameComponent.tileSize));
-    }
-
     getDefaultImageSrc(direction: string | undefined) {
         if (direction === "up") {
-            return "assets/player_up.png";
+            return "assets/player_up_2.png";
         }
         else if (direction === "down") {
-            return "assets/player_down.png";
+            return "assets/player_down_2.png";
         }
         else if (direction === "left") {
-            return "assets/player_left.png";
+            return "assets/player_left_2.png";
         }
         else if (direction === "right") {
-            return "assets/player_right.png";
+            return "assets/player_right_2.png";
         }
 
-        //return "assets/player_down.png";
         throw new Error("Invalid direction set for player");
-    }
-    
-    updatePlayerTile(direction: string) {
-        if (direction === 'up') this.row--;
-        if (direction === 'down') this.row++;
-        if (direction === 'left') this.col--;
-        if (direction === 'right') this.col++
-
-        if (this.row < 0) this.row = 0;
-        if (this.row >= GameComponent.rows - 1) this.row = (GameComponent.rows - 1);
-        if (this.col < 0) this.col = 0;
-        if (this.col >= GameComponent.cols - 1) this.col = (GameComponent.cols - 1);
     }
     
     updatePlayerPosition(direction: string | undefined) {
         if (direction === "up") {
             this.yPos -= this.speed;
-            if (this.yPos < this.row * GameComponent.tileSize) {
-                this.yPos = this.row * GameComponent.tileSize;
+            if (this.yPos < 0) {
+                this.yPos = 0;
             }
         }
         else if (direction === "down") {
             this.yPos += this.speed;
-            if (this.yPos > this.row * GameComponent.tileSize) {
-                this.yPos = this.row * GameComponent.tileSize;
+            // TODO - replace 50 with height variable for if I change the player height in the future
+            if (this.yPos > GameComponent.height - 50) {
+                this.yPos = GameComponent.height - 50;
             }
         }
         else if (direction === "left") {
             this.xPos -= this.speed;
-            if (this.xPos < this.col * GameComponent.tileSize) {
-                this.xPos = this.col * GameComponent.tileSize;
+            if (this.xPos < 0) {
+                this.xPos = 0;
             }
         }
         else if (direction === "right") {
             this.xPos += this.speed;
-            if (this.xPos > this.col * GameComponent.tileSize) {
-                this.xPos = this.col * GameComponent.tileSize;
+            // TODO - replace 50 with width variable for if I change the player width in the future
+            if (this.xPos > GameComponent.width - 50) {
+                this.xPos = GameComponent.width - 50;
             }
         }
     }
@@ -211,9 +188,4 @@ export class Player {
             this.speed = 1.75;
         }
     }
-
-    // updateImage(url: string) {
-    //     const uniqueUrl = `${url}?timestamp=${new Date().getTime()}`;
-    //     this.image = uniqueUrl;
-    // }
 }

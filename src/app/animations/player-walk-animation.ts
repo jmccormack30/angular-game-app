@@ -23,8 +23,8 @@ export class PlayerWalkAnimation {
       this.actionFrameMap.set(i, Action.WALK2);
     }
 
-    this.actionImageMapDown.set(Action.WALK1, "assets/player_down_walk_1.png");
-    this.actionImageMapDown.set(Action.WALK2, "assets/player_down_walk_2.png");
+    this.actionImageMapDown.set(Action.WALK1, "assets/player_down_walk_3.png");
+    this.actionImageMapDown.set(Action.WALK2, "assets/player_down_walk_4.png");
 
     this.actionImageMapUp.set(Action.WALK1, "assets/player_up_walk_3.png");
     this.actionImageMapUp.set(Action.WALK2, "assets/player_up_walk_4.png");

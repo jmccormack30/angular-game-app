@@ -1,5 +1,4 @@
 import { AfterViewInit, Component, ElementRef, HostListener, OnDestroy, ViewChild } from '@angular/core';
-import { Tile } from '../tile';
 import { Player } from '../entities/player';
 
 @Component({
@@ -11,14 +10,11 @@ export class GameComponent implements AfterViewInit, OnDestroy {
   @ViewChild('gameCanvas') gameCanvas!: ElementRef<HTMLCanvasElement>;
   private ctx!: CanvasRenderingContext2D;
   
-  static rows: number = 19;
-  static cols: number = 25;
-  static tileSize: number = 50;
-  tileMap: Tile[][] = [];
+  static width: number = 1250;
+  static height: number = 900;
 
-  private tileSize: number = GameComponent.tileSize;
-  private width: number = GameComponent.tileSize * GameComponent.cols;
-  private height: number = GameComponent.tileSize * GameComponent.rows;
+  private width: number = GameComponent.width;
+  private height: number = GameComponent.height;
 
   private fps: number = 60;
   private frameInterval: number = 1000 / this.fps; // Interval in milliseconds
@@ -39,8 +35,7 @@ export class GameComponent implements AfterViewInit, OnDestroy {
     this.ctx = canvas.getContext('2d')!;
 
     this.preloadImages();
-    this.initializeTileMap();
-    this.player = new Player(600, 450, 12, 9, 1.75, "down");
+    this.player = new Player(600, 450, 1.75, "down");
     this.startGameLoop();
   }
 
@@ -78,89 +73,14 @@ export class GameComponent implements AfterViewInit, OnDestroy {
 
   startGameLoop() {
     this.isRunning = true;
-    this.lastUpdateTime = performance.now(); // Track the time of the last frame
-    this.gameLoop(); // Start the game loop
+    this.lastUpdateTime = performance.now();
+    this.gameLoop();
   }
 
   stopGameLoop() {
     this.isRunning = false;
     if (this.timerId) {
       clearTimeout(this.timerId);
-    }
-  }
-
-  initializeTileMap() {
-    for (let r = 0; r < GameComponent.rows; r++) {
-      this.tileMap[r] = [];
-      for (let c = 0; c < GameComponent.cols; c++) {
-        this.tileMap[r][c] = {
-          type: 'land'
-        };
-      }
-    }
-
-    this.tileMap[17][10] = {
-      type: 'wheat'
-    }
-    this.tileMap[17][11] = {
-      type: 'wheat'
-    }
-    this.tileMap[17][12] = {
-      type: 'wheat'
-    }
-    this.tileMap[17][13] = {
-      type: 'wheat'
-    }
-    this.tileMap[17][14] = {
-      type: 'wheat'
-    }
-    this.tileMap[16][10] = {
-      type: 'wheat'
-    }
-    this.tileMap[16][11] = {
-      type: 'wheat'
-    }
-    this.tileMap[16][12] = {
-      type: 'wheat'
-    }
-    this.tileMap[16][13] = {
-      type: 'wheat'
-    }
-    this.tileMap[16][14] = {
-      type: 'wheat'
-    }
-    this.tileMap[18][10] = {
-      type: 'wheat'
-    }
-    this.tileMap[18][11] = {
-      type: 'wheat'
-    }
-    this.tileMap[18][12] = {
-      type: 'wheat'
-    }
-    this.tileMap[18][13] = {
-      type: 'wheat'
-    }
-    this.tileMap[18][14] = {
-      type: 'wheat'
-    }
-    this.tileMap[16][9] = {
-      type: 'fence1'
-    }
-    this.tileMap[17][9] = {
-      type: 'fence1'
-    }
-    this.tileMap[18][9] = {
-      type: 'fence1'
-    }
-    this.tileMap[16][15] = {
-      type: 'fence2'
-    }
-    this.tileMap[17][15] = {
-      type: 'fence2'
-    }
-    this.tileMap[18][15] = {
-      type: 'fence2'
     }
   }
 
@@ -174,53 +94,22 @@ export class GameComponent implements AfterViewInit, OnDestroy {
       this.update();
       this.lastUpdateTime = currentTime - (elapsedTime % this.frameInterval);
     }
-    // Request the next frame
+
     requestAnimationFrame(() => this.gameLoop());
   }
 
   update() {
     this.ctx.clearRect(0, 0, this.width, this.height);
 
-    for (let r = 0; r < this.tileMap.length; r++) {
-      const row = this.tileMap[r];
-      for (let c = 0; c < row.length; c++) {
-        const tile = row[c];
-        if (tile.type === 'land') {
-          const grass = this.getImage('assets/grass_2.jpg');
-          if (grass) {
-            this.ctx.drawImage(grass, c * this.tileSize, r * this.tileSize, this.tileSize, this.tileSize);
-          }
-          // this.ctx.fillStyle = 'green';
-          // this.ctx.fillRect(c * this.tileSize, r * this.tileSize, this.tileSize, this.tileSize);
-        }
-        else if (tile.type === 'melon') {
-          this.ctx.fillStyle = 'green';
-          this.ctx.fillRect(c * this.tileSize, r * this.tileSize, this.tileSize, this.tileSize);
-          const melon = this.getImage('assets/watermelon.png');
-          if (melon) {
-            this.ctx.drawImage(melon, c * this.tileSize, r * this.tileSize, this.tileSize, this.tileSize);
-          }
-        }
-        else if (tile.type === 'wheat') {
-          const wheat = this.getImage('assets/wheat_dirt.png');
-          if (wheat) {
-            this.ctx.drawImage(wheat, c * this.tileSize, r * this.tileSize, this.tileSize, this.tileSize);
-          }
-        }
-        else if (tile.type === 'fence1') {
-          const fence = this.getImage('assets/fence_dirt_grass_1.png');
-          if (fence) {
-            this.ctx.drawImage(fence, c * this.tileSize, r * this.tileSize, this.tileSize, this.tileSize)
-          }
-        }
-        else if (tile.type === 'fence2') {
-          const fence = this.getImage('assets/fence_dirt_grass_2.png');
-          if (fence) {
-            this.ctx.drawImage(fence, c * this.tileSize, r * this.tileSize, this.tileSize, this.tileSize)
-          }
-        }
+    const grass = this.getImage('assets/grass_2.jpg');
+    if (grass) {
+      const pattern = this.ctx.createPattern(grass, 'repeat');
+      if (pattern) {
+        this.ctx.fillStyle = pattern;
+        this.ctx.fillRect(0, 0, 1250, 900);
       }
     }
+
     if (this.player !== undefined) {
       this.player.update(this.keyState);
       this.player.draw(this.ctx);
@@ -235,10 +124,6 @@ export class GameComponent implements AfterViewInit, OnDestroy {
   @HostListener('window:keyup', ['$event'])
   handleKeyUp(event: KeyboardEvent) {
     this.keyState[event.key] = false;
-  }
-
-  getTileSize() {
-    return GameComponent.tileSize;
   }
 
   getImage(src: string): HTMLImageElement | undefined {
