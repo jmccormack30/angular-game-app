@@ -39,10 +39,16 @@ export class Player {
         'assets/player_down_walk_4.png',
         'assets/player_up_walk_3.png',
         'assets/player_up_walk_4.png',
+        'assets/player_up_walk_5.png',
+        'assets/player_up_walk_6.png',
+        'assets/player_up_walk_7.png',
+        'assets/player_up_walk_8.png',
         'assets/player_left_walk_1.png',
         'assets/player_left_walk_2.png',
+        'assets/player_left_walk_3.png',
         'assets/player_right_walk_1.png',
-        'assets/player_right_walk_2.png'
+        'assets/player_right_walk_2.png',
+        'assets/player_right_walk_3.png'
       ]
 
       const promises = imageSources.map(src => this.loadImage(src));
@@ -124,8 +130,8 @@ export class Player {
         else if (direction === "down") {
             this.yPos += this.speed;
             // TODO - replace 50 with height variable for if I change the player height in the future
-            if (this.yPos > GameComponent.height - 50) {
-                this.yPos = GameComponent.height - 50;
+            if (this.yPos > GameComponent.height - 63) {
+                this.yPos = GameComponent.height - 63;
             }
         }
         else if (direction === "left") {
@@ -182,10 +188,10 @@ export class Player {
 
     updateSpeed(keyState: {[key: string]: boolean }) {
         if (this.isRunning(keyState)) {
-            this.speed = 3;
+            this.speed = 5;
         }
         else {
-            this.speed = 1.75;
+            this.speed = 3;
         }
     }
 }

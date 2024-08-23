@@ -35,7 +35,7 @@ export class GameComponent implements AfterViewInit, OnDestroy {
     this.ctx = canvas.getContext('2d')!;
 
     this.preloadImages();
-    this.player = new Player(600, 450, 1.75, "down");
+    this.player = new Player(600, 450, 6, "down");
     this.startGameLoop();
   }
 

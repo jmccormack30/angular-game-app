@@ -26,14 +26,14 @@ export class PlayerWalkAnimation {
     this.actionImageMapDown.set(Action.WALK1, "assets/player_down_walk_3.png");
     this.actionImageMapDown.set(Action.WALK2, "assets/player_down_walk_4.png");
 
-    this.actionImageMapUp.set(Action.WALK1, "assets/player_up_walk_3.png");
-    this.actionImageMapUp.set(Action.WALK2, "assets/player_up_walk_4.png");
+    this.actionImageMapUp.set(Action.WALK1, "assets/player_up_walk_7.png");
+    this.actionImageMapUp.set(Action.WALK2, "assets/player_up_walk_8.png");
 
-    this.actionImageMapLeft.set(Action.WALK1, "assets/player_left_walk_1.png");
-    this.actionImageMapLeft.set(Action.WALK2, "assets/player_left.png");
+    this.actionImageMapLeft.set(Action.WALK1, "assets/player_left_walk_3.png");
+    this.actionImageMapLeft.set(Action.WALK2, "assets/player_left_2.png");
 
-    this.actionImageMapRight.set(Action.WALK1, "assets/player_right_walk_1.png");
-    this.actionImageMapRight.set(Action.WALK2, "assets/player_right.png");
+    this.actionImageMapRight.set(Action.WALK1, "assets/player_right_walk_3.png");
+    this.actionImageMapRight.set(Action.WALK2, "assets/player_right_2.png");
   }
 
   getImage(direction: string | undefined) {
