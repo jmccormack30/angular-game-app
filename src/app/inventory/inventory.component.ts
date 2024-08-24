@@ -15,7 +15,25 @@ export class InventoryComponent {
   @Input() isOpen = false;
   @Output() close = new EventEmitter<void>();
 
-  // items: InventoryItem[] = [];
+  armor = Array(4).fill(null).map((_, index) => ({
+    imageSrc: null, // Replace with actual image source if needed
+    label: `Item ${index + 1}` // Replace with actual item labels
+  }));
+
+  items = Array(30).fill(null).map((_, index) => ({
+    imageSrc: null, // Replace with actual image source if needed
+    label: `Item ${index + 1}` // Replace with actual item labels
+  }));
+
+  crafting = Array(9).fill(null).map((_, index) => ({
+    imageSrc: null, // Replace with actual image source if needed
+    label: `Item ${index + 1}` // Replace with actual item labels
+  }));
+
+  output = Array(1).fill(null).map((_, index) => ({
+    imageSrc: null, // Replace with actual image source if needed
+    label: `Item ${index + 1}` // Replace with actual item labels
+  }));
 
   isDragging = false;
   draggedItem?: InventoryItem;

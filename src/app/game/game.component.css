@@ -46,7 +46,7 @@ app-inventory {
   left: 50%;
   transform: translate(-50%, -50%); /* Center horizontally and vertically */
   width: 600px; /* Width of the inventory window */
-  height: 450px; /* Height of the inventory window */
+  height: 475px; /* Height of the inventory window */
   background-color: white; /* Background color */
   border: 2px solid #333; /* Border styling */
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Shadow for visibility */

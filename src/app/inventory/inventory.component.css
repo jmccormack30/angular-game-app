@@ -1,39 +1,139 @@
-
-
 /* Optional: Ensure inventory is only visible when needed */
 :host {
     display: block;
 }
-  
+
 .inventory-header {
     background: #444;
     color: white;
     padding: 8px;
-    height: 10px;
+    height: 11px;
     display: flex;
     justify-content: space-between;
     align-items: center;
 }
+
+.no-select {
+    user-select: none;
+    /* -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none; */
+    pointer-events: none;
+}
+
+.content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 100%;
+}
+
+.row-1 {
+    display: flex;
+    justify-content: space-between;
+}
+
+.armor-slots {
+    display: grid;
+    grid-template-columns: repeat(1, 50px); /* 10 columns of 50px each */
+    grid-template-rows: repeat(4, 50px); /* 3 rows of 50px each */
+    gap: 8px; /* Space between grid items */
+    padding: 12px; /* Space around the grid inside the container */
+    overflow: hidden;
+}
+
+.player-portrait-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 150px;
+    height: 210px;
+    margin-top: 11px;
+    margin-bottom:6px;
+    background-color: black;
+    padding: 10px; /* Space around the image inside the container */
+    border-radius: 5px; /* Optional: Rounded corners */
+}
+
+.crafting-grid {
+    display: grid;
+    margin-top: 30px;
+    width: 162px;
+    grid-template-columns: repeat(3, 50px); /* 3 columns of 50px each */
+    grid-template-rows: repeat(3, 50px); /* 3 rows of 50px each */
+    gap: 8px; /* Space between grid items */
+    padding: 12px; /* Space around the grid inside the container */
+    border-radius: 5px; /* Optional: Rounded corners */
+}
+
+.arrow-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 32px;
+    height: 26px;
+    margin-top: 114px;
+    margin-bottom:6px;
+}
+
+.arrow-image {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-right: 5px;
+}
+
+.output {
+    display: grid;
+    grid-template-columns: repeat(1, 50px); /* Single column */
+    grid-template-rows: repeat(1, 50px); /* Single row */
+    gap: 8px; /* Space between grid items */
+    padding: 12px; /* Space around the grid inside the container */
+    margin-top: 88px;
+    margin-right: 16px;
+    padding-left: 0px;
+  }
+
+.player-image {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-right: 5px;
+}
   
 .inventory-grid {
-    flex: 1;
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
-    grid-gap: 10px;
-    padding: 10px;
-    overflow: auto;
+    grid-template-columns: repeat(10, 50px); /* 10 columns of 50px each */
+    grid-template-rows: repeat(3, 50px); /* 3 rows of 50px each */
+    gap: 8px; /* Space between grid items */
+    padding: 12px; /* Space around the grid inside the container */
+    overflow: hidden; /* Scroll if the content overflows */
+    margin-top: 1%;
 }
 
 .inventory-item {
-    position: absolute;
-    width: 60px;
-    height: 60px;
+    width: 50px;
+    height: 50px;
     background: #eee;
-    border: 1px solid #ccc;
+    border: 2px solid #ccc;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
+}
+
+.inventory-item:hover {
+    border-color: #555; /* Change border color on hover */
+}
+
+.item-image {
+    max-width: 100%; /* Ensure the image does not exceed the width of the inventory item */
+    max-height: 100%; /* Ensure the image does not exceed the height of the inventory item */
+    position: absolute; /* Position relative to the .inventory-item */
+    top: 50%; /* Center vertically */
+    left: 50%; /* Center horizontally */
+    transform: translate(-50%, -50%); /* Adjust the image to be centered */
 }
 
 .inventory-item img {

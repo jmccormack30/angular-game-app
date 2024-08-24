@@ -142,6 +142,11 @@ export class GameComponent implements AfterViewInit, OnDestroy {
       console.log("Calling enterKeySubject!");
       this.enterKeySubject.next();
     }
+    if (event.key === 'Escape') {
+      if (this.isInventoryOpen) {
+        this.toggleInventory();
+      }
+    }
   }
 
   @HostListener('window:keyup', ['$event'])
