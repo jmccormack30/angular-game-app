@@ -1,5 +1,7 @@
 import { AfterViewInit, Component, ElementRef, HostListener, OnDestroy, ViewChild } from '@angular/core';
 import { Player } from '../entities/player';
+import { Subject } from 'rxjs';
+import { debounceTime } from 'rxjs/operators'
 
 @Component({
   selector: 'app-game',
@@ -10,8 +12,8 @@ export class GameComponent implements AfterViewInit, OnDestroy {
   @ViewChild('gameCanvas') gameCanvas!: ElementRef<HTMLCanvasElement>;
   private ctx!: CanvasRenderingContext2D;
   
-  static width: number = 1250;
-  static height: number = 900;
+  static width: number = 1300;
+  static height: number = 975;
 
   private width: number = GameComponent.width;
   private height: number = GameComponent.height;
@@ -24,18 +26,25 @@ export class GameComponent implements AfterViewInit, OnDestroy {
   private timerId: any;
 
   private keyState: { [key: string]: boolean } = {};
-  player: Player | undefined;
+  private enterKeySubject = new Subject<void>();
 
+  isInventoryOpen = false;
+  player: Player | undefined;
   private imageCache: { [key: string]: HTMLImageElement } = {};
 
-  constructor() {}
+  constructor() {
+  }
 
   ngAfterViewInit(): void {
+    this.enterKeySubject.pipe(debounceTime(300)).subscribe(() => {
+      this.toggleInventory();
+    });
+
     const canvas = this.gameCanvas.nativeElement;
     this.ctx = canvas.getContext('2d')!;
 
     this.preloadImages();
-    this.player = new Player(600, 450, 6, "down");
+    this.player = new Player(625, 457, 6, "down");
     this.startGameLoop();
   }
 
@@ -84,6 +93,14 @@ export class GameComponent implements AfterViewInit, OnDestroy {
     }
   }
 
+  toggleInventory() {
+    this.isInventoryOpen = !this.isInventoryOpen;
+  }
+
+  onInventoryClose() {
+    this.isInventoryOpen = false;
+  }
+
   gameLoop() {
     if (!this.isRunning) return;
 
@@ -99,17 +116,18 @@ export class GameComponent implements AfterViewInit, OnDestroy {
   }
 
   update() {
+    if (this.isInventoryOpen) {
+      return;
+    }
     this.ctx.clearRect(0, 0, this.width, this.height);
-
     const grass = this.getImage('assets/grass_2.jpg');
     if (grass) {
       const pattern = this.ctx.createPattern(grass, 'repeat');
       if (pattern) {
         this.ctx.fillStyle = pattern;
-        this.ctx.fillRect(0, 0, 1250, 900);
+        this.ctx.fillRect(0, 0, this.width, this.height);
       }
     }
-
     if (this.player !== undefined) {
       this.player.update(this.keyState);
       this.player.draw(this.ctx);
@@ -118,12 +136,22 @@ export class GameComponent implements AfterViewInit, OnDestroy {
 
   @HostListener('window:keydown', ['$event'])
   handleKeyDown(event: KeyboardEvent) {
+    console.log(`Key Down: ${event.key}`);
     this.keyState[event.key] = true;
+    if (event.key === 'Enter') {
+      console.log("Calling enterKeySubject!");
+      this.enterKeySubject.next();
+    }
   }
 
   @HostListener('window:keyup', ['$event'])
   handleKeyUp(event: KeyboardEvent) {
+    console.log(`Key Up: ${event.key}`);
     this.keyState[event.key] = false;
+  }
+
+  isKeyPressed(key: string): boolean {
+    return !!this.keyState[key];
   }
 
   getImage(src: string): HTMLImageElement | undefined {

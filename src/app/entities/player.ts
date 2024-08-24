@@ -121,6 +121,7 @@ export class Player {
     }
     
     updatePlayerPosition(direction: string | undefined) {
+        console.log(this.xPos + ", " + this.yPos);
         if (direction === "up") {
             this.yPos -= this.speed;
             if (this.yPos < 0) {
@@ -153,19 +154,19 @@ export class Player {
         let direction = "";
         let total = 0;
 
-        if (keyState['ArrowUp']) {
+        if (keyState['ArrowUp'] || keyState['W']) {
             direction = "up";
             total++;
         }
-        if (keyState['ArrowDown']) {
+        if (keyState['ArrowDown'] || keyState['S']) {
             direction = "down";
             total++;
         }
-        if (keyState['ArrowLeft']) {
+        if (keyState['ArrowLeft'] || keyState['A']) {
             direction = "left";
             total++;
         }
-        if (keyState['ArrowRight']) {
+        if (keyState['ArrowRight'] || keyState['D']) {
             direction = "right";
             total++;
         }

@@ -1,3 +1,11 @@
-<div class="canvas-container">
-  <canvas #gameCanvas width="1250" height="950"></canvas>
+<div class="canvas-wrapper">
+  <div class="canvas-container">
+    <canvas #gameCanvas width="1300" height="975"></canvas>
+    <div class="overlay" *ngIf="isInventoryOpen"></div>
+    <app-inventory
+        *ngIf="isInventoryOpen"
+        [isOpen]="isInventoryOpen"
+        (close)="onInventoryClose()">
+      </app-inventory>
+  </div>
 </div>

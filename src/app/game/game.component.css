@@ -3,18 +3,53 @@ body, html {
   padding: 0;
   height: 100%;
   width: 100%;
+  overflow: hidden; 
+  background-color: #191b1c;
+}
+
+.canvas-wrapper {
+  display: flex;
+  justify-content: center; /* Center horizontally */
+  align-items: center; /* Center vertically */
+  height: 80vh; /* Full viewport height */
+}
+
+.canvas-container {
+  position: relative; /* Fix position relative to the viewport */
+  top: 0%;
+  left: 0%;
+  width: 1300px;
+  height: 975px;
+  display: flex;
+  justify-content: center; /* Center horizontally */
   overflow: hidden; /* Hide scrollbars */
 }
 
-/* Styles for the container */
-.canvas-container {
-  display: flex;
-  justify-content: center; /* Center horizontally */
-  align-items: center;
-  position: fixed; /* Fix the position at the top */
+.overlay {
+  position: absolute; /* Cover the whole viewport */
   top: 0;
   left: 0;
-  width: 100%;
-  height: 80vh; /* Set a fixed height or auto based on content */
-  overflow: hidden;
+  width: 1300px;
+  height: 975px;
+  background-color: rgba(0, 0, 0, 0.5); /* Grey transparent background */
+  justify-content: center; /* Center horizontally */
+  align-items: center; /* Center vertically */
+  overflow: hidden; /* Hide scrollbars */
+  z-index: 999; /* Ensure it's above the canvas but below the inventory */
+  pointer-events: none; /* Allow clicks to pass through the overlay */
+  box-sizing: border-box;
+}
+
+app-inventory {
+  position: absolute; /* Position relative to the nearest positioned ancestor */
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%); /* Center horizontally and vertically */
+  width: 600px; /* Width of the inventory window */
+  height: 450px; /* Height of the inventory window */
+  background-color: white; /* Background color */
+  border: 2px solid #333; /* Border styling */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Shadow for visibility */
+  z-index: 1000; /* Ensure it is above other content */
+  overflow: hidden; /* Handle content overflow */
 }

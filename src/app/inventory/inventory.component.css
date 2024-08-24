@@ -1,0 +1,42 @@
+
+
+/* Optional: Ensure inventory is only visible when needed */
+:host {
+    display: block;
+}
+  
+.inventory-header {
+    background: #444;
+    color: white;
+    padding: 8px;
+    height: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+  
+.inventory-grid {
+    flex: 1;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+    grid-gap: 10px;
+    padding: 10px;
+    overflow: auto;
+}
+
+.inventory-item {
+    position: absolute;
+    width: 60px;
+    height: 60px;
+    background: #eee;
+    border: 1px solid #ccc;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.inventory-item img {
+    max-width: 100%;
+    max-height: 100%;
+}
