@@ -53,3 +53,17 @@ app-inventory {
   z-index: 1000; /* Ensure it is above other content */
   overflow: hidden; /* Handle content overflow */
 }
+
+.hidden {
+  display: none;
+}
+
+.drag-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 5;
+  background: rgba(0, 0, 0, 0); /* Transparent overlay */
+}

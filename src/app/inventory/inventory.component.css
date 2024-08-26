@@ -3,6 +3,10 @@
     display: block;
 }
 
+.inventory-window {
+    z-index: 10;
+}
+
 .inventory-header {
     background: #444;
     color: white;
@@ -110,6 +114,7 @@
     padding: 12px; /* Space around the grid inside the container */
     overflow: hidden; /* Scroll if the content overflows */
     margin-top: 1%;
+    z-index: 20;
 }
 
 .inventory-item {
@@ -147,7 +152,7 @@
     height: 100%;
   }
 
-  .quantity-text {
+.quantity-text {
     position: absolute;
     bottom: -20px; /* Adjust spacing from the bottom */
     right: -2px; /* Adjust spacing from the right */
@@ -161,4 +166,20 @@
         -1px -1px 0 black,
         1px -1px 0 black,
         -1px 1px 0 black;
+}
+
+.drag-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 10;
+    background: rgba(0, 0, 0, 0); /* Transparent overlay */
+  }
+
+  .floating-item {
+    position: absolute;
+    pointer-events: none; /* Allows clicks to pass through the floating item */
+    z-index: 1000; /* Ensure it appears above other elements */
   }

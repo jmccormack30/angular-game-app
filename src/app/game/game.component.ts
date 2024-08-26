@@ -2,6 +2,7 @@ import { AfterViewInit, Component, ElementRef, HostListener, OnDestroy, ViewChil
 import { Player } from '../entities/player';
 import { Subject } from 'rxjs';
 import { debounceTime } from 'rxjs/operators'
+import { InventoryComponent } from '../inventory/inventory.component';
 
 @Component({
   selector: 'app-game',
@@ -22,22 +23,21 @@ export class GameComponent implements AfterViewInit, OnDestroy {
   private frameInterval: number = 1000 / this.fps; // Interval in milliseconds
   private lastUpdateTime: number = 0;
   private isRunning: boolean = false;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private timerId: any;
 
   private keyState: { [key: string]: boolean } = {};
   private enterKeySubject = new Subject<void>();
 
+  @ViewChild('inventoryComponent') inventoryComponent!: InventoryComponent;
   isInventoryOpen = false;
   player: Player | undefined;
   private imageCache: { [key: string]: HTMLImageElement } = {};
 
-  constructor() {
-  }
+  constructor() {}
 
   ngAfterViewInit(): void {
     this.enterKeySubject.pipe(debounceTime(300)).subscribe(() => {
-      this.toggleInventory();
+      this.inventoryComponent.toggleInventory();
     });
 
     const canvas = this.gameCanvas.nativeElement;
@@ -116,7 +116,7 @@ export class GameComponent implements AfterViewInit, OnDestroy {
   }
 
   update() {
-    if (this.isInventoryOpen) {
+    if (this.inventoryComponent.isInventoryOpen) {
       return;
     }
     this.ctx.clearRect(0, 0, this.width, this.height);
@@ -141,8 +141,8 @@ export class GameComponent implements AfterViewInit, OnDestroy {
       this.enterKeySubject.next();
     }
     if (event.key === 'Escape') {
-      if (this.isInventoryOpen) {
-        this.toggleInventory();
+      if (this.inventoryComponent.isInventoryOpen) {
+        this.enterKeySubject.next();
       }
     }
   }
@@ -158,5 +158,24 @@ export class GameComponent implements AfterViewInit, OnDestroy {
 
   getImage(src: string): HTMLImageElement | undefined {
     return this.imageCache[src];
+  }
+
+  onOverlayDrop(event: DragEvent): void {
+    const targetElement = event.target as HTMLElement;
+    console.log(targetElement);
+    console.log(event);
+    console.log("overlay drop");
+    if (targetElement && targetElement.closest('.inventory-grid')) {
+      console.log("Item dropped inside inv grid");
+    }
+    else {
+      console.log("Item dropped somewhere on the game screen");
+    }
+    event.preventDefault();
+    this.inventoryComponent.clearDraggedItem();
+  }
+  
+  onOverlayDragOver(event: DragEvent): void {
+    event.preventDefault(); // Necessary for allowing drop
   }
 }

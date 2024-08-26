@@ -1,11 +1,16 @@
 <div class="canvas-wrapper">
   <div class="canvas-container">
     <canvas #gameCanvas width="1300" height="975"></canvas>
-    <div class="overlay" *ngIf="isInventoryOpen"></div>
+    <div class="overlay" *ngIf="inventoryComponent.isInventoryOpen"></div>
     <app-inventory
-        *ngIf="isInventoryOpen"
-        [isOpen]="isInventoryOpen"
+        #inventoryComponent
+        [ngClass]="{'hidden': !inventoryComponent.isInventoryOpen}"
+        [isOpen]="inventoryComponent.isInventoryOpen"
         (close)="onInventoryClose()">
       </app-inventory>
+  </div>
+  <div class="drag-overlay" *ngIf="inventoryComponent.draggedItem"
+     (dragover)="onOverlayDragOver($event)"
+     (drop)="onOverlayDrop($event)">
   </div>
 </div>
