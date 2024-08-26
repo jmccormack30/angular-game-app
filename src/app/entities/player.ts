@@ -121,7 +121,6 @@ export class Player {
     }
     
     updatePlayerPosition(direction: string | undefined) {
-        console.log(this.xPos + ", " + this.yPos);
         if (direction === "up") {
             this.yPos -= this.speed;
             if (this.yPos < 0) {

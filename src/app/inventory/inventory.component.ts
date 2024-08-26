@@ -1,10 +1,7 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
-
-interface InventoryItem {
-  name: string;
-  image: string;
-  position: { x: number; y: number };
-}
+import { Item } from '../items/item';
+import { Red } from '../items/red';
+import { Observable, from } from 'rxjs';
 
 @Component({
   selector: 'app-inventory',
@@ -15,28 +12,37 @@ export class InventoryComponent {
   @Input() isOpen = false;
   @Output() close = new EventEmitter<void>();
 
-  armor = Array(4).fill(null).map((_, index) => ({
-    imageSrc: null, // Replace with actual image source if needed
-    label: `Item ${index + 1}` // Replace with actual item labels
-  }));
+  private draggedItem: any = null;
+  private draggedRowIndex: number = -1;
+  private draggedColIndex: number = -1;
 
-  items = Array(30).fill(null).map((_, index) => ({
-    imageSrc: null, // Replace with actual image source if needed
-    label: `Item ${index + 1}` // Replace with actual item labels
-  }));
+  private imageCache: { [key: string]: HTMLImageElement } = {};
 
-  crafting = Array(9).fill(null).map((_, index) => ({
-    imageSrc: null, // Replace with actual image source if needed
-    label: `Item ${index + 1}` // Replace with actual item labels
-  }));
+  armor: (Item | null)[];
+  items: (Item | null)[][];
+  crafting: (Item | null)[][];
+  output: Item | null;
 
-  output = Array(1).fill(null).map((_, index) => ({
-    imageSrc: null, // Replace with actual image source if needed
-    label: `Item ${index + 1}` // Replace with actual item labels
-  }));
+  constructor() {
+    console.log("Creating inventory!");
+    this.armor = Array(4).fill(null);
+    this.items = Array.from({ length: 10 }, () => Array(3).fill(null));
+    this.crafting = Array.from({ length: 3 }, () => Array(3).fill(null));
+    this.output = null;
+
+    this.preloadImages().subscribe(
+      () => {
+        const red = this.getImage('assets/red_item.png');
+        if (red) {
+          console.log("Red item!");
+          const red_item = new Red("Red", 10, red);
+          this.items[0][0] = red_item;
+        }
+      }
+    );
+  }
 
   isDragging = false;
-  draggedItem?: InventoryItem;
   dragStartPosition?: { x: number, y: number };
 
   openInventory() {
@@ -48,27 +54,68 @@ export class InventoryComponent {
     this.close.emit();
   }
 
-  startDragging(event: MouseEvent, item: InventoryItem) {
-    this.isDragging = true;
+  preloadImages(): Observable<void[]> {
+    const imageSources = [
+      'assets/red_item.png'
+    ]
+
+    const promises = imageSources.map(src => this.loadImage(src));
+    return from(Promise.all(promises));
+  }
+
+  private loadImage(src: string): Promise<void> {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => {
+        this.imageCache[src] = img;
+        resolve();
+      };
+      console.log(img);
+      img.onerror = reject;
+      img.src = src;
+    });
+  }
+
+  getImage(src: string): HTMLImageElement | undefined {
+    return this.imageCache[src];
+  }
+
+  getImageHtml(item: Item): string {
+    const img = item.image;
+    return img ? img.outerHTML : '';
+  }
+
+  onDragStart(event: DragEvent, item: any, rowIndex: number, colIndex: number) {
     this.draggedItem = item;
-    this.dragStartPosition = { x: event.clientX, y: event.clientY };
+    this.draggedRowIndex = rowIndex;
+    this.draggedColIndex = colIndex;
+
+    console.log("On drag start!");
+    console.log(this.draggedItem);
+
+    // Optionally set some data to transfer
+    event.dataTransfer?.setData('text/plain', `${rowIndex},${colIndex}`);
   }
 
-  stopDragging() {
-    this.isDragging = false;
-    this.draggedItem = undefined;
-    this.dragStartPosition = undefined;
+  onDragOver(event: DragEvent) {
+    event.preventDefault(); // Allow drop
   }
 
-  onDragging(event: MouseEvent) {
-    if (this.isDragging && this.draggedItem && this.dragStartPosition) {
-      const dx = event.clientX - this.dragStartPosition.x;
-      const dy = event.clientY - this.dragStartPosition.y;
+  onDrop(event: DragEvent, rowIndex: number, colIndex: number) {
+    event.preventDefault();
 
-      this.draggedItem.position.x += dx;
-      this.draggedItem.position.y += dy;
+    // Retrieve the dragged item
+    if (this.draggedItem && this.draggedRowIndex !== -1 && this.draggedColIndex !== -1) {
+      // Remove item from original position
+      this.items[this.draggedRowIndex][this.draggedColIndex] = null;
 
-      this.dragStartPosition = { x: event.clientX, y: event.clientY };
+      // Place item in new position
+      this.items[rowIndex][colIndex] = this.draggedItem;
+
+      // Clear dragged item information
+      this.draggedItem = null;
+      this.draggedRowIndex = -1;
+      this.draggedColIndex = -1;
     }
   }
 }

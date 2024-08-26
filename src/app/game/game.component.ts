@@ -136,10 +136,8 @@ export class GameComponent implements AfterViewInit, OnDestroy {
 
   @HostListener('window:keydown', ['$event'])
   handleKeyDown(event: KeyboardEvent) {
-    console.log(`Key Down: ${event.key}`);
     this.keyState[event.key] = true;
     if (event.key === 'Enter') {
-      console.log("Calling enterKeySubject!");
       this.enterKeySubject.next();
     }
     if (event.key === 'Escape') {
@@ -151,7 +149,6 @@ export class GameComponent implements AfterViewInit, OnDestroy {
 
   @HostListener('window:keyup', ['$event'])
   handleKeyUp(event: KeyboardEvent) {
-    console.log(`Key Up: ${event.key}`);
     this.keyState[event.key] = false;
   }
 

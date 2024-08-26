@@ -32,17 +32,32 @@
             <img src="assets/player_portrait.png" alt="Player Image" class="player-image" class="no-select">
         </div>
         <div class="crafting-grid">
-            <div class="inventory-item" *ngFor="let c of crafting"></div>
+          <div class="crafting-row" *ngFor="let row of crafting">
+            <div class="inventory-item" *ngFor="let item of row"></div>
+          </div>
         </div>
         <div class="arrow-container">
             <img src="assets/arrow.png" alt="Arrow Image" class="arrow-image" class="no-select">
         </div>
         <div class="output">
-            <div class="inventory-item" *ngFor="let o of output"></div>
+            <div class="inventory-item"></div>
         </div>
       </div>
       <div class="inventory-grid">
-        <div class="inventory-item" *ngFor="let item of items"></div>
+        <div class="inventory-row" *ngFor="let row of items; let rowIndex = index">
+          <div class="inventory-item" *ngFor="let item of row; let colIndex = index"
+            [attr.draggable]="true"
+            (dragstart)="onDragStart($event, item, rowIndex, colIndex)"
+            (dragover)="onDragOver($event)"
+            (drop)="onDrop($event, rowIndex, colIndex)">
+            <ng-container *ngIf="item">
+              <div class="image-wrapper">
+                <!-- Use a wrapper to insert the image element directly -->
+                <div [innerHTML]="getImageHtml(item)"></div>
+                <p class="quantity-text">{{item.quantity}}</p>
+              </div>
+            </ng-container>
+        </div>
       </div>
     </div>
   </div>
