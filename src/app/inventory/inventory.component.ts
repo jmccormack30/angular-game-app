@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, Renderer2, ElementRef } from '@angular/core';
+import { Component, Output, EventEmitter, Renderer2, ElementRef } from '@angular/core';
 import { Item } from '../items/item';
 import { Red } from '../items/red';
 import { Observable, from } from 'rxjs';
@@ -10,7 +10,6 @@ import { Blue } from '../items/blue';
   styleUrls: ['./inventory.component.css']
 })
 export class InventoryComponent {
-  @Input() isOpen = false;
   @Output() close = new EventEmitter<void>();
 
   private floatingItem: HTMLElement | null = null;
@@ -57,7 +56,9 @@ export class InventoryComponent {
   toggleInventory() {
     if (this.isInventoryOpen) {
       this.clearItemToMove();
-      this.renderer.removeChild(document.body, this.floatingItem);
+      if (this.floatingItem) {
+        this.renderer.removeChild(document.body, this.floatingItem);
+      }
       this.closeInventory();
     }
     else {
@@ -72,8 +73,10 @@ export class InventoryComponent {
   closeInventory() {
     if (this.moveCraftingToInventory()) {
       this.isInventoryOpen = false;
-      this.isOpen = false;
       this.close.emit();
+    }
+    else {
+      console.log("Failed to move crafting to inventory!!!!!");
     }
   }
 
@@ -199,7 +202,6 @@ export class InventoryComponent {
 
       // Set the content and position
       if (this.floatingItem) {
-        //this.floatingItem.innerHTML = `<img src="${item.image.src}" alt="${item.name}">`;
         this.renderer.appendChild(document.body, this.floatingItem);
       }
 
@@ -207,9 +209,6 @@ export class InventoryComponent {
 
       // Start listening for mouse move and mouse up events
       this.renderer.listen('window', 'mousemove', (e) => this.onMouseMove(e));
-      // this.renderer.listen('window', 'mouseup', (e) => this.onMouseUp(e, rowIndex, colIndex));
-
-      console.log(this.itemToMove);
     }
   }
 
@@ -219,11 +218,6 @@ export class InventoryComponent {
     this.itemToMoveGridType = null;
     this.itemToMoveCol = -1;
     this.itemToMoveRow = -1;
-  }
-
-  onOverlayClick() {
-    console.log("Inv Overlay Clicked!");
-    // this.removeFloatingItem();
   }
 
   private onMouseMove(event: MouseEvent): void {

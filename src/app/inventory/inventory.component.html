@@ -1,4 +1,4 @@
-  <div class="inventory-window" *ngIf="isOpen">
+  <div class="inventory-window">
     <div class="inventory-header">
       <h3 class="no-select">Inventory</h3>
     </div>
@@ -44,6 +44,4 @@
       </div>
     </div>
   </div>
-  <div class="drag-overlay" *ngIf="isInventoryOpen"
-     (click)="onOverlayClick()">
-  </div>
+  <div class="drag-overlay" *ngIf="isInventoryOpen"></div>

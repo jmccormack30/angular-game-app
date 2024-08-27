@@ -5,7 +5,6 @@
     <app-inventory
         #inventoryComponent
         [ngClass]="{'hidden': !inventoryComponent.isInventoryOpen}"
-        [isOpen]="inventoryComponent.isInventoryOpen"
         (close)="onInventoryClose()">
       </app-inventory>
   </div>
