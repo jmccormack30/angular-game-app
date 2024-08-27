@@ -23,6 +23,7 @@ export class GameComponent implements AfterViewInit, OnDestroy {
   private frameInterval: number = 1000 / this.fps; // Interval in milliseconds
   private lastUpdateTime: number = 0;
   private isRunning: boolean = false;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private timerId: any;
 
   private keyState: { [key: string]: boolean } = {};
@@ -159,23 +160,9 @@ export class GameComponent implements AfterViewInit, OnDestroy {
   getImage(src: string): HTMLImageElement | undefined {
     return this.imageCache[src];
   }
-
-  onOverlayDrop(event: DragEvent): void {
-    const targetElement = event.target as HTMLElement;
-    console.log(targetElement);
-    console.log(event);
-    console.log("overlay drop");
-    if (targetElement && targetElement.closest('.inventory-grid')) {
-      console.log("Item dropped inside inv grid");
-    }
-    else {
-      console.log("Item dropped somewhere on the game screen");
-    }
-    event.preventDefault();
-    this.inventoryComponent.clearDraggedItem();
-  }
   
-  onOverlayDragOver(event: DragEvent): void {
-    event.preventDefault(); // Necessary for allowing drop
+  onOverlayClick() {
+    console.log("Game Overlay Clicked!");
+    this.inventoryComponent.removeFloatingItem();
   }
 }

@@ -13,15 +13,12 @@ export class InventoryComponent {
   @Input() isOpen = false;
   @Output() close = new EventEmitter<void>();
 
-  public draggedItem: any = null;
-  private draggedRowIndex: number = -1;
-  private draggedColIndex: number = -1;
-  private draggedItemGridType: string | null | undefined;
-
   private floatingItem: HTMLElement | null = null;
-  private originalX: number = 0;
-  private originalY: number = 0;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public itemToMove: any = null;
+  private itemToMoveGridType: string | null | undefined;
+  private itemToMoveCol: number = -1;
+  private itemToMoveRow: number = -1;
 
   private imageCache: { [key: string]: HTMLImageElement } = {};
   public isInventoryOpen = false;
@@ -59,6 +56,8 @@ export class InventoryComponent {
 
   toggleInventory() {
     if (this.isInventoryOpen) {
+      this.clearItemToMove();
+      this.renderer.removeChild(document.body, this.floatingItem);
       this.closeInventory();
     }
     else {
@@ -110,60 +109,6 @@ export class InventoryComponent {
     return img ? img.outerHTML : '';
   }
 
-  onDragStart(event: DragEvent, item: any, rowIndex: number, colIndex: number) {
-    const target = event.currentTarget as HTMLElement;
-    const gridType = target.closest('[data-grid]')?.getAttribute('data-grid');
-
-    this.draggedItem = item;
-    this.draggedRowIndex = rowIndex;
-    this.draggedColIndex = colIndex;
-    this.draggedItemGridType = gridType;
-  }
-
-  onDragOver(event: DragEvent) {
-    event.preventDefault();
-  }
-
-  onDragEnd(event: DragEvent, rowIndex: number, colIndex: number) {
-    console.log("onDragEnd()!");
-  }
-
-  onDrop(event: DragEvent, rowIndex: number, colIndex: number) {
-    console.log("onDrop()!");
-  
-    event.preventDefault();
-
-    const target = event.currentTarget as HTMLElement;
-    const targetItemGridType = target.closest('[data-grid]')?.getAttribute('data-grid');
-
-    let targetGrid = targetItemGridType === 'inventory' ? this.items : this.crafting;
-    let sourceGrid = this.draggedItemGridType === 'inventory' ? this.items : this.crafting;
-
-    // console.log("SOURCE: Row = " + this.draggedRowIndex + ", Col = " + this.draggedColIndex + ", Grid = " + this.draggedItemGridType);
-    // console.log("TARGET: Row = " + rowIndex + ", Col = " + colIndex + ", Grid = " + targetItemGridType);
-
-    if (this.draggedItem && this.draggedRowIndex !== -1 && this.draggedColIndex !== -1) {
-      let targetItem = targetGrid[colIndex][rowIndex];
-      targetGrid[colIndex][rowIndex] = this.draggedItem;
-
-      if (targetItem) {
-        sourceGrid[this.draggedColIndex][this.draggedRowIndex] = targetItem;
-      }
-      else {
-        sourceGrid[this.draggedColIndex][this.draggedRowIndex] = null;
-      }
-
-      this.clearDraggedItem();
-    }
-  }
-
-  clearDraggedItem() {
-    this.draggedItem = null;
-    this.draggedRowIndex = -1;
-    this.draggedColIndex = -1;
-    this.draggedItemGridType = null;
-  }
-
   moveCraftingToInventory(): boolean {
     let inv_row = 0;
     let inv_col = 0;
@@ -200,57 +145,85 @@ export class InventoryComponent {
     return true;
   }
 
-  onOverlayDragOver(event: DragEvent): void {
-    event.preventDefault(); // Necessary for allowing drop
-  }
+  onCellClick(item: Item | null, event: MouseEvent, rowIndex: number, colIndex: number): void {
+    const target = event.currentTarget as HTMLElement;
+    const targetItemGridType = target.closest('[data-grid]')?.getAttribute('data-grid');
 
-  onOverlayDrop(event: DragEvent): void {
-    this.clearDraggedItem();
-  }
+    const targetGrid = targetItemGridType === 'inventory' ? this.items : this.crafting;
+    const sourceGrid = this.itemToMoveGridType === 'inventory' ? this.items : this.crafting;
 
-  onCellClick(item: any, event: MouseEvent, rowIndex: number, colIndex: number): void {
-    console.log("onCellClick!");
-
-    if (!item) {
-      return;
-    }
-
-    this.itemToMove = item;
-
-    if (this.floatingItem) {
+    if (this.itemToMove) {
+      if (!item) {
+        sourceGrid[this.itemToMoveCol][this.itemToMoveRow] = null;
+      }
+      else {
+        sourceGrid[this.itemToMoveCol][this.itemToMoveRow] = item;
+      }
+      targetGrid[colIndex][rowIndex] = this.itemToMove;
+      this.clearItemToMove();
       this.renderer.removeChild(document.body, this.floatingItem);
+      this.floatingItem = null;
     }
+    else {
+      if (!item) {
+        return;
+      }
 
-    // Create a floating item element
-    this.floatingItem = this.renderer.createElement('div');
-    this.renderer.addClass(this.floatingItem, 'floating-item');
+      this.itemToMove = item;
+      this.itemToMoveGridType = targetItemGridType;
+      this.itemToMoveCol = colIndex;
+      this.itemToMoveRow = rowIndex;
 
-    // Create image element
-    const imgElement = this.renderer.createElement('img');
-    this.renderer.setAttribute(imgElement, 'src', item.image.src);
-    this.renderer.setAttribute(imgElement, 'alt', item.name);
-    
-    // Create quantity text element
-    const quantityText = this.renderer.createElement('p');
-    this.renderer.addClass(quantityText, 'quantity-text');
-    const text = this.renderer.createText(item.quantity.toString());
-    this.renderer.appendChild(quantityText, text);
+      if (this.floatingItem) {
+        this.renderer.removeChild(document.body, this.floatingItem);
+      }
 
-    // Append image and quantity text to the floating item
-    this.renderer.appendChild(this.floatingItem, imgElement);
-    this.renderer.appendChild(this.floatingItem, quantityText);
+      // Create a floating item element
+      this.floatingItem = this.renderer.createElement('div');
+      this.renderer.addClass(this.floatingItem, 'floating-item');
 
-    // Set the content and position
-    if (this.floatingItem) {
-      //this.floatingItem.innerHTML = `<img src="${item.image.src}" alt="${item.name}">`;
-      this.renderer.appendChild(document.body, this.floatingItem);
+      // Create image element
+      const imgElement = this.renderer.createElement('img');
+      this.renderer.setAttribute(imgElement, 'src', item.image.src);
+      this.renderer.setAttribute(imgElement, 'alt', item.name);
+      
+      // Create quantity text element
+      const quantityText = this.renderer.createElement('p');
+      this.renderer.addClass(quantityText, 'quantity-text');
+      const text = this.renderer.createText(item.quantity.toString());
+      this.renderer.appendChild(quantityText, text);
+
+      // Append image and quantity text to the floating item
+      this.renderer.appendChild(this.floatingItem, imgElement);
+      this.renderer.appendChild(this.floatingItem, quantityText);
+
+      // Set the content and position
+      if (this.floatingItem) {
+        //this.floatingItem.innerHTML = `<img src="${item.image.src}" alt="${item.name}">`;
+        this.renderer.appendChild(document.body, this.floatingItem);
+      }
+
+      this.updateFloatingItemPosition(event);
+
+      // Start listening for mouse move and mouse up events
+      this.renderer.listen('window', 'mousemove', (e) => this.onMouseMove(e));
+      // this.renderer.listen('window', 'mouseup', (e) => this.onMouseUp(e, rowIndex, colIndex));
+
+      console.log(this.itemToMove);
     }
+  }
 
-    this.updateFloatingItemPosition(event);
+  clearItemToMove() {
+    console.log("Clearing itemToMove!!!");
+    this.itemToMove = null;
+    this.itemToMoveGridType = null;
+    this.itemToMoveCol = -1;
+    this.itemToMoveRow = -1;
+  }
 
-    // Start listening for mouse move and mouse up events
-    this.renderer.listen('window', 'mousemove', (e) => this.onMouseMove(e));
-    this.renderer.listen('window', 'mouseup', (e) => this.onMouseUp(e, rowIndex, colIndex));
+  onOverlayClick() {
+    console.log("Inv Overlay Clicked!");
+    // this.removeFloatingItem();
   }
 
   private onMouseMove(event: MouseEvent): void {
@@ -259,22 +232,16 @@ export class InventoryComponent {
     }
   }
 
-  private onMouseUp(event: MouseEvent, rowIndex: number, colIndex: number): void {
-    console.log("onMouseUp()!");
-    console.log("Row = " + rowIndex + ", Col = " + colIndex);
-    this.removeFloatingItem();
-  }
-
   private updateFloatingItemPosition(event: MouseEvent): void {
     if (this.floatingItem) {
-      let x = event.clientX - 23;
-      let y = event.clientY - 20;
+      const x = event.clientX - 23;
+      const y = event.clientY - 20;
       this.renderer.setStyle(this.floatingItem, 'left', `${x}px`);
       this.renderer.setStyle(this.floatingItem, 'top', `${y}px`);
     }
   }
 
-  private removeFloatingItem(): void {
+  public removeFloatingItem(): void {
     if (this.floatingItem) {
       this.renderer.removeChild(document.body, this.floatingItem);
       this.floatingItem = null;

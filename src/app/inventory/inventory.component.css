@@ -25,6 +25,10 @@
     pointer-events: none;
 }
 
+.no-user-select {
+    user-select: none;
+}
+
 .content {
     flex: 1;
     display: flex;
@@ -69,6 +73,17 @@
     gap: 8px; /* Space between grid items */
     padding: 12px; /* Space around the grid inside the container */
     border-radius: 5px; /* Optional: Rounded corners */
+    z-index: 20;
+}
+
+.inventory-row, .crafting-row {
+    display: grid;
+    gap: 4px;
+}
+
+.column {
+    display: grid;
+    gap: 8px;
 }
 
 .arrow-container {
@@ -121,6 +136,7 @@
     width: 50px;
     height: 50px;
     background: #eee;
+    gap: 8px;
     border: 2px solid #ccc;
     display: flex;
     align-items: center;

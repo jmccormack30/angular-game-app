@@ -1,7 +1,6 @@
   <div class="inventory-window" *ngIf="isOpen">
     <div class="inventory-header">
       <h3 class="no-select">Inventory</h3>
-      <button (click)="closeInventory()">X</button>
     </div>
     <div class="content">
       <div class="row-1">
@@ -13,11 +12,8 @@
         </div>
         <div class="crafting-grid" data-grid="crafting">
           <div class="crafting-row" *ngFor="let row of crafting; let rowIndex = index">
-            <div class="inventory-item" *ngFor="let item of row; let colIndex = index"
-            [attr.draggable]="true"
-            (dragstart)="onDragStart($event, item, colIndex, rowIndex)"
-            (dragover)="onDragOver($event)"
-            (drop)="onDrop($event, colIndex, rowIndex)">
+            <div class="inventory-item column" *ngFor="let item of row; let colIndex = index"
+            (click)="onCellClick(item, $event, colIndex, rowIndex)">
             <ng-container *ngIf="item">
               <div class="image-wrapper">
                 <div [innerHTML]="getImageHtml(item)"></div>
@@ -36,12 +32,11 @@
       </div>
       <div class="inventory-grid" data-grid="inventory">
         <div class="inventory-row" *ngFor="let row of items; let rowIndex = index">
-          <div class="inventory-item" *ngFor="let item of row; let colIndex = index"
-            [attr.draggable]="true"
-            (click)="onCellClick(item, $event, rowIndex, colIndex)">
+          <div class="inventory-item no-user-select column" *ngFor="let item of row; let colIndex = index"
+            (click)="onCellClick(item, $event, colIndex, rowIndex)">
             <ng-container *ngIf="item && item !== itemToMove">
               <div class="image-wrapper">
-                <div [innerHTML]="getImageHtml(item)"></div>
+                <div class="no-select" [innerHTML]="getImageHtml(item)"></div>
                 <p class="quantity-text">{{item.quantity}}</p>
               </div>
             </ng-container>
@@ -50,6 +45,5 @@
     </div>
   </div>
   <div class="drag-overlay" *ngIf="isInventoryOpen"
-     (dragover)="onOverlayDragOver($event)"
-     (drop)="onOverlayDrop($event)">
+     (click)="onOverlayClick()">
   </div>
