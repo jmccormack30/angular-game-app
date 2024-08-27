@@ -157,10 +157,21 @@ export class InventoryComponent {
 
     if (this.itemToMove) {
       if (!item) {
-        sourceGrid[this.itemToMoveCol][this.itemToMoveRow] = null;
+        if (this.itemToMoveCol != -1 && this.itemToMoveRow != -1) {
+          sourceGrid[this.itemToMoveCol][this.itemToMoveRow] = null;
+        }
       }
       else {
-        sourceGrid[this.itemToMoveCol][this.itemToMoveRow] = item;
+        if (this.itemToMove.name === item.name) {
+          if (this.itemToMoveCol != -1 && this.itemToMoveRow != -1) {
+            sourceGrid[this.itemToMoveCol][this.itemToMoveRow] = null;
+          }
+          let newQty = item.quantity + this.itemToMove.quantity;
+          this.itemToMove.quantity = newQty;
+        }
+        else {
+          sourceGrid[this.itemToMoveCol][this.itemToMoveRow] = item;
+        }
       }
       targetGrid[colIndex][rowIndex] = this.itemToMove;
       this.clearItemToMove();
@@ -172,10 +183,25 @@ export class InventoryComponent {
         return;
       }
 
-      this.itemToMove = item;
-      this.itemToMoveGridType = targetItemGridType;
-      this.itemToMoveCol = colIndex;
-      this.itemToMoveRow = rowIndex;
+      if (event.button == 2) {
+        event.preventDefault();
+        if (item.quantity <= 1) {
+          return;
+        }
+        let splitQty = Math.floor(item.quantity / 2);
+        let remQty = item.quantity - splitQty;
+        item.quantity = remQty;
+
+        let splitItem = this.createItem(item);
+        splitItem.quantity = splitQty;
+        this.itemToMove = splitItem;
+      }
+      else if (event.button == 0) {
+        this.itemToMove = item;
+        this.itemToMoveGridType = targetItemGridType;
+        this.itemToMoveCol = colIndex;
+        this.itemToMoveRow = rowIndex;
+      }
 
       if (this.floatingItem) {
         this.renderer.removeChild(document.body, this.floatingItem);
@@ -187,13 +213,13 @@ export class InventoryComponent {
 
       // Create image element
       const imgElement = this.renderer.createElement('img');
-      this.renderer.setAttribute(imgElement, 'src', item.image.src);
-      this.renderer.setAttribute(imgElement, 'alt', item.name);
+      this.renderer.setAttribute(imgElement, 'src', this.itemToMove.image.src);
+      this.renderer.setAttribute(imgElement, 'alt', this.itemToMove.name);
       
       // Create quantity text element
       const quantityText = this.renderer.createElement('p');
       this.renderer.addClass(quantityText, 'quantity-text');
-      const text = this.renderer.createText(item.quantity.toString());
+      const text = this.renderer.createText(this.itemToMove.quantity.toString());
       this.renderer.appendChild(quantityText, text);
 
       // Append image and quantity text to the floating item
@@ -241,5 +267,9 @@ export class InventoryComponent {
       this.floatingItem = null;
       this.itemToMove = null;
     }
+  }
+
+  createItem(item: Item) {
+    return new Item(item.name, item.quantity, item.image);
   }
 }
