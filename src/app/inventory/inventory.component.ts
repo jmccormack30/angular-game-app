@@ -156,90 +156,109 @@ export class InventoryComponent {
     const sourceGrid = this.itemToMoveGridType === 'inventory' ? this.items : this.crafting;
 
     if (this.itemToMove) {
-      if (!item) {
-        if (this.itemToMoveCol != -1 && this.itemToMoveRow != -1) {
-          sourceGrid[this.itemToMoveCol][this.itemToMoveRow] = null;
-        }
+      const qtyToMove = this.getQuantityToMove(event);
+
+      if (qtyToMove === -1) {
+        return;
       }
-      else {
-        if (this.itemToMove.name === item.name) {
-          if (this.itemToMoveCol != -1 && this.itemToMoveRow != -1) {
-            sourceGrid[this.itemToMoveCol][this.itemToMoveRow] = null;
-          }
-          let newQty = item.quantity + this.itemToMove.quantity;
-          this.itemToMove.quantity = newQty;
+
+      const isMoveFullQty = (this.itemToMove.quantity === qtyToMove);
+      const isMoveSingleQty = (qtyToMove === 1)
+
+      if (!item) {
+        if (isMoveFullQty) {
+          targetGrid[colIndex][rowIndex] = this.itemToMove;
+          this.clearItemToMove();
+          this.removeFloatingItem();
+          return;
+        }
+        else if (isMoveSingleQty) {
+          this.itemToMove.quantity -= 1;
+          this.updateFloatingItemQuantity(this.itemToMove.quantity);
+          const splitItem = this.createItem(this.itemToMove);
+          splitItem.quantity = 1;
+          targetGrid[colIndex][rowIndex] = splitItem;
+          return;
         }
         else {
-          sourceGrid[this.itemToMoveCol][this.itemToMoveRow] = item;
+          return;
         }
       }
-      targetGrid[colIndex][rowIndex] = this.itemToMove;
-      this.clearItemToMove();
-      this.renderer.removeChild(document.body, this.floatingItem);
-      this.floatingItem = null;
+
+      if (item) {
+        if (this.isSameItem(this.itemToMove, item)) {
+          if (isMoveFullQty) {
+            const newQty = item.quantity + qtyToMove;
+            item.quantity = newQty;
+            this.clearItemToMove();
+            this.removeFloatingItem();
+            return;
+          }
+          else if (isMoveSingleQty) {
+            this.itemToMove.quantity -= 1;
+            this.updateFloatingItemQuantity(this.itemToMove.quantity);
+            item.quantity += 1;
+            return;
+          }
+          else {
+            return;
+          }
+        }
+        else {
+          // swap floating item with item in cell
+          targetGrid[colIndex][rowIndex] = this.itemToMove
+          this.clearItemToMove();
+          this.removeFloatingItem();
+
+          this.createFloatingItem(item, event);
+          this.itemToMove = item;
+          return;
+        }
+      }
     }
-    else {
+
+    if (!this.itemToMove) {
       if (!item) {
         return;
       }
 
+      // right click
       if (event.button == 2) {
         event.preventDefault();
-        if (item.quantity <= 1) {
+        if (item.quantity < 1) {
           return;
         }
-        let splitQty = Math.floor(item.quantity / 2);
-        let remQty = item.quantity - splitQty;
-        item.quantity = remQty;
+        else if (item.quantity === 1) {
+          this.itemToMove = item;
+          targetGrid[colIndex][rowIndex] = null;
+        }
+        else {
+          const splitQty = Math.floor(item.quantity / 2);
+          const remQty = item.quantity - splitQty;
+          item.quantity = remQty;
 
-        let splitItem = this.createItem(item);
-        splitItem.quantity = splitQty;
-        this.itemToMove = splitItem;
+          const splitItem = this.createItem(item);
+          splitItem.quantity = splitQty;
+          this.itemToMove = splitItem;
+        }
       }
+      // left click
       else if (event.button == 0) {
         this.itemToMove = item;
         this.itemToMoveGridType = targetItemGridType;
         this.itemToMoveCol = colIndex;
         this.itemToMoveRow = rowIndex;
+
+        // clear the item from the cell if we picked it up
+        const sourceGrid = this.itemToMoveGridType === 'inventory' ? this.items : this.crafting;
+        sourceGrid[colIndex][rowIndex] = null;
       }
 
-      if (this.floatingItem) {
-        this.renderer.removeChild(document.body, this.floatingItem);
-      }
-
-      // Create a floating item element
-      this.floatingItem = this.renderer.createElement('div');
-      this.renderer.addClass(this.floatingItem, 'floating-item');
-
-      // Create image element
-      const imgElement = this.renderer.createElement('img');
-      this.renderer.setAttribute(imgElement, 'src', this.itemToMove.image.src);
-      this.renderer.setAttribute(imgElement, 'alt', this.itemToMove.name);
-      
-      // Create quantity text element
-      const quantityText = this.renderer.createElement('p');
-      this.renderer.addClass(quantityText, 'quantity-text');
-      const text = this.renderer.createText(this.itemToMove.quantity.toString());
-      this.renderer.appendChild(quantityText, text);
-
-      // Append image and quantity text to the floating item
-      this.renderer.appendChild(this.floatingItem, imgElement);
-      this.renderer.appendChild(this.floatingItem, quantityText);
-
-      // Set the content and position
-      if (this.floatingItem) {
-        this.renderer.appendChild(document.body, this.floatingItem);
-      }
-
-      this.updateFloatingItemPosition(event);
-
-      // Start listening for mouse move and mouse up events
-      this.renderer.listen('window', 'mousemove', (e) => this.onMouseMove(e));
+      this.createFloatingItem(this.itemToMove, event)
     }
   }
 
   clearItemToMove() {
-    console.log("Clearing itemToMove!!!");
     this.itemToMove = null;
     this.itemToMoveGridType = null;
     this.itemToMoveCol = -1;
@@ -265,11 +284,85 @@ export class InventoryComponent {
     if (this.floatingItem) {
       this.renderer.removeChild(document.body, this.floatingItem);
       this.floatingItem = null;
-      this.itemToMove = null;
+      console.log(this.itemToMoveCol);
+      console.log(this.itemToMoveRow);
+    }
+  }
+
+  public returnFloatingItemToCell(): void {
+    if (this.itemToMove) {
+      if (this.itemToMoveCol !== -1 && this.itemToMoveRow !== -1) {
+        const grid = this.itemToMoveGridType === 'inventory' ? this.items : this.crafting;
+        grid[this.itemToMoveCol][this.itemToMoveRow] = this.itemToMove;
+        this.clearItemToMove();
+      }
     }
   }
 
   createItem(item: Item) {
     return new Item(item.name, item.quantity, item.image);
+  }
+
+  getQuantityToMove(event: MouseEvent) {
+    switch (event.button) {
+      case 2: // Right click
+        return 1;
+      case 0: // Left click
+        return this.itemToMove.quantity;
+      default:
+        return -1;
+    }
+  }
+
+  isSameItem(item1: Item, item2: Item) {
+    return item1.name === item2.name;
+  }
+
+  createFloatingItem(item: Item, event: MouseEvent) {
+    if (this.floatingItem) {
+      this.renderer.removeChild(document.body, this.floatingItem);
+    }
+
+    // Create a floating item element
+    this.floatingItem = this.renderer.createElement('div');
+    this.renderer.addClass(this.floatingItem, 'floating-item');
+
+    // Create image element
+    const imgElement = this.renderer.createElement('img');
+    this.renderer.setAttribute(imgElement, 'src', item.image.src);
+    this.renderer.setAttribute(imgElement, 'alt', item.name);
+    
+    // Create quantity text element
+    const quantityText = this.renderer.createElement('p');
+    this.renderer.addClass(quantityText, 'quantity-text');
+    const text = this.renderer.createText(item.quantity.toString());
+    this.renderer.appendChild(quantityText, text);
+
+    // Append image and quantity text to the floating item
+    this.renderer.appendChild(this.floatingItem, imgElement);
+    this.renderer.appendChild(this.floatingItem, quantityText);
+
+    // Set the content and position
+    if (this.floatingItem) {
+      this.renderer.appendChild(document.body, this.floatingItem);
+    }
+
+    this.updateFloatingItemPosition(event);
+
+    // Start listening for mouse move and mouse up events
+    this.renderer.listen('window', 'mousemove', (e) => this.onMouseMove(e));
+  }
+
+  updateFloatingItemQuantity(quantity: number) {
+    if (this.floatingItem) {
+      const quantityTextElement = this.floatingItem.querySelector('.quantity-text') as HTMLElement;;
+      if (quantityTextElement) {
+        this.updateQuantityText(quantityTextElement, quantity);
+      }
+    }
+  }
+
+  updateQuantityText(element: HTMLElement, quantity: number) {
+    this.renderer.setProperty(element, 'textContent', quantity.toString());
   }
 }

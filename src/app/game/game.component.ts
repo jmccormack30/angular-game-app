@@ -164,5 +164,6 @@ export class GameComponent implements AfterViewInit, OnDestroy {
   onOverlayClick() {
     console.log("Game Overlay Clicked!");
     this.inventoryComponent.removeFloatingItem();
+    this.inventoryComponent.returnFloatingItemToCell();
   }
 }
