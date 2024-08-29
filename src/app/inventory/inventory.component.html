@@ -33,12 +33,13 @@
       <div class="inventory-grid" data-grid="inventory">
         <div class="inventory-row" *ngFor="let row of items; let rowIndex = index">
           <div class="inventory-item no-user-select column" *ngFor="let item of row; let colIndex = index"
-            (click)="onCellClick(item, $event, colIndex, rowIndex)"
-            (contextmenu)="onCellClick(item, $event, colIndex, rowIndex)">
+            (click)="singleClick(item, $event, colIndex, rowIndex)"
+            (dblclick)="onDoubleClick($event)"
+            (contextmenu)="singleClick(item, $event, colIndex, rowIndex)">
             <ng-container *ngIf="item && item !== itemToMove">
               <div class="image-wrapper">
                 <div class="no-select" [innerHTML]="getImageHtml(item)"></div>
-                <p class="quantity-text">{{item.quantity}}</p>
+                <p class="quantity-text" *ngIf="item.quantity > 1">{{item.quantity}}</p>
               </div>
             </ng-container>
         </div>

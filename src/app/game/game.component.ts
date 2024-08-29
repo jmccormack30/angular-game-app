@@ -37,7 +37,7 @@ export class GameComponent implements AfterViewInit, OnDestroy {
   constructor() {}
 
   ngAfterViewInit(): void {
-    this.enterKeySubject.pipe(debounceTime(300)).subscribe(() => {
+    this.enterKeySubject.pipe(debounceTime(250)).subscribe(() => {
       this.inventoryComponent.toggleInventory();
     });
 
@@ -164,6 +164,6 @@ export class GameComponent implements AfterViewInit, OnDestroy {
   onOverlayClick() {
     console.log("Game Overlay Clicked!");
     this.inventoryComponent.removeFloatingItem();
-    this.inventoryComponent.returnFloatingItemToCell();
+    this.inventoryComponent.returnItemToCell();
   }
 }

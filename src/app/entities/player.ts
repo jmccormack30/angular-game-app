@@ -153,19 +153,19 @@ export class Player {
         let direction = "";
         let total = 0;
 
-        if (keyState['ArrowUp'] || keyState['W']) {
+        if (keyState['ArrowUp'] || keyState['W'] || keyState['w']) {
             direction = "up";
             total++;
         }
-        if (keyState['ArrowDown'] || keyState['S']) {
+        if (keyState['ArrowDown'] || keyState['S'] || keyState['s']) {
             direction = "down";
             total++;
         }
-        if (keyState['ArrowLeft'] || keyState['A']) {
+        if (keyState['ArrowLeft'] || keyState['A'] || keyState['a']) {
             direction = "left";
             total++;
         }
-        if (keyState['ArrowRight'] || keyState['D']) {
+        if (keyState['ArrowRight'] || keyState['D'] || keyState['d']) {
             direction = "right";
             total++;
         }

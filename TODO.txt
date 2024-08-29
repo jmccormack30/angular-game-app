@@ -1,13 +1,9 @@
-1. When right click splitting a stack and then clicking off the inventory window the item is disappearing. Floating Item is being cleared, but we are not moving itemToMove back to a cell.
-We are also not clearing itemToMove, so when clicking on another cell, it is returned. Need to return itemToMove to a cell. Might need to keep track of the source cell col and row even
-when coming from a split stack. Need to adjust this logic.
+1. Remove quantity text from item in cell if it has 1 quantity
 
-2. Remove quantity text from item in cell if it has 1 quantity
-
-3. Hold down right click with an item in the mouse to add 1 to a cell automatically. This will allow you to slide the mouse over multiple cells to add 1 to each one without having
+2. Hold down right click with an item in the mouse to add 1 to a cell automatically. This will allow you to slide the mouse over multiple cells to add 1 to each one without having
 to let go and press right click multiple times. Need to make sure this does not continuously add +1 to a cell many times if you are holding down.
 
-4. Add a hot key for when you have an item in the mouse. The hotkey will take all other items that are the same in cells and consolidate them into the one item which is in the mouse.
+3. Add a hot key for when you have an item in the mouse. The hotkey will take all other items that are the same in cells and consolidate them into the one item which is in the mouse.
 This should only consolidate up to the quantity maximum (have not determined yet).
 
-5. add all the same inventory logic to the crafting grid too
+4. add all the same inventory logic to the crafting grid too

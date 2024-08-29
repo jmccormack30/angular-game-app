@@ -21,6 +21,7 @@ export class InventoryComponent {
 
   private imageCache: { [key: string]: HTMLImageElement } = {};
   public isInventoryOpen = false;
+  private isSingleClick = false;
 
   armor: (Item | null)[];
   items: (Item | null)[][];
@@ -55,6 +56,7 @@ export class InventoryComponent {
 
   toggleInventory() {
     if (this.isInventoryOpen) {
+      this.returnItemToCell();
       this.clearItemToMove();
       if (this.floatingItem) {
         this.renderer.removeChild(document.body, this.floatingItem);
@@ -148,8 +150,27 @@ export class InventoryComponent {
     return true;
   }
 
+  singleClick(item: Item | null, event: MouseEvent, rowIndex: number, colIndex: number) {
+    console.log("single click");
+    console.log(event);
+    this.isSingleClick = true;
+    setTimeout(() => {
+      if (this.isSingleClick) {
+        this.onCellClick(item, event, rowIndex, colIndex);
+      }
+    }, 250);
+  }
+
+  onDoubleClick(event: MouseEvent) {
+    console.log("double click");
+    this.isSingleClick = false;
+  }
+
   onCellClick(item: Item | null, event: MouseEvent, rowIndex: number, colIndex: number): void {
+    console.log("on cell click");
+    console.log(event);
     const target = event.currentTarget as HTMLElement;
+    console.log(target);
     const targetItemGridType = target.closest('[data-grid]')?.getAttribute('data-grid');
 
     const targetGrid = targetItemGridType === 'inventory' ? this.items : this.crafting;
@@ -222,6 +243,10 @@ export class InventoryComponent {
         return;
       }
 
+      this.itemToMoveGridType = targetItemGridType;
+      this.itemToMoveCol = colIndex;
+      this.itemToMoveRow = rowIndex;
+
       // right click
       if (event.button == 2) {
         event.preventDefault();
@@ -244,12 +269,8 @@ export class InventoryComponent {
       }
       // left click
       else if (event.button == 0) {
-        this.itemToMove = item;
-        this.itemToMoveGridType = targetItemGridType;
-        this.itemToMoveCol = colIndex;
-        this.itemToMoveRow = rowIndex;
-
         // clear the item from the cell if we picked it up
+        this.itemToMove = item;
         const sourceGrid = this.itemToMoveGridType === 'inventory' ? this.items : this.crafting;
         sourceGrid[colIndex][rowIndex] = null;
       }
@@ -289,13 +310,19 @@ export class InventoryComponent {
     }
   }
 
-  public returnFloatingItemToCell(): void {
+  public returnItemToCell(): void {
     if (this.itemToMove) {
       if (this.itemToMoveCol !== -1 && this.itemToMoveRow !== -1) {
         const grid = this.itemToMoveGridType === 'inventory' ? this.items : this.crafting;
-        grid[this.itemToMoveCol][this.itemToMoveRow] = this.itemToMove;
+        let item = grid[this.itemToMoveCol][this.itemToMoveRow];
+        if (item) {
+          item.quantity = item.quantity + this.itemToMove.quantity;
+        }
+        else {
+          grid[this.itemToMoveCol][this.itemToMoveRow] = this.itemToMove;
+        }
         this.clearItemToMove();
-      }
+      } 
     }
   }
 
@@ -331,16 +358,20 @@ export class InventoryComponent {
     const imgElement = this.renderer.createElement('img');
     this.renderer.setAttribute(imgElement, 'src', item.image.src);
     this.renderer.setAttribute(imgElement, 'alt', item.name);
-    
-    // Create quantity text element
-    const quantityText = this.renderer.createElement('p');
-    this.renderer.addClass(quantityText, 'quantity-text');
-    const text = this.renderer.createText(item.quantity.toString());
-    this.renderer.appendChild(quantityText, text);
 
-    // Append image and quantity text to the floating item
+    // Append image to the floating item
     this.renderer.appendChild(this.floatingItem, imgElement);
-    this.renderer.appendChild(this.floatingItem, quantityText);
+
+    if (item.quantity > 1) {
+      // Create quantity text element
+      const quantityText = this.renderer.createElement('p');
+      this.renderer.addClass(quantityText, 'quantity-text');
+      const text = this.renderer.createText(item.quantity.toString());
+      this.renderer.appendChild(quantityText, text);
+
+      // Append quantity text to the floating item
+      this.renderer.appendChild(this.floatingItem, quantityText);
+    }
 
     // Set the content and position
     if (this.floatingItem) {
@@ -357,7 +388,14 @@ export class InventoryComponent {
     if (this.floatingItem) {
       const quantityTextElement = this.floatingItem.querySelector('.quantity-text') as HTMLElement;;
       if (quantityTextElement) {
-        this.updateQuantityText(quantityTextElement, quantity);
+        if (quantity === 1) {
+          // Hide the quantity text element
+          quantityTextElement.style.display = 'none'; // Or use 'visibility: hidden;'
+        } else {
+          // Show and update the quantity text
+          quantityTextElement.style.display = 'block'; // Ensure it's visible
+          this.updateQuantityText(quantityTextElement, quantity);
+        }
       }
     }
   }
