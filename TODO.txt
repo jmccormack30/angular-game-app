@@ -9,3 +9,5 @@ to let go and press right click multiple times. Need to make sure this does not 
 
 4. Add a hot key for when you have an item in the mouse. The hotkey will take all other items that are the same in cells and consolidate them into the one item which is in the mouse.
 This should only consolidate up to the quantity maximum (have not determined yet).
+
+5. add all the same inventory logic to the crafting grid too
