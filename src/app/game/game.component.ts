@@ -75,7 +75,6 @@ export class GameComponent implements AfterViewInit, OnDestroy {
         this.imageCache[src] = img;
         resolve();
       };
-      console.log(img);
       img.onerror = reject;
       img.src = src;
     });

@@ -1,9 +1,9 @@
-1. Remove quantity text from item in cell if it has 1 quantity
-
-2. Hold down right click with an item in the mouse to add 1 to a cell automatically. This will allow you to slide the mouse over multiple cells to add 1 to each one without having
+1. Hold down right click with an item in the mouse to add 1 to a cell automatically. This will allow you to slide the mouse over multiple cells to add 1 to each one without having
 to let go and press right click multiple times. Need to make sure this does not continuously add +1 to a cell many times if you are holding down.
 
-3. Add a hot key for when you have an item in the mouse. The hotkey will take all other items that are the same in cells and consolidate them into the one item which is in the mouse.
-This should only consolidate up to the quantity maximum (have not determined yet).
+3. Add a max stack quantity (maybe 100?) - this needs to be accounted for in several places in the logic
 
-4. add all the same inventory logic to the crafting grid too
+4. Add crafting recipes and output
+
+    - Shift right click output moves to next open slot in inventory or next slot with same item (try to re-use moveCraftingToInventory() logic)
+    - Left click ouput picks up, can do multiple times

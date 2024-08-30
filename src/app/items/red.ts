@@ -1,8 +1,9 @@
 import { Item } from "./item";
 
 export class Red extends Item {
+    static override itemName: string = "Red";
 
-    constructor(name: string, quantity: number, image: HTMLImageElement) {
-        super(name, quantity, image);
-    };
+    constructor(quantity: number, image: HTMLImageElement | null = null) {
+        super(quantity, image);
+    }
 }

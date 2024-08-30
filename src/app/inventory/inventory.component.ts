@@ -1,8 +1,9 @@
 import { Component, Output, EventEmitter, Renderer2, ElementRef } from '@angular/core';
+import { Observable, from } from 'rxjs';
 import { Item } from '../items/item';
 import { Red } from '../items/red';
-import { Observable, from } from 'rxjs';
-import { Blue } from '../items/blue';
+import { Blue } from '../items/blue'
+
 
 @Component({
   selector: 'app-inventory',
@@ -21,7 +22,9 @@ export class InventoryComponent {
 
   private imageCache: { [key: string]: HTMLImageElement } = {};
   public isInventoryOpen = false;
-  private isSingleClick = false;
+
+  lastItemPickUpTime: number | null = null;
+  pickUpThreshold: number = 250; // Time window in milliseconds
 
   armor: (Item | null)[];
   items: (Item | null)[][];
@@ -38,15 +41,13 @@ export class InventoryComponent {
     this.preloadImages().subscribe(
       () => {
         const red = this.getImage('assets/red_item.png');
-        console.log(red);
         if (red) {
-          const red_item = new Red("Red", 10, red);
+          const red_item = new Red(10, red);
           this.items[0][0] = red_item;
         }
         const blue = this.getImage('assets/blue_item.png');
-        console.log(blue);
         if (blue) {
-          const blue_item = new Blue("Blue", 25, blue);
+          const blue_item = new Blue(25, blue);
           this.items[1][0] = blue_item;
         }
       }
@@ -99,7 +100,6 @@ export class InventoryComponent {
         this.imageCache[src] = img;
         resolve();
       };
-      console.log(img);
       img.onerror = reject;
       img.src = src;
     });
@@ -115,12 +115,37 @@ export class InventoryComponent {
   }
 
   moveCraftingToInventory(): boolean {
-    let inv_row = 0;
-    let inv_col = 0;
+    let inv_target_row = 0;
+    let inv_target_col = 0;
 
-    const getNextOpenInventorySlot = () => {
+    const getNextSlotForItem = (item: Item) => {
+      let inv_row = 0;
+      let inv_col = 0;
+
+      while (inv_row < 3) {
+        let targetItem = this.items[inv_col][inv_row];
+        if (targetItem && targetItem.isSameItemType(item)) {
+          inv_target_row = inv_row;
+          inv_target_col = inv_col;
+          return true;
+        }
+        inv_col++;
+        if (inv_col > 9) {
+          inv_col = 0;
+          inv_row++;
+        }
+      }
+      return false;
+    }
+
+    const getNextOpenSlot = () => {
+      let inv_row = 0;
+      let inv_col = 0;
+
       while (inv_row < 3) {
         if (this.items[inv_col][inv_row] === null)  {
+          inv_target_row = inv_row;
+          inv_target_col = inv_col;
           return true;
         }
         inv_col++;
@@ -136,8 +161,15 @@ export class InventoryComponent {
       for (let c_col = 0; c_col < 3; c_col++) {
         const item = this.crafting[c_col][c_row];
         if (item) {
-          if (getNextOpenInventorySlot()) {
-            this.items[inv_col][inv_row] = item;
+          if (getNextSlotForItem(item)) {
+            let targetItem = this.items[inv_target_col][inv_target_row];
+            if (targetItem) {
+              targetItem.quantity += item.quantity;
+              this.crafting[c_col][c_row] = null;
+            }
+          }
+          else if (getNextOpenSlot()) {
+            this.items[inv_target_col][inv_target_row] = item;
             this.crafting[c_col][c_row] = null;
           }
           else {
@@ -150,29 +182,29 @@ export class InventoryComponent {
     return true;
   }
 
-  singleClick(item: Item | null, event: MouseEvent, rowIndex: number, colIndex: number) {
-    console.log("single click");
-    console.log(event);
-    this.isSingleClick = true;
-    setTimeout(() => {
-      if (this.isSingleClick) {
-        this.onCellClick(item, event, rowIndex, colIndex);
-      }
-    }, 250);
-  }
-
-  onDoubleClick(event: MouseEvent) {
-    console.log("double click");
-    this.isSingleClick = false;
-  }
-
   onCellClick(item: Item | null, event: MouseEvent, rowIndex: number, colIndex: number): void {
-    console.log("on cell click");
-    console.log(event);
-    const target = event.currentTarget as HTMLElement;
-    console.log(target);
-    const targetItemGridType = target.closest('[data-grid]')?.getAttribute('data-grid');
+    const currentTime = Date.now();
 
+    if (this.lastItemPickUpTime && this.lastItemPickUpTime > -1) {
+      const time_spent = currentTime - this.lastItemPickUpTime;
+      this.lastItemPickUpTime = -1;
+
+      if (time_spent < this.pickUpThreshold && this.itemToMove) {
+        this.itemToMove = this.combineAllForSameItem(this.itemToMove);
+        this.createFloatingItem(this.itemToMove, event)
+        return;
+      }
+    }
+
+    const target = event.target as HTMLElement;
+    const inventoryItem = target.closest('.inventory-item') as HTMLElement;
+
+    if (!inventoryItem) {
+      console.error("Could not find inventory item");
+      return;
+    }
+
+    const targetItemGridType = inventoryItem.closest('[data-grid]')?.getAttribute('data-grid');
     const targetGrid = targetItemGridType === 'inventory' ? this.items : this.crafting;
     const sourceGrid = this.itemToMoveGridType === 'inventory' ? this.items : this.crafting;
 
@@ -196,7 +228,9 @@ export class InventoryComponent {
         else if (isMoveSingleQty) {
           this.itemToMove.quantity -= 1;
           this.updateFloatingItemQuantity(this.itemToMove.quantity);
-          const splitItem = this.createItem(this.itemToMove);
+          console.log(this.itemToMove.toString());
+          const splitItem = this.itemToMove.clone();
+          console.log(splitItem.toString());
           splitItem.quantity = 1;
           targetGrid[colIndex][rowIndex] = splitItem;
           return;
@@ -207,7 +241,7 @@ export class InventoryComponent {
       }
 
       if (item) {
-        if (this.isSameItem(this.itemToMove, item)) {
+        if (item.isSameItemType(this.itemToMove)) {
           if (isMoveFullQty) {
             const newQty = item.quantity + qtyToMove;
             item.quantity = newQty;
@@ -262,20 +296,21 @@ export class InventoryComponent {
           const remQty = item.quantity - splitQty;
           item.quantity = remQty;
 
-          const splitItem = this.createItem(item);
+          const splitItem = item.clone();
           splitItem.quantity = splitQty;
           this.itemToMove = splitItem;
         }
       }
       // left click
       else if (event.button == 0) {
+        this.lastItemPickUpTime = Date.now();
         // clear the item from the cell if we picked it up
         this.itemToMove = item;
         const sourceGrid = this.itemToMoveGridType === 'inventory' ? this.items : this.crafting;
         sourceGrid[colIndex][rowIndex] = null;
       }
 
-      this.createFloatingItem(this.itemToMove, event)
+      this.createFloatingItem(this.itemToMove, event);
     }
   }
 
@@ -305,8 +340,6 @@ export class InventoryComponent {
     if (this.floatingItem) {
       this.renderer.removeChild(document.body, this.floatingItem);
       this.floatingItem = null;
-      console.log(this.itemToMoveCol);
-      console.log(this.itemToMoveRow);
     }
   }
 
@@ -326,10 +359,6 @@ export class InventoryComponent {
     }
   }
 
-  createItem(item: Item) {
-    return new Item(item.name, item.quantity, item.image);
-  }
-
   getQuantityToMove(event: MouseEvent) {
     switch (event.button) {
       case 2: // Right click
@@ -339,10 +368,6 @@ export class InventoryComponent {
       default:
         return -1;
     }
-  }
-
-  isSameItem(item1: Item, item2: Item) {
-    return item1.name === item2.name;
   }
 
   createFloatingItem(item: Item, event: MouseEvent) {
@@ -356,8 +381,8 @@ export class InventoryComponent {
 
     // Create image element
     const imgElement = this.renderer.createElement('img');
-    this.renderer.setAttribute(imgElement, 'src', item.image.src);
-    this.renderer.setAttribute(imgElement, 'alt', item.name);
+    this.renderer.setAttribute(imgElement, 'src', item.image?.src ?? '');
+    this.renderer.setAttribute(imgElement, 'alt', item.getItemName());
 
     // Append image to the floating item
     this.renderer.appendChild(this.floatingItem, imgElement);
@@ -402,5 +427,39 @@ export class InventoryComponent {
 
   updateQuantityText(element: HTMLElement, quantity: number) {
     this.renderer.setProperty(element, 'textContent', quantity.toString());
+  }
+
+  combineAllForSameItem(itemToMove: Item): Item | null {
+    // TODO: Consider a single cell max quantity if implemented later
+    // TODO: Also pick up items from crafting inventory
+
+    let inv_row = 0;
+    let inv_col = 0;
+
+    let total_qty = 0;
+
+    for (let i_row = 0; i_row < 3; i_row++) {
+      for (let i_col = 0; i_col < 10; i_col++) {
+        const item = this.items[i_col][i_row];
+        if (item && item.isSameItemType(itemToMove)) {
+          total_qty += item.quantity;
+          this.items[i_col][i_row] = null;
+        }
+      }
+    }
+
+    for (let c_row = 0; c_row < 3; c_row++) {
+      for (let c_col = 0; c_col < 3; c_col++) {
+        const item = this.crafting[c_col][c_row];
+        if (item && item.isSameItemType(itemToMove)) {
+          total_qty += item.quantity;
+          // TODO: check for exceeding max quantity
+          this.crafting[c_col][c_row] = null;
+        }
+      }
+    }
+
+    itemToMove.quantity += total_qty;
+    return itemToMove;
   }
 }
