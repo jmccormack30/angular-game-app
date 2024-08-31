@@ -3,6 +3,10 @@ import { Observable, from } from 'rxjs';
 import { Item } from '../items/item';
 import { Red } from '../items/red';
 import { Blue } from '../items/blue'
+import { Recipe } from '../crafting/recipe';
+import { Recipes } from '../crafting/recipes';
+import { ImageService } from '../imageservice';
+import { ItemFactory } from '../items/itemfactory';
 
 
 @Component({
@@ -31,28 +35,20 @@ export class InventoryComponent {
   crafting: (Item | null)[][];
   output: Item | null;
 
-  constructor(private renderer: Renderer2, private el: ElementRef) {
-    console.log("Creating inventory!");
+  constructor(private renderer: Renderer2, private el: ElementRef, private imageService: ImageService) {
+    console.log("inventory component init");
+
     this.armor = Array(4).fill(null);
     this.items = Array.from({ length: 10 }, () => Array(3).fill(null));
     this.crafting = Array.from({ length: 3 }, () => Array(3).fill(null));
     this.output = null;
 
-    this.preloadImages().subscribe(
-      () => {
-        const red = this.getImage('assets/red_item.png');
-        if (red) {
-          const red_item = new Red(10, red);
-          this.items[0][0] = red_item;
-        }
-        const blue = this.getImage('assets/blue_item.png');
-        if (blue) {
-          const blue_item = new Blue(25, blue);
-          this.items[1][0] = blue_item;
-        }
-      }
-    );
-    console.log("Finished creating inventory!");
+    const red = ItemFactory.createItem(Red, 10);
+    const blue = ItemFactory.createItem(Blue, 25);
+    this.items[0][0] = red;
+    this.items[1][0] = blue;
+
+    console.log("inventory component end");
   }
 
   toggleInventory() {
@@ -83,31 +79,31 @@ export class InventoryComponent {
     }
   }
 
-  preloadImages(): Observable<void[]> {
-    const imageSources = [
-      'assets/red_item.png',
-      'assets/blue_item.png'
-    ]
+  // preloadImages(): Observable<void[]> {
+  //   const imageSources = [
+  //     'assets/red_item.png',
+  //     'assets/blue_item.png'
+  //   ]
 
-    const promises = imageSources.map(src => this.loadImage(src));
-    return from(Promise.all(promises));
-  }
+  //   const promises = imageSources.map(src => this.loadImage(src));
+  //   return from(Promise.all(promises));
+  // }
 
-  private loadImage(src: string): Promise<void> {
-    return new Promise((resolve, reject) => {
-      const img = new Image();
-      img.onload = () => {
-        this.imageCache[src] = img;
-        resolve();
-      };
-      img.onerror = reject;
-      img.src = src;
-    });
-  }
+  // private loadImage(src: string): Promise<void> {
+  //   return new Promise((resolve, reject) => {
+  //     const img = new Image();
+  //     img.onload = () => {
+  //       this.imageCache[src] = img;
+  //       resolve();
+  //     };
+  //     img.onerror = reject;
+  //     img.src = src;
+  //   });
+  // }
 
-  getImage(src: string): HTMLImageElement | undefined {
-    return this.imageCache[src];
-  }
+  // getImage(src: string): HTMLImageElement | undefined {
+  //   return this.imageCache[src];
+  // }
 
   getImageHtml(item: Item): string {
     const img = item.image;
@@ -221,6 +217,7 @@ export class InventoryComponent {
       if (!item) {
         if (isMoveFullQty) {
           targetGrid[colIndex][rowIndex] = this.itemToMove;
+          this.updateCraftingOutput();
           this.clearItemToMove();
           this.removeFloatingItem();
           return;
@@ -228,11 +225,10 @@ export class InventoryComponent {
         else if (isMoveSingleQty) {
           this.itemToMove.quantity -= 1;
           this.updateFloatingItemQuantity(this.itemToMove.quantity);
-          console.log(this.itemToMove.toString());
           const splitItem = this.itemToMove.clone();
-          console.log(splitItem.toString());
           splitItem.quantity = 1;
           targetGrid[colIndex][rowIndex] = splitItem;
+          this.updateCraftingOutput();
           return;
         }
         else {
@@ -245,6 +241,7 @@ export class InventoryComponent {
           if (isMoveFullQty) {
             const newQty = item.quantity + qtyToMove;
             item.quantity = newQty;
+            this.updateCraftingOutput();
             this.clearItemToMove();
             this.removeFloatingItem();
             return;
@@ -253,6 +250,7 @@ export class InventoryComponent {
             this.itemToMove.quantity -= 1;
             this.updateFloatingItemQuantity(this.itemToMove.quantity);
             item.quantity += 1;
+            this.updateCraftingOutput();
             return;
           }
           else {
@@ -262,6 +260,7 @@ export class InventoryComponent {
         else {
           // swap floating item with item in cell
           targetGrid[colIndex][rowIndex] = this.itemToMove
+          this.updateCraftingOutput();
           this.clearItemToMove();
           this.removeFloatingItem();
 
@@ -461,5 +460,85 @@ export class InventoryComponent {
 
     itemToMove.quantity += total_qty;
     return itemToMove;
+  }
+
+  updateCraftingOutput() {
+    // console.log("item placed in crafting grid");
+    const crafting_items: Item[] = [];
+    for (let c_row = 0; c_row < 3; c_row++) {
+      for (let c_col = 0; c_col < 3; c_col++) {
+        const item = this.crafting[c_col][c_row];
+        if (item) {
+          crafting_items.push(item);
+        }
+      }
+    }
+
+    // console.log(crafting_items);
+
+    let allRecipes = Array.from(Recipes.recipeList.values()).filter(recipe => 
+      crafting_items.every(item => recipe.getRequiredItems().some(requiredItem => requiredItem.equals(item))));
+
+    // console.log(allRecipes);
+
+    allRecipes.forEach((recipe) => {
+      let recipe_crafting = recipe.getCrafting();
+
+      let validItem = true;
+      let output_qty = Number.MAX_SAFE_INTEGER;
+
+      outerLoop:
+      for (let row = 0; row < 3; row++) {
+        for (let col = 0; col < 3; col++) {
+          const recipe_item = recipe_crafting[col][row];
+          const crafting_item = this.crafting[col][row];
+
+          console.log("Row = " + row + ", Col = " + col + ", C: " + crafting_item + ", R: " + recipe_item);
+
+          if (recipe_item === null && crafting_item === null) {
+            continue;
+          }
+          else if (recipe_item === null && crafting_item !== null) {
+            validItem = false;
+            break outerLoop;
+          }
+          else if (recipe_item !== null && crafting_item === null) {
+            validItem = false;
+            break outerLoop;
+          }
+          else if (recipe_item !== null && crafting_item !== null && !recipe_item.equals(crafting_item)) {
+            validItem = false;
+            break outerLoop;
+          }
+          else {
+            if (recipe_item !== null && crafting_item !== null && recipe_item.equals(crafting_item)) {
+                let crafting_item_qty = crafting_item.quantity;
+                let recipe_item_qty = recipe_item.quantity;
+
+                let allowed_qty = Math.floor(crafting_item_qty / recipe_item_qty);
+                console.log(allowed_qty);
+                if (output_qty > allowed_qty) {
+                  output_qty = allowed_qty;
+                }
+                if (output_qty <= 0) {
+                  break outerLoop;
+                }
+            }
+            else {
+              validItem = false;
+              break outerLoop;
+            }
+          }
+        }
+      }
+
+      if (validItem) {
+        const ItemClass = recipe.getOutput()?.constructor as typeof Item;
+        let output_item = ItemFactory.createItem(ItemClass, output_qty);
+        if (output_item) {
+          this.output = output_item;
+        }
+      }
+    });
   }
 }

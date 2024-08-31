@@ -1,5 +1,6 @@
 import { PlayerWalkAnimation } from "../animations/player-walk-animation";
 import { GameComponent } from "../game/game.component";
+import { ImageService } from "../imageservice";
 
 export class Player {
     xPos: number;
@@ -7,7 +8,7 @@ export class Player {
     speed: number;
     direction: string | undefined;
 
-    image: HTMLImageElement | undefined;
+    image: HTMLImageElement | null = null;
     playerImages: { [key: string]: string } = {};
     private imageCache: { [key: string]: HTMLImageElement } = {};
 
@@ -15,57 +16,56 @@ export class Player {
 
     private keyState: { [key: string]: boolean } = {};
   
-    constructor(xPos: number, yPos: number, speed: number, direction: string) {
+    constructor(private imageService: ImageService, xPos: number, yPos: number, speed: number, direction: string) {
       this.xPos = xPos;
       this.yPos = yPos;
       this.speed = speed;
       this.direction = direction;
-      this.preloadImages(); 
     }
 
-    preloadImages(): Promise<void[]> {
-      const imageSources = [
-        'assets/player_right.png',
-        'assets/player_right_2.png',
-        'assets/player_left.png',
-        'assets/player_left_2.png',
-        'assets/player_up.png',
-        'assets/player_up_2.png',
-        'assets/player_down.png',
-        'assets/player_down_2.png',
-        'assets/player_down_walk_1.png',
-        'assets/player_down_walk_2.png',
-        'assets/player_down_walk_3.png',
-        'assets/player_down_walk_4.png',
-        'assets/player_up_walk_3.png',
-        'assets/player_up_walk_4.png',
-        'assets/player_up_walk_5.png',
-        'assets/player_up_walk_6.png',
-        'assets/player_up_walk_7.png',
-        'assets/player_up_walk_8.png',
-        'assets/player_left_walk_1.png',
-        'assets/player_left_walk_2.png',
-        'assets/player_left_walk_3.png',
-        'assets/player_right_walk_1.png',
-        'assets/player_right_walk_2.png',
-        'assets/player_right_walk_3.png'
-      ]
+    // preloadImages(): Promise<void[]> {
+    //   const imageSources = [
+    //     'assets/player_right.png',
+    //     'assets/player_right_2.png',
+    //     'assets/player_left.png',
+    //     'assets/player_left_2.png',
+    //     'assets/player_up.png',
+    //     'assets/player_up_2.png',
+    //     'assets/player_down.png',
+    //     'assets/player_down_2.png',
+    //     'assets/player_down_walk_1.png',
+    //     'assets/player_down_walk_2.png',
+    //     'assets/player_down_walk_3.png',
+    //     'assets/player_down_walk_4.png',
+    //     'assets/player_up_walk_3.png',
+    //     'assets/player_up_walk_4.png',
+    //     'assets/player_up_walk_5.png',
+    //     'assets/player_up_walk_6.png',
+    //     'assets/player_up_walk_7.png',
+    //     'assets/player_up_walk_8.png',
+    //     'assets/player_left_walk_1.png',
+    //     'assets/player_left_walk_2.png',
+    //     'assets/player_left_walk_3.png',
+    //     'assets/player_right_walk_1.png',
+    //     'assets/player_right_walk_2.png',
+    //     'assets/player_right_walk_3.png'
+    //   ]
 
-      const promises = imageSources.map(src => this.loadImage(src));
-      return Promise.all(promises);
-    }
+    //   const promises = imageSources.map(src => this.loadImage(src));
+    //   return Promise.all(promises);
+    // }
 
-    private loadImage(src: string): Promise<void> {
-      return new Promise((resolve, reject) => {
-        const img = new Image();
-        img.onload = () => {
-          this.imageCache[src] = img;
-          resolve();
-        };
-        img.onerror = reject;
-        img.src = src;
-      });
-    }
+    // private loadImage(src: string): Promise<void> {
+    //   return new Promise((resolve, reject) => {
+    //     const img = new Image();
+    //     img.onload = () => {
+    //       this.imageCache[src] = img;
+    //       resolve();
+    //     };
+    //     img.onerror = reject;
+    //     img.src = src;
+    //   });
+    // }
 
     update(keyState: {[key: string]: boolean }) {
         const input = this.getDirection(keyState);
@@ -91,11 +91,11 @@ export class Player {
     draw(ctx: CanvasRenderingContext2D) {
         if (this.animation !== undefined) {
             const src = this.animation.getImage(this.direction);
-            this.image = this.getImage(src);
+            this.image = ImageService.getImage(src);
         }
         else {
             const src = this.getDefaultImageSrc(this.direction);
-            this.image = this.getImage(src);
+            this.image = ImageService.getImage(src);
         }
         
         if (this.image) {
@@ -178,9 +178,9 @@ export class Player {
         }
     }
 
-    getImage(src: string): HTMLImageElement | undefined {
-        return this.imageCache[src];
-    }
+    // getImage(src: string): HTMLImageElement | undefined {
+    //     return this.imageCache[src];
+    // }
 
     isRunning(keyState: {[key: string]: boolean }) {
         return keyState['Shift'];

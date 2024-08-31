@@ -28,7 +28,14 @@
             <img src="assets/arrow.png" alt="Arrow Image" class="arrow-image" class="no-select">
         </div>
         <div class="output">
-            <div class="inventory-item"></div>
+            <div class="inventory-item no-user-select column">
+              <ng-container *ngIf="output && output !== itemToMove">
+                <div class="image-wrapper">
+                  <div class="no-select" [innerHTML]="getImageHtml(output)"></div>
+                  <p class="quantity-text" *ngIf="output.quantity > 1">{{output.quantity}}</p>
+                </div>
+              </ng-container>
+            </div>
         </div>
       </div>
       <div class="inventory-grid" data-grid="inventory">

@@ -1,12 +1,28 @@
+import { Injectable } from "@angular/core";
+import { ImageService } from "../imageservice";
 import { Item } from "./item";
 
 export type ItemConstructor<T extends Item> = new (quantity: number, image: HTMLImageElement | null) => T;
 
+@Injectable({
+    providedIn: 'root'
+})
 export class ItemFactory {
-    private static constructors: Map<string, ItemConstructor<Item>> = new Map();
+    constructor() {}
+
+    static constructors: Map<string, ItemConstructor<Item>> = new Map();
 
     static register<T extends Item>(name: string, constructor: ItemConstructor<T>): void {
         this.constructors.set(name, constructor);
+    }
+
+    static createItem(ItemClass: typeof Item, quantity: number) {
+        const Constructor = this.constructors.get(ItemClass.itemName);
+        if (!Constructor) {
+            throw new Error(`No constructor registered for item name: ${name}`);
+        }
+        const img = ImageService.getImage(ItemClass.imageSrc);
+        return new Constructor(quantity, img);
     }
 
     static clone(item: Item): Item {

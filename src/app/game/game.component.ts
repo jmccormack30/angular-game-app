@@ -3,6 +3,8 @@ import { Player } from '../entities/player';
 import { Subject } from 'rxjs';
 import { debounceTime } from 'rxjs/operators'
 import { InventoryComponent } from '../inventory/inventory.component';
+import { ImageService } from '../imageservice';
+import { PlayerFactoryService } from '../entities/playerfactory';
 
 @Component({
   selector: 'app-game',
@@ -26,6 +28,8 @@ export class GameComponent implements AfterViewInit, OnDestroy {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private timerId: any;
 
+  public isInventoryReady = false;
+
   private keyState: { [key: string]: boolean } = {};
   private enterKeySubject = new Subject<void>();
 
@@ -34,51 +38,55 @@ export class GameComponent implements AfterViewInit, OnDestroy {
   player: Player | undefined;
   private imageCache: { [key: string]: HTMLImageElement } = {};
 
-  constructor() {}
+  constructor(private imageService: ImageService, private playerFactory: PlayerFactoryService) {}
 
   ngAfterViewInit(): void {
+    console.log("game component init");
     this.enterKeySubject.pipe(debounceTime(250)).subscribe(() => {
       this.inventoryComponent.toggleInventory();
     });
 
     const canvas = this.gameCanvas.nativeElement;
     this.ctx = canvas.getContext('2d')!;
+    this.player = this.playerFactory.createPlayer(625, 457, 6, "down");
 
-    this.preloadImages();
-    this.player = new Player(625, 457, 6, "down");
-    this.startGameLoop();
+    ImageService.preloadImages().subscribe(() => {
+      this.isInventoryReady = true;
+      this.startGameLoop();
+    });
+    console.log("game component end");
   }
 
   ngOnDestroy(): void {
     this.stopGameLoop();
   }
 
-  preloadImages(): Promise<void[]> {
-    const imageSources = [
-      'assets/watermelon.png',
-      'assets/fence_vertical.png',
-      'assets/grass_2.jpg',
-      'assets/wheat_grass.png',
-      'assets/wheat_dirt.png',
-      'assets/fence_dirt_grass_1.png',
-      'assets/fence_dirt_grass_2.png'
-    ]
+  // preloadImages(): Observable<void[]> {
+  //   const imageSources = [
+  //     'assets/watermelon.png',
+  //     'assets/fence_vertical.png',
+  //     'assets/grass_2.jpg',
+  //     'assets/wheat_grass.png',
+  //     'assets/wheat_dirt.png',
+  //     'assets/fence_dirt_grass_1.png',
+  //     'assets/fence_dirt_grass_2.png'
+  //   ]
 
-    const promises = imageSources.map(src => this.loadImage(src));
-    return Promise.all(promises);
-  }
+  //   const promises = imageSources.map(src => this.loadImage(src));
+  //   return Promise.all(promises);
+  // }
 
-  private loadImage(src: string): Promise<void> {
-    return new Promise((resolve, reject) => {
-      const img = new Image();
-      img.onload = () => {
-        this.imageCache[src] = img;
-        resolve();
-      };
-      img.onerror = reject;
-      img.src = src;
-    });
-  }
+  // private loadImage(src: string): Promise<void> {
+  //   return new Promise((resolve, reject) => {
+  //     const img = new Image();
+  //     img.onload = () => {
+  //       this.imageCache[src] = img;
+  //       resolve();
+  //     };
+  //     img.onerror = reject;
+  //     img.src = src;
+  //   });
+  // }
 
   startGameLoop() {
     this.isRunning = true;
@@ -120,7 +128,7 @@ export class GameComponent implements AfterViewInit, OnDestroy {
       return;
     }
     this.ctx.clearRect(0, 0, this.width, this.height);
-    const grass = this.getImage('assets/grass_2.jpg');
+    const grass = ImageService.getImage('assets/grass_2.jpg');
     if (grass) {
       const pattern = this.ctx.createPattern(grass, 'repeat');
       if (pattern) {

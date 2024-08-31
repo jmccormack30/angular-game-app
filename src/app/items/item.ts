@@ -1,9 +1,11 @@
+import { ImageService } from "../imageservice";
 import { ItemConstructor, ItemFactory } from "./itemfactory";
 
 export class Item {
     quantity: number;
     image: HTMLImageElement | null;
     static itemName: string;
+    static imageSrc: string;
 
     constructor(quantity: number, image: HTMLImageElement | null) {
         this.quantity = quantity;
@@ -30,6 +32,10 @@ export class Item {
     isSameItemType(other: Item): boolean {
         return other !== null && other instanceof Item &&
                this.getItemName() === other.getItemName();
+    }
+
+    equals(other: Item): boolean {
+        return other !== null && other instanceof Item && this.getItemName() === other.getItemName();
     }
 
     clone(): Item {
