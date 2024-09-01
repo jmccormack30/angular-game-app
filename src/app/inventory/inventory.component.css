@@ -112,6 +112,7 @@
     margin-top: 88px;
     margin-right: 16px;
     padding-left: 0px;
+    z-index: 20;
   }
 
 .player-image {
