@@ -35,6 +35,8 @@ export class InventoryComponent {
   crafting: (Item | null)[][];
   output: Item | null;
 
+  currentRecipe: Recipe | null = null;
+
   constructor(private renderer: Renderer2, private el: ElementRef, private imageService: ImageService) {
     console.log("inventory component init");
 
@@ -176,6 +178,20 @@ export class InventoryComponent {
       }
     }
     return true;
+  }
+
+  onOutputClick(item: Item | null, event: MouseEvent) {
+    if (!item || event.button !== 0 || item.quantity === 0) {
+      return;
+    }
+
+    if (!this.itemToMove) {
+      this.itemToMove = item;
+      this.output = null;
+      this.createFloatingItem(this.itemToMove, event)
+      this.useCraftingItems();
+      this.updateCraftingOutput();
+    }
   }
 
   onCellClick(item: Item | null, event: MouseEvent, rowIndex: number, colIndex: number): void {
@@ -490,7 +506,10 @@ export class InventoryComponent {
       return;
     }
 
+    let cur_recipe = null;
+
     allRecipes.forEach((recipe) => {
+      cur_recipe = recipe;
       let recipe_crafting = recipe.getCrafting();
 
       let validItem = true;
@@ -546,15 +565,74 @@ export class InventoryComponent {
         let output_item = ItemFactory.createItem(ItemClass, output_qty);
         if (output_item) {
           this.output = output_item;
+          this.currentRecipe = cur_recipe;
         }
       }
       else {
         this.output = null;
+        this.currentRecipe = null;
       }
     });
   }
 
-  onOutputClick(item: Item | null, event: MouseEvent) {
-    console.log("output clicked!");
+  useCraftingItems() {
+    console.log("in useCraftingItems!");
+    if (!this.currentRecipe) {
+      return;
+    }
+    let recipe_crafting = this.currentRecipe.getCrafting();
+
+    for (let row = 0; row < 3; row++) {
+      for (let col = 0; col < 3; col++) {
+        const recipe_item = recipe_crafting[col][row];
+        const crafting_item = this.crafting[col][row];
+
+        // console.log("Row = " + row + ", Col = " + col + ", C: " + crafting_item + ", R: " + recipe_item);
+
+        if (recipe_item === null && crafting_item === null) {
+          continue;
+        }
+        else if (recipe_item === null && crafting_item !== null) {
+          console.log("Error: Trying to use crafting items but does not match with recipe");
+          this.output = null;
+          this.currentRecipe = null;
+          return;
+        }
+        else if (recipe_item !== null && crafting_item === null) {
+          console.log("Error: Trying to use crafting items but does not match with recipe");
+          this.output = null;
+          this.currentRecipe = null;
+          return;
+        }
+        else if (recipe_item !== null && crafting_item !== null && !recipe_item.equals(crafting_item)) {
+          console.log("Error: Trying to use crafting items but does not match with recipe");
+          this.output = null;
+          this.currentRecipe = null;
+          return;
+        }
+        else {
+          if (recipe_item !== null && crafting_item !== null && recipe_item.equals(crafting_item)) {
+            if (crafting_item.quantity < recipe_item.quantity) {
+              console.log("Error: Not enough quantity for recipe");
+              this.output = null;
+              this.currentRecipe = null;
+              return;
+            }
+            else {
+              crafting_item.quantity -= recipe_item.quantity;
+              if (crafting_item.quantity <= 0) {
+                this.crafting[col][row] = null;
+              }
+            }
+          }
+          else {
+            console.log("Error: Trying to use crafting items but does not match with recipe");
+            this.output = null;
+            this.currentRecipe = null;
+            return;
+          }
+        }
+      }
+    }
   }
 }
