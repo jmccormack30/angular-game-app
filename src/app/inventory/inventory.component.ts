@@ -1,12 +1,11 @@
 import { Component, Output, EventEmitter, Renderer2, ElementRef } from '@angular/core';
-import { Observable, from } from 'rxjs';
 import { Item } from '../items/item';
 import { Red } from '../items/red';
 import { Blue } from '../items/blue'
 import { Recipe } from '../crafting/recipe';
 import { Recipes } from '../crafting/recipes';
-import { ImageService } from '../imageservice';
 import { ItemFactory } from '../items/itemfactory';
+import { KeyService } from '../keyservice';
 
 
 @Component({
@@ -23,8 +22,6 @@ export class InventoryComponent {
   private itemToMoveGridType: string | null | undefined;
   private itemToMoveCol: number = -1;
   private itemToMoveRow: number = -1;
-
-  private imageCache: { [key: string]: HTMLImageElement } = {};
   public isInventoryOpen = false;
 
   lastItemPickUpTime: number | null = null;
@@ -36,10 +33,9 @@ export class InventoryComponent {
   output: Item | null;
 
   currentRecipe: Recipe | null = null;
+  current_qty_craftable = 0;
 
-  constructor(private renderer: Renderer2, private el: ElementRef, private imageService: ImageService) {
-    console.log("inventory component init");
-
+  constructor(private renderer: Renderer2, private el: ElementRef) {
     this.armor = Array(4).fill(null);
     this.items = Array.from({ length: 10 }, () => Array(3).fill(null));
     this.crafting = Array.from({ length: 3 }, () => Array(3).fill(null));
@@ -49,17 +45,10 @@ export class InventoryComponent {
     const blue = ItemFactory.createItem(Blue, 25);
     this.items[0][0] = red;
     this.items[1][0] = blue;
-
-    console.log("inventory component end");
   }
 
   toggleInventory() {
     if (this.isInventoryOpen) {
-      this.returnItemToCell();
-      this.clearItemToMove();
-      if (this.floatingItem) {
-        this.renderer.removeChild(document.body, this.floatingItem);
-      }
       this.closeInventory();
     }
     else {
@@ -72,40 +61,22 @@ export class InventoryComponent {
   }
 
   closeInventory() {
-    if (this.moveCraftingToInventory()) {
-      this.isInventoryOpen = false;
-      this.close.emit();
-    }
-    else {
-      console.log("Failed to move crafting to inventory!!!!!");
+    if (this.isInventoryOpen) {
+      this.returnItemToCell();
+      this.clearItemToMove();
+      this.output = null;
+      if (this.floatingItem) {
+        this.renderer.removeChild(document.body, this.floatingItem);
+      }
+      if (this.moveCraftingToInventory()) {
+        this.isInventoryOpen = false;
+        this.close.emit();
+      }
+      else {
+        console.log("Failed to move crafting to inventory!!!!!");
+      }
     }
   }
-
-  // preloadImages(): Observable<void[]> {
-  //   const imageSources = [
-  //     'assets/red_item.png',
-  //     'assets/blue_item.png'
-  //   ]
-
-  //   const promises = imageSources.map(src => this.loadImage(src));
-  //   return from(Promise.all(promises));
-  // }
-
-  // private loadImage(src: string): Promise<void> {
-  //   return new Promise((resolve, reject) => {
-  //     const img = new Image();
-  //     img.onload = () => {
-  //       this.imageCache[src] = img;
-  //       resolve();
-  //     };
-  //     img.onerror = reject;
-  //     img.src = src;
-  //   });
-  // }
-
-  // getImage(src: string): HTMLImageElement | undefined {
-  //   return this.imageCache[src];
-  // }
 
   getImageHtml(item: Item): string {
     const img = item.image;
@@ -113,61 +84,11 @@ export class InventoryComponent {
   }
 
   moveCraftingToInventory(): boolean {
-    let inv_target_row = 0;
-    let inv_target_col = 0;
-
-    const getNextSlotForItem = (item: Item) => {
-      let inv_row = 0;
-      let inv_col = 0;
-
-      while (inv_row < 3) {
-        let targetItem = this.items[inv_col][inv_row];
-        if (targetItem && targetItem.isSameItemType(item)) {
-          inv_target_row = inv_row;
-          inv_target_col = inv_col;
-          return true;
-        }
-        inv_col++;
-        if (inv_col > 9) {
-          inv_col = 0;
-          inv_row++;
-        }
-      }
-      return false;
-    }
-
-    const getNextOpenSlot = () => {
-      let inv_row = 0;
-      let inv_col = 0;
-
-      while (inv_row < 3) {
-        if (this.items[inv_col][inv_row] === null)  {
-          inv_target_row = inv_row;
-          inv_target_col = inv_col;
-          return true;
-        }
-        inv_col++;
-        if (inv_col > 9) {
-          inv_col = 0;
-          inv_row++;
-        }
-      }
-      return false;
-    }
-
     for (let c_row = 0; c_row < 3; c_row++) {
       for (let c_col = 0; c_col < 3; c_col++) {
         const item = this.crafting[c_col][c_row];
         if (item) {
-          if (getNextSlotForItem(item)) {
-            let targetItem = this.items[inv_target_col][inv_target_row];
-            if (targetItem) {
-              targetItem.quantity += item.quantity;
-              this.crafting[c_col][c_row] = null;
-            }
-          }
-          else if (getNextOpenSlot()) {
-            this.items[inv_target_col][inv_target_row] = item;
+          if (this.moveItemToInventory(item)) {
             this.crafting[c_col][c_row] = null;
           }
           else {
@@ -180,8 +101,70 @@ export class InventoryComponent {
     return true;
   }
 
+  getNextSlotForItem = (item: Item) => {
+    let inv_row = 0;
+    let inv_col = 0;
+
+    while (inv_row < 3) {
+      const targetItem = this.items[inv_col][inv_row];
+      if (targetItem && targetItem.isSameItemType(item)) {
+        return [inv_row, inv_col];
+      }
+      inv_col++;
+      if (inv_col > 9) {
+        inv_col = 0;
+        inv_row++;
+      }
+    }
+    return null;
+  }
+
+  getNextOpenSlot = () => {
+    let inv_row = 0;
+    let inv_col = 0;
+
+    while (inv_row < 3) {
+      if (this.items[inv_col][inv_row] === null)  {
+        return [inv_row, inv_col];
+      }
+      inv_col++;
+      if (inv_col > 9) {
+        inv_col = 0;
+        inv_row++;
+      }
+    }
+    return null;
+  }
+
+  moveItemToInventory(item: Item) {
+    let slot = this.getNextSlotForItem(item);
+    if (slot !== null) {
+      const targetItem = this.items[slot[1]][slot[0]];
+      if (targetItem) {
+        targetItem.quantity += item.quantity;
+        return true;
+      }
+    }
+    slot = this.getNextOpenSlot();
+    if (slot !== null) {
+      this.items[slot[1]][slot[0]] = item;
+      return true;
+    }
+    console.log("No available slots found in the inventory!!!");
+    return false;
+  }
+
   onOutputClick(item: Item | null, event: MouseEvent) {
     if (!item || event.button !== 0 || item.quantity === 0) {
+      return;
+    }
+
+    if (KeyService.isKeyPressed('Shift')) {
+      item.quantity = this.current_qty_craftable * item.quantity;
+      this.moveItemToInventory(item);
+      this.output = null;
+      this.useCraftingItems(this.current_qty_craftable);
+      this.updateCraftingOutput();
       return;
     }
 
@@ -189,7 +172,7 @@ export class InventoryComponent {
       this.itemToMove = item;
       this.output = null;
       this.createFloatingItem(this.itemToMove, event)
-      this.useCraftingItems();
+      this.useCraftingItems(1);
       this.updateCraftingOutput();
     }
     else {
@@ -199,7 +182,7 @@ export class InventoryComponent {
       this.itemToMove.quantity += this.output?.quantity;
       this.output = null;
       this.updateFloatingItemQuantity(this.itemToMove.quantity);
-      this.useCraftingItems();
+      this.useCraftingItems(1);
       this.updateCraftingOutput();
     }
   }
@@ -229,7 +212,6 @@ export class InventoryComponent {
     const targetItemGridType = inventoryItem.closest('[data-grid]')?.getAttribute('data-grid');
     const targetGrid = targetItemGridType === 'inventory' ? this.items : this.crafting;
     const isTargetCrafting = targetItemGridType === 'crafting';
-    const isTargetOutput = targetItemGridType === 'output';
 
     if (this.itemToMove) {
       const qtyToMove = this.getQuantityToMove(event);
@@ -371,7 +353,7 @@ export class InventoryComponent {
     if (this.itemToMove) {
       if (this.itemToMoveCol !== -1 && this.itemToMoveRow !== -1) {
         const grid = this.itemToMoveGridType === 'inventory' ? this.items : this.crafting;
-        let item = grid[this.itemToMoveCol][this.itemToMoveRow];
+        const item = grid[this.itemToMoveCol][this.itemToMoveRow];
         if (item) {
           item.quantity = item.quantity + this.itemToMove.quantity;
         }
@@ -437,10 +419,8 @@ export class InventoryComponent {
   }
 
   updateFloatingItemQuantity(quantity: number) {
-    console.log(this.floatingItem);
     if (this.floatingItem) {
       const quantityTextElement = this.floatingItem.querySelector('.quantity-text') as HTMLElement;;
-      console.log(quantityTextElement);
       if (quantityTextElement) {
         if (quantity === 1) {
           // Hide the quantity text element
@@ -455,16 +435,12 @@ export class InventoryComponent {
   }
 
   updateQuantityText(element: HTMLElement, quantity: number) {
-    console.log("update qty text: " + quantity);
     this.renderer.setProperty(element, 'textContent', quantity.toString());
   }
 
   combineAllForSameItem(itemToMove: Item): Item | null {
     // TODO: Consider a single cell max quantity if implemented later
     // TODO: Also pick up items from crafting inventory
-
-    let inv_row = 0;
-    let inv_col = 0;
 
     let total_qty = 0;
     let crafting_updated = false;
@@ -500,6 +476,10 @@ export class InventoryComponent {
   }
 
   updateCraftingOutput() {
+    this.output = null;
+    this.currentRecipe = null;
+    this.current_qty_craftable = 0;
+
     const crafting_items: Item[] = [];
     for (let c_row = 0; c_row < 3; c_row++) {
       for (let c_col = 0; c_col < 3; c_col++) {
@@ -510,7 +490,7 @@ export class InventoryComponent {
       }
     }
 
-    let allRecipes = Array.from(Recipes.recipeList.values()).filter(recipe => 
+    const allRecipes = Array.from(Recipes.recipeList.values()).filter(recipe => 
       crafting_items.every(item => recipe.getRequiredItems().some(requiredItem => requiredItem.equals(item))));
 
     if (allRecipes.length == 0) {
@@ -519,10 +499,11 @@ export class InventoryComponent {
     }
 
     let cur_recipe = null;
+    let qty = Number.MAX_SAFE_INTEGER;
 
     allRecipes.forEach((recipe) => {
       cur_recipe = recipe;
-      let recipe_crafting = recipe.getCrafting();
+      const recipe_crafting = recipe.getCrafting();
       let validItem = true;
 
       outerLoop:
@@ -531,7 +512,7 @@ export class InventoryComponent {
           const recipe_item = recipe_crafting[col][row];
           const crafting_item = this.crafting[col][row];
 
-          console.log("Row = " + row + ", Col = " + col + ", C: " + crafting_item + ", R: " + recipe_item);
+          // console.log("Row = " + row + ", Col = " + col + ", C: " + crafting_item + ", R: " + recipe_item);
 
           if (recipe_item === null && crafting_item === null) {
             continue;
@@ -550,13 +531,16 @@ export class InventoryComponent {
           }
           else {
             if (recipe_item !== null && crafting_item !== null && recipe_item.equals(crafting_item)) {
-                let crafting_item_qty = crafting_item.quantity;
-                let recipe_item_qty = recipe_item.quantity;
+                const crafting_item_qty = crafting_item.quantity;
+                const recipe_item_qty = recipe_item.quantity;
 
-                let allowed_qty = Math.floor(crafting_item_qty / recipe_item_qty);
+                const allowed_qty = Math.floor(crafting_item_qty / recipe_item_qty);
                 if (allowed_qty <= 0) {
                   validItem = false;
                   break outerLoop;
+                }
+                if (allowed_qty < qty) {
+                  qty = allowed_qty;
                 }
             }
             else {
@@ -571,10 +555,11 @@ export class InventoryComponent {
         const outputItem = recipe.getOutput();
         if (outputItem) {
           const ItemClass = outputItem.constructor as typeof Item;
-          let newItem = ItemFactory.createItem(ItemClass, outputItem.quantity);
+          const newItem = ItemFactory.createItem(ItemClass, outputItem.quantity);
           if (newItem) {
             this.output = newItem;
             this.currentRecipe = cur_recipe;
+            this.current_qty_craftable = qty;
           }
         }
       }
@@ -585,12 +570,12 @@ export class InventoryComponent {
     });
   }
 
-  useCraftingItems() {
-    console.log("in useCraftingItems!");
+  useCraftingItems(qty: number) {
+    // console.log("in useCraftingItems!");
     if (!this.currentRecipe) {
       return;
     }
-    let recipe_crafting = this.currentRecipe.getCrafting();
+    const recipe_crafting = this.currentRecipe.getCrafting();
 
     for (let row = 0; row < 3; row++) {
       for (let col = 0; col < 3; col++) {
@@ -622,14 +607,14 @@ export class InventoryComponent {
         }
         else {
           if (recipe_item !== null && crafting_item !== null && recipe_item.equals(crafting_item)) {
-            if (crafting_item.quantity < recipe_item.quantity) {
+            if (crafting_item.quantity < recipe_item.quantity * qty) {
               console.log("Error: Not enough quantity for recipe");
               this.output = null;
               this.currentRecipe = null;
               return;
             }
             else {
-              crafting_item.quantity -= recipe_item.quantity;
+              crafting_item.quantity -= (recipe_item.quantity * qty);
               if (crafting_item.quantity <= 0) {
                 this.crafting[col][row] = null;
               }
@@ -639,6 +624,7 @@ export class InventoryComponent {
             console.log("Error: Trying to use crafting items but does not match with recipe");
             this.output = null;
             this.currentRecipe = null;
+            this.current_qty_craftable = 0;
             return;
           }
         }

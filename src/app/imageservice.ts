@@ -1,9 +1,5 @@
-import { Injectable } from "@angular/core";
 import { Observable, from } from "rxjs";
 
-@Injectable({
-    providedIn: 'root'  // This makes the service available app-wide
-  })
 export class ImageService {
     public static imageCache: { [key: string]: HTMLImageElement } = {};
 

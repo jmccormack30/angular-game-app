@@ -1,6 +1,7 @@
 import { PlayerWalkAnimation } from "../animations/player-walk-animation";
 import { GameComponent } from "../game/game.component";
 import { ImageService } from "../imageservice";
+import { KeyService } from "../keyservice";
 
 export class Player {
     xPos: number;
@@ -16,59 +17,15 @@ export class Player {
 
     private keyState: { [key: string]: boolean } = {};
   
-    constructor(private imageService: ImageService, xPos: number, yPos: number, speed: number, direction: string) {
+    constructor(xPos: number, yPos: number, speed: number, direction: string) {
       this.xPos = xPos;
       this.yPos = yPos;
       this.speed = speed;
       this.direction = direction;
     }
 
-    // preloadImages(): Promise<void[]> {
-    //   const imageSources = [
-    //     'assets/player_right.png',
-    //     'assets/player_right_2.png',
-    //     'assets/player_left.png',
-    //     'assets/player_left_2.png',
-    //     'assets/player_up.png',
-    //     'assets/player_up_2.png',
-    //     'assets/player_down.png',
-    //     'assets/player_down_2.png',
-    //     'assets/player_down_walk_1.png',
-    //     'assets/player_down_walk_2.png',
-    //     'assets/player_down_walk_3.png',
-    //     'assets/player_down_walk_4.png',
-    //     'assets/player_up_walk_3.png',
-    //     'assets/player_up_walk_4.png',
-    //     'assets/player_up_walk_5.png',
-    //     'assets/player_up_walk_6.png',
-    //     'assets/player_up_walk_7.png',
-    //     'assets/player_up_walk_8.png',
-    //     'assets/player_left_walk_1.png',
-    //     'assets/player_left_walk_2.png',
-    //     'assets/player_left_walk_3.png',
-    //     'assets/player_right_walk_1.png',
-    //     'assets/player_right_walk_2.png',
-    //     'assets/player_right_walk_3.png'
-    //   ]
-
-    //   const promises = imageSources.map(src => this.loadImage(src));
-    //   return Promise.all(promises);
-    // }
-
-    // private loadImage(src: string): Promise<void> {
-    //   return new Promise((resolve, reject) => {
-    //     const img = new Image();
-    //     img.onload = () => {
-    //       this.imageCache[src] = img;
-    //       resolve();
-    //     };
-    //     img.onerror = reject;
-    //     img.src = src;
-    //   });
-    // }
-
-    update(keyState: {[key: string]: boolean }) {
-        const input = this.getDirection(keyState);
+    update() {
+        const input = KeyService.getPlayerDirection();
         
         if (input === undefined) {
             this.animation = undefined;
@@ -79,8 +36,10 @@ export class Player {
             this.animation = undefined;
         }
 
+        const shift = KeyService.isKeyPressed('Shift');
+
         this.direction = input;
-        this.updateSpeed(keyState);
+        this.updateSpeed(shift);
         this.updatePlayerPosition(this.direction);
 
         if (this.animation === undefined) {
@@ -149,49 +108,7 @@ export class Player {
         }
     }
 
-    getDirection(keyState: { [key: string]: boolean }) {
-        let direction = "";
-        let total = 0;
-
-        if (keyState['ArrowUp'] || keyState['W'] || keyState['w']) {
-            direction = "up";
-            total++;
-        }
-        if (keyState['ArrowDown'] || keyState['S'] || keyState['s']) {
-            direction = "down";
-            total++;
-        }
-        if (keyState['ArrowLeft'] || keyState['A'] || keyState['a']) {
-            direction = "left";
-            total++;
-        }
-        if (keyState['ArrowRight'] || keyState['D'] || keyState['d']) {
-            direction = "right";
-            total++;
-        }
-
-        if (total > 1 || total === 0) {
-            return undefined;
-        }
-        else {
-            return direction;
-        }
-    }
-
-    // getImage(src: string): HTMLImageElement | undefined {
-    //     return this.imageCache[src];
-    // }
-
-    isRunning(keyState: {[key: string]: boolean }) {
-        return keyState['Shift'];
-    }
-
-    updateSpeed(keyState: {[key: string]: boolean }) {
-        if (this.isRunning(keyState)) {
-            this.speed = 5;
-        }
-        else {
-            this.speed = 3;
-        }
+    updateSpeed(shift: boolean) {
+        this.speed = shift ? 5 : 3;
     }
 }

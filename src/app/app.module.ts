@@ -5,15 +5,15 @@ import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { GameComponent } from './game/game.component';
 import { InventoryComponent } from './inventory/inventory.component';
-import { PlayerFactoryService } from './entities/playerfactory';
 import { ImageService } from './imageservice';
-import { ItemFactory } from './items/itemfactory';
 import { Observable } from 'rxjs';
+import { KeyService } from './keyservice';
 
 // Load all images on start
-export function initializeApp(imageService: ImageService) {
+export function initializeApp() {
   return (): Observable<void[]> => {
     // Initialize images or other resources here
+    KeyService.initialize();
     return ImageService.preloadImages();
   };
 }
@@ -29,12 +29,12 @@ export function initializeApp(imageService: ImageService) {
     AppRoutingModule
   ],
   providers: [
-    ItemFactory,
     ImageService,
+    KeyService,
     {
       provide: APP_INITIALIZER,
       useFactory: initializeApp,
-      deps: [ImageService],
+      deps: [ImageService, KeyService],
       multi: true
     }
   ],
