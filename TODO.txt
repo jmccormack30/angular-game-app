@@ -1,9 +1,8 @@
 1. Hold down right click with an item in the mouse to add 1 to a cell automatically. This will allow you to slide the mouse over multiple cells to add 1 to each one without having
 to let go and press right click multiple times. Need to make sure this does not continuously add +1 to a cell many times if you are holding down.
 
-3. Add a max stack quantity (maybe 100?) - this needs to be accounted for in several places in the logic
+2. Add a max stack quantity (maybe 100?) - this needs to be accounted for in several places in the logic
 
-4. Add crafting recipes and output
+3. Eventually refactor inventory.component.ts 
 
-    - Shift right click output moves to next open slot in inventory or next slot with same item (try to re-use moveCraftingToInventory() logic)
-    - Left click ouput picks up, can do multiple times
+4. Add a 4th inventory row which wil be the hot bar. Add it at the bottom of the game screen and the ability to slide / select which item is selected
