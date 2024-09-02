@@ -192,6 +192,16 @@ export class InventoryComponent {
       this.useCraftingItems();
       this.updateCraftingOutput();
     }
+    else {
+      if (!this.itemToMove.equals(item)) {
+        return;
+      }
+      this.itemToMove.quantity += this.output?.quantity;
+      this.output = null;
+      this.updateFloatingItemQuantity(this.itemToMove.quantity);
+      this.useCraftingItems();
+      this.updateCraftingOutput();
+    }
   }
 
   onCellClick(item: Item | null, event: MouseEvent, rowIndex: number, colIndex: number): void {
@@ -401,16 +411,19 @@ export class InventoryComponent {
     // Append image to the floating item
     this.renderer.appendChild(this.floatingItem, imgElement);
 
-    if (item.quantity > 1) {
-      // Create quantity text element
-      const quantityText = this.renderer.createElement('p');
-      this.renderer.addClass(quantityText, 'quantity-text');
-      const text = this.renderer.createText(item.quantity.toString());
-      this.renderer.appendChild(quantityText, text);
-
-      // Append quantity text to the floating item
-      this.renderer.appendChild(this.floatingItem, quantityText);
+    const quantityText = this.renderer.createElement('p');
+    if (item.quantity === 1) {
+      quantityText.style.display = 'none';
     }
+    else {
+      quantityText.style.display = 'block';
+    }
+    this.renderer.addClass(quantityText, 'quantity-text');
+    const text = this.renderer.createText(item.quantity.toString());
+    this.renderer.appendChild(quantityText, text);
+
+    // Append quantity text to the floating item
+    this.renderer.appendChild(this.floatingItem, quantityText);
 
     // Set the content and position
     if (this.floatingItem) {
@@ -424,8 +437,10 @@ export class InventoryComponent {
   }
 
   updateFloatingItemQuantity(quantity: number) {
+    console.log(this.floatingItem);
     if (this.floatingItem) {
       const quantityTextElement = this.floatingItem.querySelector('.quantity-text') as HTMLElement;;
+      console.log(quantityTextElement);
       if (quantityTextElement) {
         if (quantity === 1) {
           // Hide the quantity text element
@@ -440,6 +455,7 @@ export class InventoryComponent {
   }
 
   updateQuantityText(element: HTMLElement, quantity: number) {
+    console.log("update qty text: " + quantity);
     this.renderer.setProperty(element, 'textContent', quantity.toString());
   }
 
@@ -484,7 +500,6 @@ export class InventoryComponent {
   }
 
   updateCraftingOutput() {
-    console.log("item placed in crafting grid");
     const crafting_items: Item[] = [];
     for (let c_row = 0; c_row < 3; c_row++) {
       for (let c_col = 0; c_col < 3; c_col++) {
@@ -495,12 +510,9 @@ export class InventoryComponent {
       }
     }
 
-    // console.log(crafting_items);
-
     let allRecipes = Array.from(Recipes.recipeList.values()).filter(recipe => 
       crafting_items.every(item => recipe.getRequiredItems().some(requiredItem => requiredItem.equals(item))));
 
-    // console.log(allRecipes);
     if (allRecipes.length == 0) {
       this.output = null;
       return;
@@ -511,9 +523,7 @@ export class InventoryComponent {
     allRecipes.forEach((recipe) => {
       cur_recipe = recipe;
       let recipe_crafting = recipe.getCrafting();
-
       let validItem = true;
-      let output_qty = Number.MAX_SAFE_INTEGER;
 
       outerLoop:
       for (let row = 0; row < 3; row++) {
@@ -544,11 +554,8 @@ export class InventoryComponent {
                 let recipe_item_qty = recipe_item.quantity;
 
                 let allowed_qty = Math.floor(crafting_item_qty / recipe_item_qty);
-                console.log(allowed_qty);
-                if (output_qty > allowed_qty) {
-                  output_qty = allowed_qty;
-                }
-                if (output_qty <= 0) {
+                if (allowed_qty <= 0) {
+                  validItem = false;
                   break outerLoop;
                 }
             }
@@ -561,11 +568,14 @@ export class InventoryComponent {
       }
 
       if (validItem) {
-        const ItemClass = recipe.getOutput()?.constructor as typeof Item;
-        let output_item = ItemFactory.createItem(ItemClass, output_qty);
-        if (output_item) {
-          this.output = output_item;
-          this.currentRecipe = cur_recipe;
+        const outputItem = recipe.getOutput();
+        if (outputItem) {
+          const ItemClass = outputItem.constructor as typeof Item;
+          let newItem = ItemFactory.createItem(ItemClass, outputItem.quantity);
+          if (newItem) {
+            this.output = newItem;
+            this.currentRecipe = cur_recipe;
+          }
         }
       }
       else {
