@@ -27,7 +27,7 @@
         <div class="arrow-container">
             <img src="assets/arrow.png" alt="Arrow Image" class="arrow-image" class="no-select">
         </div>
-        <div class="output">
+        <div class="output" data-grid="output">
             <div class="inventory-item no-user-select column"
               (click)="onOutputClick(output, $event)">
               <ng-container *ngIf="output && output !== itemToMove">

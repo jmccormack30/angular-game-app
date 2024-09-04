@@ -17,7 +17,12 @@ export class GameComponent implements AfterViewInit, OnDestroy {
   private ctx!: CanvasRenderingContext2D;
   
   static width: number = 1300;
-  static height: number = 975;
+  static height: number = 950;
+
+  private cols = 26;
+  private rows = 19;
+  private cell_size = 50;
+  private grid = Array.from({ length: 26 }, () => Array(19).fill(null));
 
   private width: number = GameComponent.width;
   private height: number = GameComponent.height;
@@ -29,7 +34,6 @@ export class GameComponent implements AfterViewInit, OnDestroy {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private timerId: any;
 
-  public isInventoryReady = false;
   private enterKeySubject = new Subject<void>();
 
   @ViewChild('inventoryComponent') inventoryComponent!: InventoryComponent;
@@ -46,14 +50,54 @@ export class GameComponent implements AfterViewInit, OnDestroy {
       this.inventoryComponent.closeInventory();
     });
 
+    this.grid[15][7] = 'wheat';
+    this.grid[15][8] = 'wheat';
+    this.grid[15][9] = 'wheat';
+    this.grid[15][10] = 'wheat';
+    this.grid[15][11] = 'wheat';
+    this.grid[15][12] = 'wheat';
+    this.grid[16][7] = 'wheat';
+    this.grid[16][8] = 'wheat';
+    this.grid[16][9] = 'wheat';
+    this.grid[16][10] = 'wheat';
+    this.grid[16][11] = 'wheat';
+    this.grid[16][12] = 'wheat';
+    this.grid[17][7] = 'wheat';
+    this.grid[17][8] = 'wheat';
+    this.grid[17][9] = 'wheat';
+    this.grid[17][10] = 'wheat';
+    this.grid[17][11] = 'wheat';
+    this.grid[17][12] = 'wheat';
+    this.grid[18][7] = 'wheat';
+    this.grid[18][8] = 'wheat';
+    this.grid[18][9] = 'wheat';
+    this.grid[18][10] = 'wheat';  
+    this.grid[18][11] = 'wheat';
+    this.grid[18][12] = 'wheat';
+    this.grid[19][7] = 'wheat';
+    this.grid[19][8] = 'wheat';
+    this.grid[19][9] = 'wheat';
+    this.grid[19][10] = 'wheat';
+    this.grid[19][11] = 'wheat';
+    this.grid[19][12] = 'wheat';
+    this.grid[20][7] = 'wheat';
+    this.grid[20][8] = 'wheat';
+    this.grid[20][9] = 'wheat';
+    this.grid[20][10] = 'wheat';
+    this.grid[20][11] = 'wheat';
+    this.grid[20][12] = 'wheat';
+    this.grid[21][7] = 'wheat';
+    this.grid[21][8] = 'wheat';
+    this.grid[21][9] = 'wheat';
+    this.grid[21][10] = 'wheat';
+    this.grid[21][11] = 'wheat';
+    this.grid[21][12] = 'wheat';
+
     const canvas = this.gameCanvas.nativeElement;
     this.ctx = canvas.getContext('2d')!;
     this.player = this.playerFactory.createPlayer(625, 457, 6, "down");
 
-    ImageService.preloadImages().subscribe(() => {
-      this.isInventoryReady = true;
-      this.startGameLoop();
-    });
+    this.startGameLoop();
   }
 
   ngOnDestroy(): void {
@@ -108,6 +152,30 @@ export class GameComponent implements AfterViewInit, OnDestroy {
         this.ctx.fillRect(0, 0, this.width, this.height);
       }
     }
+
+    // Draw the grid lines
+    this.ctx.strokeStyle = 'black'; // Set line color for grid outlines
+
+    for (let row = 0; row < this.rows; row++) {
+      for (let col = 0; col < this.cols; col++) {
+        const x = col * this.cell_size;
+        const y = row * this.cell_size;
+        this.ctx.strokeRect(x, y, this.cell_size, this.cell_size);  // Draw the outline of each cell
+      } 
+    }
+
+    for (let col = 0; col < this.cols; col++) {
+      for (let row = 0; row < this.rows; row++) {
+        const cell = this.grid[col][row];
+        if (cell !== null && cell === 'wheat') {
+          const wheat = ImageService.getImage('assets/wheat_dirt.png');
+          if (wheat) {
+            this.ctx.drawImage(wheat, col * 50, row * 50  );
+          }
+        }
+      }
+    }
+
     if (this.player !== undefined) {
       this.player.update();
       this.player.draw(this.ctx);

@@ -12,6 +12,8 @@ body, html {
   justify-content: center; /* Center horizontally */
   align-items: center; /* Center vertically */
   height: 80vh; /* Full viewport height */
+  width: 100wh;
+  padding-top: 50px;
 }
 
 .canvas-container {
@@ -19,7 +21,7 @@ body, html {
   top: 0%;
   left: 0%;
   width: 1300px;
-  height: 975px;
+  height: 950px;
   display: flex;
   justify-content: center; /* Center horizontally */
   overflow: hidden; /* Hide scrollbars */
@@ -30,7 +32,7 @@ body, html {
   top: 0;
   left: 0;
   width: 1300px;
-  height: 975px;
+  height: 950px;
   background-color: rgba(0, 0, 0, 0.5); /* Grey transparent background */
   justify-content: center; /* Center horizontally */
   align-items: center; /* Center vertically */

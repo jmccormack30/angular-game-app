@@ -6,6 +6,7 @@ export class ImageService {
     public static preloadImages(): Observable<void[]> {
         const imageSources = [
             'assets/grass_2.jpg',
+            'assets/wheat_dirt.png',
             'assets/red_item.png',
             'assets/blue_item.png',
             'assets/player_right.png',
