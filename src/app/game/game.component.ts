@@ -15,17 +15,31 @@ import { KeyService } from '../keyservice';
 export class GameComponent implements AfterViewInit, OnDestroy {
   @ViewChild('gameCanvas') gameCanvas!: ElementRef<HTMLCanvasElement>;
   private ctx!: CanvasRenderingContext2D;
-  
+
+  // CANVAS
   static width: number = 1300;
   static height: number = 950;
+
+  private width: number = GameComponent.width;
+  private height: number = GameComponent.height;
 
   private cols = 26;
   private rows = 19;
   private cell_size = 50;
   private grid = Array.from({ length: 26 }, () => Array(19).fill(null));
 
-  private width: number = GameComponent.width;
-  private height: number = GameComponent.height;
+  public canvas_xPos = 0;
+  public canvas_yPos = 950;
+
+  // MAP
+  private map_pixel_width = 1300;
+  private map_pixel_height = 1900;
+
+  private map_cell_width = 26;
+  private map_cell_height = 38
+
+  // [col][row]
+  private map = new Array(this.map_cell_width).fill(null).map(() => new Array(this.map_cell_height).fill(null));
 
   private fps: number = 60;
   private frameInterval: number = 1000 / this.fps; // Interval in milliseconds
@@ -50,48 +64,8 @@ export class GameComponent implements AfterViewInit, OnDestroy {
       this.inventoryComponent.closeInventory();
     });
 
-    this.grid[15][7] = 'wheat';
-    this.grid[15][8] = 'wheat';
-    this.grid[15][9] = 'wheat';
-    this.grid[15][10] = 'wheat';
-    this.grid[15][11] = 'wheat';
-    this.grid[15][12] = 'wheat';
-    this.grid[16][7] = 'wheat';
-    this.grid[16][8] = 'wheat';
-    this.grid[16][9] = 'wheat';
-    this.grid[16][10] = 'wheat';
-    this.grid[16][11] = 'wheat';
-    this.grid[16][12] = 'wheat';
-    this.grid[17][7] = 'wheat';
-    this.grid[17][8] = 'wheat';
-    this.grid[17][9] = 'wheat';
-    this.grid[17][10] = 'wheat';
-    this.grid[17][11] = 'wheat';
-    this.grid[17][12] = 'wheat';
-    this.grid[18][7] = 'wheat';
-    this.grid[18][8] = 'wheat';
-    this.grid[18][9] = 'wheat';
-    this.grid[18][10] = 'wheat';  
-    this.grid[18][11] = 'wheat';
-    this.grid[18][12] = 'wheat';
-    this.grid[19][7] = 'wheat';
-    this.grid[19][8] = 'wheat';
-    this.grid[19][9] = 'wheat';
-    this.grid[19][10] = 'wheat';
-    this.grid[19][11] = 'wheat';
-    this.grid[19][12] = 'wheat';
-    this.grid[20][7] = 'wheat';
-    this.grid[20][8] = 'wheat';
-    this.grid[20][9] = 'wheat';
-    this.grid[20][10] = 'wheat';
-    this.grid[20][11] = 'wheat';
-    this.grid[20][12] = 'wheat';
-    this.grid[21][7] = 'wheat';
-    this.grid[21][8] = 'wheat';
-    this.grid[21][9] = 'wheat';
-    this.grid[21][10] = 'wheat';
-    this.grid[21][11] = 'wheat';
-    this.grid[21][12] = 'wheat';
+    this.map[18][26] = 'wheat';
+    this.map[9][14] = 'wheat';
 
     const canvas = this.gameCanvas.nativeElement;
     this.ctx = canvas.getContext('2d')!;
@@ -144,46 +118,131 @@ export class GameComponent implements AfterViewInit, OnDestroy {
       return;
     }
     this.ctx.clearRect(0, 0, this.width, this.height);
-    const grass = ImageService.getImage('assets/grass_2.jpg');
-    if (grass) {
-      const pattern = this.ctx.createPattern(grass, 'repeat');
-      if (pattern) {
-        this.ctx.fillStyle = pattern;
-        this.ctx.fillRect(0, 0, this.width, this.height);
-      }
-    }
+    // if (this.player !== undefined) {
+    //   this.renderMap(this.player.xPos, this.player.yPos);
+    // }
+    // const grass = ImageService.getImage('assets/grass_2.jpg');
+    // if (grass) {
+    //   this.ctx.drawImage(grass, -25, 450);
+    //   const pattern = this.ctx.createPattern(grass, 'repeat');
+    //   if (pattern) {
+    //     this.ctx.fillStyle = pattern;
+    //     this.ctx.fillRect(0, 0, this.width, this.height);
+    //   }
+    // }
 
-    // Draw the grid lines
-    this.ctx.strokeStyle = 'black'; // Set line color for grid outlines
+    const {startCol, startRow, width, height } = this.getVisibleTiles(this.canvas_xPos, this.canvas_yPos);
 
-    for (let row = 0; row < this.rows; row++) {
-      for (let col = 0; col < this.cols; col++) {
-        const x = col * this.cell_size;
-        const y = row * this.cell_size;
-        this.ctx.strokeRect(x, y, this.cell_size, this.cell_size);  // Draw the outline of each cell
-      } 
-    }
+    const xPosOriginal = this.getXPos(startCol);
+    const yPosOriginal = this.getYPos(startRow);
 
-    for (let col = 0; col < this.cols; col++) {
-      for (let row = 0; row < this.rows; row++) {
-        const cell = this.grid[col][row];
-        if (cell !== null && cell === 'wheat') {
-          const wheat = ImageService.getImage('assets/wheat_dirt.png');
-          if (wheat) {
-            this.ctx.drawImage(wheat, col * 50, row * 50  );
+    let xPos = xPosOriginal;
+    let yPos = yPosOriginal;
+
+    // console.log("startCol: " + startCol + ", startRow: " + startRow + ", width: " + width + ", height: " + height);
+    // console.log("xPos: " + xPos + ", yPos: " + yPos); 
+
+    this.ctx.strokeStyle = 'black';
+
+    for (let col = startCol; col < startCol + width; col++) {
+      yPos = yPosOriginal;
+      for (let row = startRow; row < startRow + height; row++) {
+          const tile = this.map[col][row];
+          const image = this.getImage(tile);
+
+          if (image) {
+            this.ctx.drawImage(image, xPos, yPos);
           }
-        }
+          this.ctx.strokeRect(xPos, yPos, this.cell_size, this.cell_size);
+          yPos += 50;
       }
+      xPos += 50;
     }
+
+    //Draw the grid lines
+    // this.ctx.strokeStyle = 'black'; // Set line color for grid outlines
+
+    // for (let row = 0; row < this.rows; row++) {
+    //   for (let col = 0; col < this.cols; col++) {
+    //     const x = col * this.cell_size;
+    //     const y = row * this.cell_size;
+    //     this.ctx.strokeRect(x, y, this.cell_size, this.cell_size);  // Draw the outline of each cell
+    //   } 
+    // }
 
     if (this.player !== undefined) {
       this.player.update();
       this.player.draw(this.ctx);
+      const input = KeyService.getPlayerDirection();
+      if (input === "up") {
+        this.canvas_yPos -= 3;
+        if (this.canvas_yPos < 0) {
+          this.canvas_yPos = 0;
+        }
+      }
+      else if (input === "down") {
+        this.canvas_yPos += 3;
+        console.log("canvas yPos = " + this.canvas_yPos + ", map pixel height = " + this.map_pixel_height + ", height = " + height);
+        if (this.canvas_yPos > this.map_pixel_height - this.height) {
+          console.log("Got here!");
+          this.canvas_yPos = this.map_pixel_height - this.height;
+        }
+      }
     }
   }
   
   onOverlayClick() {
     this.inventoryComponent.removeFloatingItem();
     this.inventoryComponent.returnItemToCell();
+  }
+
+  getVisibleTiles(canvasX: number, canvasY: number): { startCol: number, startRow: number, width: number, height: number } {
+    // Calculate the positions for the right and bottom edges of the visible area
+    const rightSideXPos = canvasX + this.width;
+    const bottomSideYPos = canvasY + this.height;
+
+    // Calculate the starting and ending column and row indices based on tile size
+    const startCol = Math.floor(canvasX / this.cell_size);
+    let endCol = Math.floor(rightSideXPos / this.cell_size);
+    const startRow = Math.floor(canvasY / this.cell_size);
+    let endRow = Math.floor(bottomSideYPos / this.cell_size);
+
+    if (endCol >= this.map_cell_width) endCol = this.map_cell_width - 1;
+    if (endRow >= this.map_cell_height) endRow = this.map_cell_height - 1;
+
+    // Calculate width and height in terms of number of tiles
+    const width = endCol - startCol + 1;
+    const height = endRow - startRow + 1;
+
+    return { startCol, startRow, width, height };
+  }
+
+  getXPos(startCol: number) {
+    const mapXPos = startCol * this.cell_size;
+    if (mapXPos < this.canvas_xPos) {
+      return mapXPos - this.canvas_xPos;
+    }
+    else {
+      return 0;
+    }
+  }
+
+  getYPos(startRow: number) {
+    const mapYPos = startRow * this.cell_size;
+    if (mapYPos < this.canvas_yPos) {
+      return mapYPos - this.canvas_yPos;
+    }
+    else {
+      return 0;
+    }
+  }
+
+  getImage(tile: string) {
+    if (tile === 'wheat') {
+      return ImageService.getImage('assets/wheat_dirt.png');
+    }
+    else {
+      return ImageService.getImage('assets/grass_2.jpg');
+    }
   }
 }

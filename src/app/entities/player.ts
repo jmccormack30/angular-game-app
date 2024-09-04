@@ -40,7 +40,7 @@ export class Player {
 
         this.direction = input;
         this.updateSpeed(shift);
-        this.updatePlayerPosition(this.direction);
+        //this.updatePlayerPosition(this.direction);
 
         if (this.animation === undefined) {
             this.animation = new PlayerWalkAnimation();
