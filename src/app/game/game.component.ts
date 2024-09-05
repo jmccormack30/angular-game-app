@@ -32,10 +32,10 @@ export class GameComponent implements AfterViewInit, OnDestroy {
   public canvas_yPos = 950;
 
   // MAP
-  private map_pixel_width = 1300;
+  private map_pixel_width = 2600;
   private map_pixel_height = 1900;
 
-  private map_cell_width = 26;
+  private map_cell_width = 52;
   private map_cell_height = 38
 
   // [col][row]
@@ -66,6 +66,8 @@ export class GameComponent implements AfterViewInit, OnDestroy {
 
     this.map[18][26] = 'wheat';
     this.map[9][14] = 'wheat';
+    this.map[38][26] = 'wheat';
+    this.map[28][14] = 'wheat';
 
     const canvas = this.gameCanvas.nativeElement;
     this.ctx = canvas.getContext('2d')!;
@@ -175,17 +177,47 @@ export class GameComponent implements AfterViewInit, OnDestroy {
       this.player.draw(this.ctx);
       const input = KeyService.getPlayerDirection();
       if (input === "up") {
-        this.canvas_yPos -= 3;
+        if (this.canvas_yPos === 0 || this.player.yPos > 443) {
+          this.player.updatePlayerPosition('up');
+        }
+        else {
+          this.canvas_yPos -= this.player.speed;
+        }
         if (this.canvas_yPos < 0) {
           this.canvas_yPos = 0;
         }
       }
       else if (input === "down") {
-        this.canvas_yPos += 3;
-        console.log("canvas yPos = " + this.canvas_yPos + ", map pixel height = " + this.map_pixel_height + ", height = " + height);
+        if (this.canvas_yPos >= this.map_pixel_height - this.height || this.player.yPos < 443) {
+          this.player.updatePlayerPosition('down');
+        }
+        else {
+          this.canvas_yPos += this.player.speed;
+        }
         if (this.canvas_yPos > this.map_pixel_height - this.height) {
-          console.log("Got here!");
           this.canvas_yPos = this.map_pixel_height - this.height;
+        }
+      }
+      else if (input === 'left') {
+        if (this.canvas_xPos === 0 || this.player.xPos > 625) {
+          this.player.updatePlayerPosition('left');
+        }
+        else {
+          this.canvas_xPos -= this.player.speed;
+        }
+        if (this.canvas_xPos < 0) {
+          this.canvas_xPos = 0;
+        }
+      }
+      else if (input === 'right') {
+        if (this.canvas_xPos >= this.map_pixel_width - this.width || this.player.xPos < 625) {
+          this.player.updatePlayerPosition('right');
+        }
+        else {
+          this.canvas_xPos += this.player.speed;
+        }
+        if (this.canvas_xPos > this.map_pixel_width - this.width) {
+          this.canvas_xPos = this.map_pixel_width - this.width;
         }
       }
     }
