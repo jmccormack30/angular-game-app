@@ -29,7 +29,8 @@ export class GameComponent implements AfterViewInit, OnDestroy {
   private grid = Array.from({ length: 26 }, () => Array(19).fill(null));
 
   public canvas_xPos = 0;
-  public canvas_yPos = 950;
+  public canvas_yPos = 0
+  //public canvas_yPos = 950;
 
   // MAP
   private map_pixel_width = 2600;

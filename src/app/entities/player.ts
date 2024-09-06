@@ -64,16 +64,16 @@ export class Player {
 
     getDefaultImageSrc(direction: string | undefined) {
         if (direction === "up") {
-            return "assets/player_up_2.png";
+            return "assets/player_ps_up.png";
         }
         else if (direction === "down") {
-            return "assets/player_down_2.png";
+            return "assets/player_sd_down.png";
         }
         else if (direction === "left") {
-            return "assets/player_left_2.png";
+            return "assets/player_ps_left.png";
         }
         else if (direction === "right") {
-            return "assets/player_right_2.png";
+            return "assets/player_ps_right.png";
         }
 
         throw new Error("Invalid direction set for player");

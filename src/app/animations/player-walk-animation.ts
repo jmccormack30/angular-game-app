@@ -1,12 +1,15 @@
 enum Action {
+  NEUTRAL = "NEUTRAL",
   WALK1 = "down_walk_1",
-  WALK2 = "down_walk_2"
+  WALK2 = "down_walk_2",
+  WALK3 = "down_walk_3",
+  WALK4 = "down_walk_4"
 }
 
 export class PlayerWalkAnimation {
 
   frameIndex = 0;
-  totalFrames = 30;
+  totalFrames = 56;
 
   actionFrameMap: Map<number, Action> = new Map<number, Action>();
 
@@ -16,18 +19,42 @@ export class PlayerWalkAnimation {
   actionImageMapRight: Map<Action, string> = new Map<Action, string>();
 
   constructor() {
-    for (let i = 0; i <= 14; i++) {
+    for (let i = 0; i < 7; i++) {
       this.actionFrameMap.set(i, Action.WALK1)
     }
-    for (let i = 15; i <= 29; i++) {
+    for (let i = 7; i < 15; i++) {
       this.actionFrameMap.set(i, Action.WALK2);
     }
+    for (let i = 15; i < 21; i++) {
+      this.actionFrameMap.set(i, Action.WALK1)
+    }
+    for (let i = 21; i < 28; i++) {
+      this.actionFrameMap.set(i, Action.NEUTRAL);
+    }
+    for (let i = 28; i < 35; i++) {
+      this.actionFrameMap.set(i, Action.WALK3);
+    }
+    for (let i = 35; i < 43; i++) {
+      this.actionFrameMap.set(i, Action.WALK4);
+    }
+    for (let i = 43; i < 49; i++) {
+      this.actionFrameMap.set(i, Action.WALK3);
+    }
+    for (let i = 49; i < 56; i++) {
+      this.actionFrameMap.set(i, Action.NEUTRAL);
+    }
 
-    this.actionImageMapDown.set(Action.WALK1, "assets/player_down_walk_3.png");
-    this.actionImageMapDown.set(Action.WALK2, "assets/player_down_walk_4.png");
+    this.actionImageMapDown.set(Action.WALK1, 'assets/player_ps_down_run_2.png');
+    this.actionImageMapDown.set(Action.WALK2, 'assets/player_ps_down_run_3.png');
+    this.actionImageMapDown.set(Action.WALK3, "assets/player_ps_down_run_4.png");
+    this.actionImageMapDown.set(Action.WALK4, 'assets/player_ps_down_run_5.png');
+    this.actionImageMapDown.set(Action.NEUTRAL, 'assets/player_sd_down.png');
 
-    this.actionImageMapUp.set(Action.WALK1, "assets/player_up_walk_7.png");
-    this.actionImageMapUp.set(Action.WALK2, "assets/player_up_walk_8.png");
+    this.actionImageMapUp.set(Action.WALK1, 'assets/player_ps_up_run_2.png');
+    this.actionImageMapUp.set(Action.WALK2, 'assets/player_ps_up_run_3.png');
+    this.actionImageMapUp.set(Action.WALK3, 'assets/player_ps_up_run_4.png');
+    this.actionImageMapUp.set(Action.WALK4, 'assets/player_ps_up_run_5.png');
+    this.actionImageMapUp.set(Action.NEUTRAL,'assets/player_ps_up.png');
 
     this.actionImageMapLeft.set(Action.WALK1, "assets/player_left_walk_3.png");
     this.actionImageMapLeft.set(Action.WALK2, "assets/player_left_2.png");
