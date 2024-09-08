@@ -1,4 +1,5 @@
-import { PlayerWalkAnimation } from "../animations/player-walk-animation";
+import { PlayerWalkLeftRightAnimation } from "../animations/player-walk-left-right-animation";
+import { PlayerWalkUpDownAnimation } from "../animations/player-walk-up-down-animation";
 import { GameComponent } from "../game/game.component";
 import { ImageService } from "../imageservice";
 import { KeyService } from "../keyservice";
@@ -13,7 +14,7 @@ export class Player {
     playerImages: { [key: string]: string } = {};
     private imageCache: { [key: string]: HTMLImageElement } = {};
 
-    animation : PlayerWalkAnimation | undefined;
+    animation : PlayerWalkUpDownAnimation | PlayerWalkLeftRightAnimation | undefined;
 
     private keyState: { [key: string]: boolean } = {};
   
@@ -43,7 +44,12 @@ export class Player {
         //this.updatePlayerPosition(this.direction);
 
         if (this.animation === undefined) {
-            this.animation = new PlayerWalkAnimation();
+            if (this.direction === "up" || this.direction === "down") {
+                this.animation = new PlayerWalkUpDownAnimation();
+            }
+            else if (this.direction === "left" || this.direction === "right") {
+                this.animation = new PlayerWalkLeftRightAnimation();
+            }
         }
     }
 
@@ -89,8 +95,8 @@ export class Player {
         else if (direction === "down") {
             this.yPos += this.speed;
             // TODO - replace 50 with height variable for if I change the player height in the future
-            if (this.yPos > GameComponent.height - 63) {
-                this.yPos = GameComponent.height - 63;
+            if (this.yPos > GameComponent.height - 96) {
+                this.yPos = GameComponent.height - 96;
             }
         }
         else if (direction === "left") {

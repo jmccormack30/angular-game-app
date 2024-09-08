@@ -1,12 +1,12 @@
 enum Action {
   NEUTRAL = "NEUTRAL",
-  WALK1 = "down_walk_1",
+  WALK1 = "walk_2",
   WALK2 = "down_walk_2",
   WALK3 = "down_walk_3",
   WALK4 = "down_walk_4"
 }
 
-export class PlayerWalkAnimation {
+export class PlayerWalkUpDownAnimation {
 
   frameIndex = 0;
   totalFrames = 56;
@@ -15,8 +15,6 @@ export class PlayerWalkAnimation {
 
   actionImageMapUp: Map<Action, string> = new Map<Action, string>();
   actionImageMapDown: Map<Action, string> = new Map<Action, string>();
-  actionImageMapLeft: Map<Action, string> = new Map<Action, string>();
-  actionImageMapRight: Map<Action, string> = new Map<Action, string>();
 
   constructor() {
     for (let i = 0; i < 7; i++) {
@@ -55,12 +53,6 @@ export class PlayerWalkAnimation {
     this.actionImageMapUp.set(Action.WALK3, 'assets/player_ps_up_run_4.png');
     this.actionImageMapUp.set(Action.WALK4, 'assets/player_ps_up_run_5.png');
     this.actionImageMapUp.set(Action.NEUTRAL,'assets/player_ps_up.png');
-
-    this.actionImageMapLeft.set(Action.WALK1, "assets/player_left_walk_3.png");
-    this.actionImageMapLeft.set(Action.WALK2, "assets/player_left_2.png");
-
-    this.actionImageMapRight.set(Action.WALK1, "assets/player_right_walk_3.png");
-    this.actionImageMapRight.set(Action.WALK2, "assets/player_right_2.png");
   }
 
   getImage(direction: string | undefined) {
@@ -74,12 +66,6 @@ export class PlayerWalkAnimation {
       }
       else if (direction === "down") {
         image = this.actionImageMapDown.get(action) as Action;
-      }
-      else if (direction === "left") {
-        image = this.actionImageMapLeft.get(action) as Action;
-      }
-      else if (direction === "right") {
-        image = this.actionImageMapRight.get(action) as Action;
       }
 
       this.frameIndex++;

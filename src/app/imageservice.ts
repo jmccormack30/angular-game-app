@@ -44,7 +44,20 @@ export class ImageService {
             'assets/player_ps_up_run_2.png',
             'assets/player_ps_up_run_3.png',
             'assets/player_ps_up_run_4.png',
-            'assets/player_ps_up_run_5.png'
+            'assets/player_ps_up_run_5.png',
+            'assets/player_ps_right_incline.png',
+            'assets/player_ps_right_run_2.png',
+            'assets/player_ps_right_run_3.png',
+            'assets/player_ps_right_run_4.png',
+            'assets/player_ps_right_run_5.png',
+            'assets/player_ps_right_walk_7.png',
+            'assets/player_ps_right_walk_8.png',
+            'assets/player_ps_right_walk_9.png',
+            'assets/player_ps_right_walk_10.png',
+            'assets/player_ps_left_walk_7.png',
+            'assets/player_ps_left_walk_8.png',
+            'assets/player_ps_left_walk_9.png',
+            'assets/player_ps_left_walk_10.png'
         ]
 
         const promises = imageSources.map(src => this.loadImage(src));

@@ -1,3 +1,5 @@
+// INVENTORY
+
 1. Hold down right click with an item in the mouse to add 1 to a cell automatically. This will allow you to slide the mouse over multiple cells to add 1 to each one without having
 to let go and press right click multiple times. Need to make sure this does not continuously add +1 to a cell many times if you are holding down.
 
@@ -6,3 +8,35 @@ to let go and press right click multiple times. Need to make sure this does not 
 3. Eventually refactor inventory.component.ts 
 
 4. Add a 4th inventory row which wil be the hot bar. Add it at the bottom of the game screen and the ability to slide / select which item is selected
+
+5. When hovering over an item in the inventory, add a tooltip window that shows the name of the item? (any other info?)
+
+// ANIMATION
+
+1. When player holds shift to sprint, increase the animation speed of walking
+
+// OTHER
+
+1. Wheat harvesting
+
+    a. Find a good wheat texture
+    b. When player walks over, harvest it and add 1-2 wheat to inventory. Update wheat texture to empty
+    c. Add a random number generator timer for when the wheat will re-grow
+    d. If wheat re-grows while player is in it, don't allow harvesting until player leaves then re-enters
+    e. Add a wheat texture for the inventory slot
+    f. Add bread as a wheat crafting recipe. Add bread texture.
+    e. Long term goal: Add a hoe, and a swing animation for harvesting wheat
+
+2. Add other crops
+
+3. Add ore mining
+
+    a. Find good textures for order nodes
+    b. Long term goal: Add a pickaxe, and swing animation for mining nodes.
+    c. If player runs into node, deplete it and add to inventory. gone rock goes blank but does not disapeer. Gnode can regernate with a random timer.
+    d. Add ore textures to inventory
+
+4. Add blocks to the game, with ability to place them
+
+    a. Will require a player hot bar. If block selected, allow placing into grids on the map.
+    b. Add collision detection to not move through blocks.
