@@ -6,6 +6,9 @@ import { InventoryComponent } from '../inventory/inventory.component';
 import { ImageService } from '../imageservice';
 import { PlayerFactoryService } from '../entities/playerfactory';
 import { KeyService } from '../keyservice';
+import { Tile } from '../entities/tile';
+import { Wheat } from '../entities/wheat';
+import { Grass } from '../entities/grass';
 
 @Component({
   selector: 'app-game',
@@ -26,7 +29,8 @@ export class GameComponent implements AfterViewInit, OnDestroy {
   private cols = 26;
   private rows = 19;
   private cell_size = 50;
-  private grid = Array.from({ length: 26 }, () => Array(19).fill(null));
+  private grassTile = new Grass();
+  private grid = Array.from({ length: 26 }, () => Array(19).fill(this.grassTile));
 
   public canvas_xPos = 0;
   public canvas_yPos = 0
@@ -40,7 +44,7 @@ export class GameComponent implements AfterViewInit, OnDestroy {
   private map_cell_height = 38
 
   // [col][row]
-  private map = new Array(this.map_cell_width).fill(null).map(() => new Array(this.map_cell_height).fill(null));
+  private map = new Array(this.map_cell_width).fill(this.grassTile).map(() => new Array(this.map_cell_height).fill(this.grassTile));
 
   private fps: number = 60;
   private frameInterval: number = 1000 / this.fps; // Interval in milliseconds
@@ -65,10 +69,12 @@ export class GameComponent implements AfterViewInit, OnDestroy {
       this.inventoryComponent.closeInventory();
     });
 
-    this.map[18][26] = 'wheat';
-    this.map[9][14] = 'wheat';
-    this.map[38][26] = 'wheat';
-    this.map[28][14] = 'wheat';
+    const wheatTile = new Wheat();
+
+    this.map[18][26] = wheatTile;
+    this.map[9][14] = wheatTile;
+    this.map[38][26] = wheatTile;
+    this.map[28][14] = wheatTile;
 
     const canvas = this.gameCanvas.nativeElement;
     this.ctx = canvas.getContext('2d')!;
@@ -151,10 +157,11 @@ export class GameComponent implements AfterViewInit, OnDestroy {
       yPos = yPosOriginal;
       for (let row = startRow; row < startRow + height; row++) {
           const tile = this.map[col][row];
-          const image = this.getImage(tile);
-
-          if (image) {
-            this.ctx.drawImage(image, xPos, yPos);
+          if (tile) {
+            const image = tile.image;
+            if (image) {
+              this.ctx.drawImage(image, xPos, yPos);
+            }
           }
           this.ctx.strokeRect(xPos, yPos, this.cell_size, this.cell_size);
           yPos += 50;
@@ -267,15 +274,6 @@ export class GameComponent implements AfterViewInit, OnDestroy {
     }
     else {
       return 0;
-    }
-  }
-
-  getImage(tile: string) {
-    if (tile === 'wheat') {
-      return ImageService.getImage('assets/wheat_dirt.png');
-    }
-    else {
-      return ImageService.getImage('assets/grass_2.jpg');
     }
   }
 }

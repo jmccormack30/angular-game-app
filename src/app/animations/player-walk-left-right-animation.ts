@@ -66,8 +66,6 @@ export class PlayerWalkLeftRightAnimation {
           else if (direction === "right") {
             image = this.actionImageMapRight.get(action) as Action;
           }
-
-          console.log("Direction = " + direction + ", Image = " + image + ", Frame = " + this.frameIndex);
     
           this.frameIndex++;
           if (this.frameIndex >= this.totalFrames) this.frameIndex = 0;
