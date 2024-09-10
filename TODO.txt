@@ -9,7 +9,7 @@ to let go and press right click multiple times. Need to make sure this does not 
 
 4. Add a 4th inventory row which wil be the hot bar. Add it at the bottom of the game screen and the ability to slide / select which item is selected
 
-5. When hovering over an item in the inventory, add a tooltip window that shows the name of the item? (any other info?)
+5. Enhance the tooltip when hovering over an item in the inventory. 
 
 // ANIMATION
 
@@ -19,12 +19,7 @@ to let go and press right click multiple times. Need to make sure this does not 
 
 1. Wheat harvesting
 
-    a. Find a good wheat texture
-    b. When player walks over, harvest it and add 1-2 wheat to inventory. Update wheat texture to empty
-    c. Add a random number generator timer for when the wheat will re-grow
-    d. If wheat re-grows while player is in it, don't allow harvesting until player leaves then re-enters
-    e. Add a wheat texture for the inventory slot
-    f. Add bread as a wheat crafting recipe. Add bread texture.
+    a. Add wheat textures for different stages of growth. Add logic for different stages of growth.
     e. Long term goal: Add a hoe, and a swing animation for harvesting wheat
 
 2. Add other crops
