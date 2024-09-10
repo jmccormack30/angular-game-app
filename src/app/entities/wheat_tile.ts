@@ -19,8 +19,7 @@ export class WheatTile extends Tile {
             this.image = ImageService.getImage('assets/dirt.png');
             this.lastTime = Date.now();
             this.active = false;
-            console.log(inventoryComponent);
-            inventoryComponent.moveItemToInventory(ItemFactory.createItem(WheatItem, 1))
+            this.addWheatToInventory(inventoryComponent);
         }
     }
 
@@ -43,5 +42,11 @@ export class WheatTile extends Tile {
                 }
             }
         }
+    }
+
+    private addWheatToInventory(inventoryComponent: InventoryComponent) {
+        const randomFloat = Math.random();
+        const qty = (randomFloat <= 0.20) ? 2 : 1;
+        inventoryComponent.moveItemToInventory(ItemFactory.createItem(WheatItem, qty));
     }
 }

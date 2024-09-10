@@ -15,7 +15,7 @@
             <div class="inventory-item no-user-select column" *ngFor="let item of row; let colIndex = index"
             (click)="onCellClick(item, $event, colIndex, rowIndex)"
             (contextmenu)="onCellClick(item, $event, colIndex, rowIndex)"
-            (mouseenter)="onMouseEnter(item, $event, inventoryGrid)"
+            (mouseenter)="onMouseEnter(item, $event)"
             (mouseleave)="onMouseLeave()">
             <ng-container *ngIf="item">
               <div class="image-wrapper">
@@ -32,7 +32,7 @@
         <div class="output" data-grid="output">
             <div class="inventory-item no-user-select column"
               (click)="onOutputClick(output, $event)"
-              (mouseenter)="onMouseEnter(output, $event, inventoryGrid)"
+              (mouseenter)="onMouseEnter(output, $event)"
               (mouseleave)="onMouseLeave()">
               <ng-container *ngIf="output && output !== itemToMove">
                 <div class="image-wrapper">
@@ -48,7 +48,7 @@
           <div class="inventory-item no-user-select column" *ngFor="let item of row; let colIndex = index"
             (click)="onCellClick(item, $event, colIndex, rowIndex)"
             (contextmenu)="onCellClick(item, $event, colIndex, rowIndex)"
-            (mouseenter)="onMouseEnter(item, $event, inventoryGrid)"
+            (mouseenter)="onMouseEnter(item, $event)"
             (mouseleave)="onMouseLeave()">
             <ng-container *ngIf="item && item !== itemToMove">
               <div class="image-wrapper">

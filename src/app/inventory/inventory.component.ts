@@ -1,7 +1,5 @@
 import { Component, Output, EventEmitter, Renderer2, ElementRef } from '@angular/core';
 import { Item } from '../items/item';
-import { Red } from '../items/red';
-import { Blue } from '../items/blue'
 import { Recipe } from '../crafting/recipe';
 import { Recipes } from '../crafting/recipes';
 import { ItemFactory } from '../items/itemfactory';
@@ -35,7 +33,7 @@ export class InventoryComponent {
   currentRecipe: Recipe | null = null;
   current_qty_craftable = 0;
 
-  hoveredItem: any = null; // To track the item being hovered over
+  hoveredItem: Item | null = null; // To track the item being hovered over
   popupPosition = { x: 0, y: 0 }; // To track the position of the popup
 
   constructor(private renderer: Renderer2, private el: ElementRef) {
@@ -105,8 +103,11 @@ export class InventoryComponent {
 
     while (inv_row < 3) {
       const targetItem = this.items[inv_col][inv_row];
-      if (targetItem && targetItem.isSameItemType(item)) {
-        return [inv_row, inv_col];
+      if (targetItem) {
+        const maxQtyForItem = (targetItem.constructor as typeof Item).maxStackQty;
+        if (targetItem.quantity < maxQtyForItem && targetItem.isSameItemType(item)) {
+          return [inv_row, inv_col];
+        }
       }
       inv_col++;
       if (inv_col > 9) {
@@ -135,19 +136,53 @@ export class InventoryComponent {
   }
 
   moveItemToInventory(item: Item) {
+    const maxQtyForItem = (item.constructor as typeof Item).maxStackQty;
+    let qtyToMove = item.quantity;
+    console.log("maxQtyForItem: " + maxQtyForItem + ", qtyToMove: " + qtyToMove);
     let slot = this.getNextSlotForItem(item);
-    if (slot !== null) {
+    console.log("Initial Slot: " + slot);
+
+    while (qtyToMove > 0 && slot !== null) {
+      console.log("inside first loop");
       const targetItem = this.items[slot[1]][slot[0]];
       if (targetItem) {
-        targetItem.quantity += item.quantity;
-        return true;
+        const qty = Math.min(qtyToMove, (maxQtyForItem - targetItem.quantity));
+        targetItem.quantity += qty;
+        qtyToMove -= qty;
+        
+        if (qtyToMove > 0) {
+          slot = this.getNextSlotForItem(item);
+        }
+        else {
+          slot = null;
+        }
       }
     }
-    slot = this.getNextOpenSlot();
-    if (slot !== null) {
-      this.items[slot[1]][slot[0]] = item;
+
+    if (qtyToMove === 0) {
       return true;
     }
+
+    slot = this.getNextOpenSlot();
+    while (qtyToMove > 0 && slot !== null) {
+      const qty = Math.min(qtyToMove, maxQtyForItem);
+      if (qty < qtyToMove) {
+        const newItem = ItemFactory.clone(item);
+        newItem.quantity = qty;
+        this.items[slot[1]][slot[0]] = newItem;
+        item.quantity -= qty;
+        slot = this.getNextOpenSlot();
+      }
+      else {
+        this.items[slot[1]][slot[0]] = item;
+        slot = null;
+      }
+    }
+
+    if (qtyToMove === 0) {
+      return true;
+    }
+
     console.log("No available slots found in the inventory!!!");
     return false;
   }
@@ -436,31 +471,49 @@ export class InventoryComponent {
     this.renderer.setProperty(element, 'textContent', quantity.toString());
   }
 
-  combineAllForSameItem(itemToMove: Item): Item | null {
-    // TODO: Consider a single cell max quantity if implemented later
-    // TODO: Also pick up items from crafting inventory
-
-    let total_qty = 0;
-    let crafting_updated = false;
+  getSortedItemsAscendingQty(itemToMove: Item): { item: Item; col: number; row: number }[] {
+    const itemList: { item: Item; col: number; row: number }[] = [];
 
     for (let i_row = 0; i_row < 3; i_row++) {
       for (let i_col = 0; i_col < 10; i_col++) {
         const item = this.items[i_col][i_row];
         if (item && item.isSameItemType(itemToMove)) {
-          total_qty += item.quantity;
-          this.items[i_col][i_row] = null;
+          itemList.push({ item: item, col: i_col, row: i_row });
         }
       }
     }
 
-    for (let c_row = 0; c_row < 3; c_row++) {
-      for (let c_col = 0; c_col < 3; c_col++) {
-        const item = this.crafting[c_col][c_row];
-        if (item && item.isSameItemType(itemToMove)) {
-          total_qty += item.quantity;
-          crafting_updated = true;
-          // TODO: check for exceeding max quantity
-          this.crafting[c_col][c_row] = null;
+    const sortedItems = itemList.sort((a, b) => {
+      return a.item.quantity - b.item.quantity;
+    });
+
+    return sortedItems;
+  }
+
+  combineAllForSameItem(itemToMove: Item): Item | null {
+    let crafting_updated = false;
+    const maxQtyForItem = (itemToMove.constructor as typeof Item).maxStackQty;
+    let qtyToMove = maxQtyForItem - itemToMove.quantity;
+    let totalQty = 0;
+
+    if (qtyToMove <= 0) {
+      return itemToMove;
+    }
+
+    const itemList: { item: Item; col: number; row: number }[] = this.getSortedItemsAscendingQty(itemToMove);
+
+    itemLoop: for (const { item, col, row} of itemList) {
+      if (item && item.isSameItemType(itemToMove)) {
+        if (item.quantity <= qtyToMove) {
+          qtyToMove -= item.quantity;
+          totalQty += item.quantity;
+          this.items[col][row] = null;
+        }
+        else {
+          item.quantity -= qtyToMove;
+          totalQty += qtyToMove;
+          qtyToMove = 0;
+          break itemLoop;
         }
       }
     }
@@ -469,8 +522,44 @@ export class InventoryComponent {
       this.updateCraftingOutput();
     }
 
-    itemToMove.quantity += total_qty;
+    itemToMove.quantity += totalQty;
     return itemToMove;
+
+    // outerLoop: for (let i_row = 0; i_row < 3; i_row++) {
+    //   for (let i_col = 0; i_col < 10; i_col++) {
+    //     const item = this.items[i_col][i_row];
+    //     if (item && item.isSameItemType(itemToMove)) {
+    //       if (item.quantity + total_qty <= qtyToMove) {
+    //         total_qty += item.quantity;
+    //         this.items[i_col][i_row] = null;
+    //       }
+    //       else {
+    //         item.quantity -= (qtyToMove - total_qty);
+    //         total_qty += (qtyToMove - total_qty);
+    //         break outerLoop;
+    //       }
+    //     }
+    //   }
+    // }
+
+    // outerLoop: for (let c_row = 0; c_row < 3; c_row++) {
+    //   for (let c_col = 0; c_col < 3; c_col++) {
+    //     const item = this.crafting[c_col][c_row];
+    //     if (item && item.isSameItemType(itemToMove)) {
+    //       if (item.quantity + total_qty <= qtyToMove) {
+    //         total_qty += item.quantity;
+    //         crafting_updated = true;
+    //         this.crafting[c_col][c_row] = null;
+    //       }
+    //       else {
+    //         total_qty += (qtyToMove - total_qty);
+    //         item.quantity -= (qtyToMove - total_qty);
+    //         crafting_updated = true;
+    //         break outerLoop;
+    //       }
+    //     }
+    //   }
+    // }
   }
 
   updateCraftingOutput() {
@@ -630,7 +719,7 @@ export class InventoryComponent {
     }
   }
 
-  onMouseEnter(item: any, event: MouseEvent, inventoryElement: HTMLElement): void {
+  onMouseEnter(item: Item | null, event: MouseEvent): void {
     if (item) {
       this.hoveredItem = item;
   

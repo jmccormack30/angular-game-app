@@ -3,10 +3,8 @@ import { Player } from '../entities/player';
 import { Subject } from 'rxjs';
 import { debounceTime } from 'rxjs/operators'
 import { InventoryComponent } from '../inventory/inventory.component';
-import { ImageService } from '../imageservice';
 import { PlayerFactoryService } from '../entities/playerfactory';
 import { KeyService } from '../keyservice';
-import { Tile } from '../entities/tile';
 import { WheatTile } from '../entities/wheat_tile';
 import { Grass } from '../entities/grass';
 
