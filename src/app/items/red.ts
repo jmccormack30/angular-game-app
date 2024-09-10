@@ -1,4 +1,3 @@
-import { ImageService } from "../imageservice";
 import { Item } from "./item";
 
 export class Red extends Item {

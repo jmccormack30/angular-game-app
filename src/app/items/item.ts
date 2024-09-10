@@ -1,4 +1,3 @@
-import { ImageService } from "../imageservice";
 import { ItemConstructor, ItemFactory } from "./itemfactory";
 
 export class Item {

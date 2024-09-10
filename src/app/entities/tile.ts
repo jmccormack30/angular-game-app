@@ -1,3 +1,5 @@
+import { InventoryComponent } from "../inventory/inventory.component";
+
 export abstract class Tile {
     private width = 50;
     private height = 50;
@@ -40,7 +42,7 @@ export abstract class Tile {
         return false;
     }
 
-    abstract handlePlayerCollision(): void;
+    abstract handlePlayerCollision(inventoryComponent: InventoryComponent): void;
 
     abstract handlePlayerNoCollision(): void;
 }

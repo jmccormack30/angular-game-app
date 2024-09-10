@@ -7,7 +7,7 @@ import { ImageService } from '../imageservice';
 import { PlayerFactoryService } from '../entities/playerfactory';
 import { KeyService } from '../keyservice';
 import { Tile } from '../entities/tile';
-import { Wheat } from '../entities/wheat';
+import { WheatTile } from '../entities/wheat_tile';
 import { Grass } from '../entities/grass';
 
 @Component({
@@ -71,7 +71,7 @@ export class GameComponent implements AfterViewInit, OnDestroy {
 
     for (let col = 1; col < 25; col++) {
       for (let row = 1; row < 9; row++) {
-        const wheat = new Wheat();
+        const wheat = new WheatTile();
         this.map[col][row] = wheat;
       }
     }
@@ -123,9 +123,9 @@ export class GameComponent implements AfterViewInit, OnDestroy {
   }
 
   update() {
-    if (this.inventoryComponent.isInventoryOpen) {
-      return;
-    }
+    // if (this.inventoryComponent.isInventoryOpen) {
+    //   return;
+    // }
     this.ctx.clearRect(0, 0, this.width, this.height);
     // if (this.player !== undefined) {
     //   this.renderMap(this.player.xPos, this.player.yPos);
@@ -168,7 +168,7 @@ export class GameComponent implements AfterViewInit, OnDestroy {
               if (playerMapY && playerMapX) {
                 if (tile.isCheckCollision) {
                   if (tile.isPlayerCollision(col * 50, row * 50, playerMapX, playerMapY)) {
-                    tile.handlePlayerCollision();
+                    tile.handlePlayerCollision(this.inventoryComponent);
                   }
                   else {
                     tile.handlePlayerNoCollision();
@@ -194,7 +194,10 @@ export class GameComponent implements AfterViewInit, OnDestroy {
     //   } 
     // }
 
-    if (this.player !== undefined) {
+    if (this.inventoryComponent.isInventoryOpen) {
+      return;
+    }
+    if (this.player !== undefined && !this.inventoryComponent.isInventoryOpen) {
       this.player.update();
       this.player.draw(this.ctx);
       const input = KeyService.getPlayerDirection();

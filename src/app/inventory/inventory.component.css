@@ -195,8 +195,18 @@
     background: rgba(0, 0, 0, 0); /* Transparent overlay */
   }
 
-  .floating-item {
+.floating-item {
     position: absolute;
     pointer-events: none; /* Allows clicks to pass through the floating item */
     z-index: 1000; /* Ensure it appears above other elements */
-  }
+}
+
+.item-popup {
+    position: absolute;
+    background-color: rgba(0, 0, 0, 0.75);
+    color: white;
+    padding: 5px;
+    border-radius: 4px;
+    pointer-events: none; /* Prevents the popup from interfering with mouse events */
+    z-index: 1001;
+}

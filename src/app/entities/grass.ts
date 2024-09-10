@@ -1,4 +1,5 @@
 import { ImageService } from "../imageservice";
+import { InventoryComponent } from "../inventory/inventory.component";
 import { Tile } from "./tile";
 
 export class Grass extends Tile {
@@ -6,7 +7,7 @@ export class Grass extends Tile {
         super('grass', ImageService.getImage('assets/grass_2.jpg'), false);
     }
 
-    override handlePlayerCollision(): void {
+    override handlePlayerCollision(inventoryComponent: InventoryComponent): void {
         // No implementation
         return;
     }

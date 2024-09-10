@@ -1,7 +1,10 @@
 import { ImageService } from "../imageservice";
+import { InventoryComponent } from "../inventory/inventory.component";
+import { ItemFactory } from "../items/itemfactory";
+import { WheatItem } from "../items/wheat_item";
 import { Tile } from "./tile";
 
-export class Wheat extends Tile {
+export class WheatTile extends Tile {
     private lastTime = -1;
     private active: boolean = true;
     private respawnRate = 0.05;
@@ -11,10 +14,14 @@ export class Wheat extends Tile {
         super('wheat', ImageService.getImage('assets/wheat_dirt.png'), true);
     }
 
-    override handlePlayerCollision(): void {
-        this.image = ImageService.getImage('assets/dirt.png');
-        this.lastTime = Date.now();
-        this.active = false;
+    override handlePlayerCollision(inventoryComponent: InventoryComponent): void {
+        if (this.active) {
+            this.image = ImageService.getImage('assets/dirt.png');
+            this.lastTime = Date.now();
+            this.active = false;
+            console.log(inventoryComponent);
+            inventoryComponent.moveItemToInventory(ItemFactory.createItem(WheatItem, 1))
+        }
     }
 
     override handlePlayerNoCollision(): void {

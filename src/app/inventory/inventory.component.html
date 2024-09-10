@@ -14,7 +14,9 @@
           <div class="crafting-row" *ngFor="let row of crafting; let rowIndex = index">
             <div class="inventory-item no-user-select column" *ngFor="let item of row; let colIndex = index"
             (click)="onCellClick(item, $event, colIndex, rowIndex)"
-            (contextmenu)="onCellClick(item, $event, colIndex, rowIndex)">
+            (contextmenu)="onCellClick(item, $event, colIndex, rowIndex)"
+            (mouseenter)="onMouseEnter(item, $event, inventoryGrid)"
+            (mouseleave)="onMouseLeave()">
             <ng-container *ngIf="item">
               <div class="image-wrapper">
                 <div [innerHTML]="getImageHtml(item)"></div>
@@ -29,7 +31,9 @@
         </div>
         <div class="output" data-grid="output">
             <div class="inventory-item no-user-select column"
-              (click)="onOutputClick(output, $event)">
+              (click)="onOutputClick(output, $event)"
+              (mouseenter)="onMouseEnter(output, $event, inventoryGrid)"
+              (mouseleave)="onMouseLeave()">
               <ng-container *ngIf="output && output !== itemToMove">
                 <div class="image-wrapper">
                   <div class="no-select" [innerHTML]="getImageHtml(output)"></div>
@@ -39,11 +43,13 @@
             </div>
         </div>
       </div>
-      <div class="inventory-grid" data-grid="inventory">
+      <div class="inventory-grid" #inventoryGrid data-grid="inventory">
         <div class="inventory-row" *ngFor="let row of items; let rowIndex = index">
           <div class="inventory-item no-user-select column" *ngFor="let item of row; let colIndex = index"
             (click)="onCellClick(item, $event, colIndex, rowIndex)"
-            (contextmenu)="onCellClick(item, $event, colIndex, rowIndex)">
+            (contextmenu)="onCellClick(item, $event, colIndex, rowIndex)"
+            (mouseenter)="onMouseEnter(item, $event, inventoryGrid)"
+            (mouseleave)="onMouseLeave()">
             <ng-container *ngIf="item && item !== itemToMove">
               <div class="image-wrapper">
                 <div class="no-select" [innerHTML]="getImageHtml(item)"></div>
@@ -53,5 +59,8 @@
         </div>
       </div>
     </div>
+    <div class="item-popup" *ngIf="hoveredItem" [style.left.px]="popupPosition.x" [style.top.px]="popupPosition.y">
+        {{ hoveredItem.getItemName() }}
+      </div>
   </div>
   <div class="drag-overlay" *ngIf="isInventoryOpen"></div>

@@ -1,8 +1,8 @@
 import { Item } from "./item";
 
-export class Blue extends Item {
-    static override itemName: string = "Blue";
-    static override imageSrc = 'assets/wheat_inv.png';
+export class Bread extends Item {
+    static override itemName: string = "Bread";
+    static override imageSrc = 'assets/bread.png';
 
     constructor(quantity: number, image: HTMLImageElement | null) {
         super(quantity, image);

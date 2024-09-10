@@ -1,5 +1,7 @@
 import { Blue } from "../items/blue";
+import { Bread } from "../items/bread";
 import { Red } from "../items/red";
+import { WheatItem } from "../items/wheat_item";
 import { Recipe } from "./recipe";
 
 export class Recipes {
@@ -26,5 +28,17 @@ export class Recipes {
 
         this.recipeList.set(BLUE_01.getRecipeName(), BLUE_01);
         this.recipeList.set(RED_01.getRecipeName(), RED_01);
+
+        const WHEAT = new WheatItem(1, null);
+        const BREAD = new Bread(1, null);
+
+        const BREAD_01 = new Recipe("BREAD_01");
+        BREAD_01.setItem(1, 0, WHEAT);
+        BREAD_01.setItem(1, 1, WHEAT);
+        BREAD_01.setItem(1, 2, WHEAT);
+        BREAD_01.setRequiredItems([WHEAT]);
+        BREAD_01.setOutput(BREAD);
+
+        this.recipeList.set(BREAD_01.getRecipeName(), BREAD_01);
     }
 }

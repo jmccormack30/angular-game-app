@@ -35,16 +35,14 @@ export class InventoryComponent {
   currentRecipe: Recipe | null = null;
   current_qty_craftable = 0;
 
+  hoveredItem: any = null; // To track the item being hovered over
+  popupPosition = { x: 0, y: 0 }; // To track the position of the popup
+
   constructor(private renderer: Renderer2, private el: ElementRef) {
     this.armor = Array(4).fill(null);
     this.items = Array.from({ length: 10 }, () => Array(3).fill(null));
     this.crafting = Array.from({ length: 3 }, () => Array(3).fill(null));
     this.output = null;
-
-    const red = ItemFactory.createItem(Red, 10);
-    const blue = ItemFactory.createItem(Blue, 25);
-    this.items[0][0] = red;
-    this.items[1][0] = blue;
   }
 
   toggleInventory() {
@@ -630,5 +628,25 @@ export class InventoryComponent {
         }
       }
     }
+  }
+
+  onMouseEnter(item: any, event: MouseEvent, inventoryElement: HTMLElement): void {
+    if (item) {
+      this.hoveredItem = item;
+  
+      // Get the bounding box of the inventory window
+      const inventoryWindow = document.querySelector('.inventory-window') as HTMLElement;
+      const inventoryWindowRect = inventoryWindow.getBoundingClientRect();
+  
+      // Calculate the position relative to the inventory window
+      const x = event.clientX - inventoryWindowRect.left + 1;
+      const y = event.clientY - inventoryWindowRect.top - 25;
+  
+      this.popupPosition = { x, y }; // Set the final position relative to the inventory window
+    }
+  }
+
+  onMouseLeave(): void {
+    this.hoveredItem = null; // Hide the popup when mouse leaves
   }
 }
