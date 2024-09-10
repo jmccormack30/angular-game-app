@@ -69,12 +69,12 @@ export class GameComponent implements AfterViewInit, OnDestroy {
       this.inventoryComponent.closeInventory();
     });
 
-    const wheatTile = new Wheat();
-
-    this.map[18][26] = wheatTile;
-    this.map[9][14] = wheatTile;
-    this.map[38][26] = wheatTile;
-    this.map[28][14] = wheatTile;
+    for (let col = 1; col < 25; col++) {
+      for (let row = 1; row < 9; row++) {
+        const wheat = new Wheat();
+        this.map[col][row] = wheat;
+      }
+    }
 
     const canvas = this.gameCanvas.nativeElement;
     this.ctx = canvas.getContext('2d')!;
@@ -162,8 +162,22 @@ export class GameComponent implements AfterViewInit, OnDestroy {
             if (image) {
               this.ctx.drawImage(image, xPos, yPos);
             }
+            if (this.player) {
+              const playerMapY = this.canvas_yPos + this.player?.yPos;
+              const playerMapX = this.canvas_xPos + this.player?.xPos;
+              if (playerMapY && playerMapX) {
+                if (tile.isCheckCollision) {
+                  if (tile.isPlayerCollision(col * 50, row * 50, playerMapX, playerMapY)) {
+                    tile.handlePlayerCollision();
+                  }
+                  else {
+                    tile.handlePlayerNoCollision();
+                  }
+                }
+              }
+            }
           }
-          this.ctx.strokeRect(xPos, yPos, this.cell_size, this.cell_size);
+          //this.ctx.strokeRect(xPos, yPos, this.cell_size, this.cell_size);
           yPos += 50;
       }
       xPos += 50;

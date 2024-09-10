@@ -57,7 +57,8 @@ export class ImageService {
             'assets/player_ps_left_walk_7.png',
             'assets/player_ps_left_walk_8.png',
             'assets/player_ps_left_walk_9.png',
-            'assets/player_ps_left_walk_10.png'
+            'assets/player_ps_left_walk_10.png',
+            'assets/dirt.png'
         ]
 
         const promises = imageSources.map(src => this.loadImage(src));
