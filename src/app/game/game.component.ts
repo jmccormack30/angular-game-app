@@ -194,55 +194,56 @@ export class GameComponent implements AfterViewInit, OnDestroy {
     //   } 
     // }
 
-    if (this.inventoryComponent.isInventoryOpen) {
-      return;
-    }
-    if (this.player !== undefined && !this.inventoryComponent.isInventoryOpen) {
-      this.player.update();
+    if (this.player !== undefined) {
+      if (!this.inventoryComponent.isInventoryOpen) {
+        this.player.update();
+      }
       this.player.draw(this.ctx);
-      const input = KeyService.getPlayerDirection();
-      if (input === "up") {
-        if (this.canvas_yPos === 0 || this.player.yPos > 443) {
-          this.player.updatePlayerPosition('up');
+      if (!this.inventoryComponent.isInventoryOpen) {
+        const input = KeyService.getPlayerDirection();
+        if (input === "up") {
+          if (this.canvas_yPos === 0 || this.player.yPos > 443) {
+            this.player.updatePlayerPosition('up');
+          }
+          else {
+            this.canvas_yPos -= this.player.speed;
+          }
+          if (this.canvas_yPos < 0) {
+            this.canvas_yPos = 0;
+          }
         }
-        else {
-          this.canvas_yPos -= this.player.speed;
+        else if (input === "down") {
+          if (this.canvas_yPos >= this.map_pixel_height - this.height || this.player.yPos < 443) {
+            this.player.updatePlayerPosition('down');
+          }
+          else {
+            this.canvas_yPos += this.player.speed;
+          }
+          if (this.canvas_yPos > this.map_pixel_height - this.height) {
+            this.canvas_yPos = this.map_pixel_height - this.height;
+          }
         }
-        if (this.canvas_yPos < 0) {
-          this.canvas_yPos = 0;
+        else if (input === 'left') {
+          if (this.canvas_xPos === 0 || this.player.xPos > 625) {
+            this.player.updatePlayerPosition('left');
+          }
+          else {
+            this.canvas_xPos -= this.player.speed;
+          }
+          if (this.canvas_xPos < 0) {
+            this.canvas_xPos = 0;
+          }
         }
-      }
-      else if (input === "down") {
-        if (this.canvas_yPos >= this.map_pixel_height - this.height || this.player.yPos < 443) {
-          this.player.updatePlayerPosition('down');
-        }
-        else {
-          this.canvas_yPos += this.player.speed;
-        }
-        if (this.canvas_yPos > this.map_pixel_height - this.height) {
-          this.canvas_yPos = this.map_pixel_height - this.height;
-        }
-      }
-      else if (input === 'left') {
-        if (this.canvas_xPos === 0 || this.player.xPos > 625) {
-          this.player.updatePlayerPosition('left');
-        }
-        else {
-          this.canvas_xPos -= this.player.speed;
-        }
-        if (this.canvas_xPos < 0) {
-          this.canvas_xPos = 0;
-        }
-      }
-      else if (input === 'right') {
-        if (this.canvas_xPos >= this.map_pixel_width - this.width || this.player.xPos < 625) {
-          this.player.updatePlayerPosition('right');
-        }
-        else {
-          this.canvas_xPos += this.player.speed;
-        }
-        if (this.canvas_xPos > this.map_pixel_width - this.width) {
-          this.canvas_xPos = this.map_pixel_width - this.width;
+        else if (input === 'right') {
+          if (this.canvas_xPos >= this.map_pixel_width - this.width || this.player.xPos < 625) {
+            this.player.updatePlayerPosition('right');
+          }
+          else {
+            this.canvas_xPos += this.player.speed;
+          }
+          if (this.canvas_xPos > this.map_pixel_width - this.width) {
+            this.canvas_xPos = this.map_pixel_width - this.width;
+          }
         }
       }
     }
