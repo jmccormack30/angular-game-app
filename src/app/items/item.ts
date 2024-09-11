@@ -3,7 +3,7 @@ import { ItemConstructor, ItemFactory } from "./itemfactory";
 export class Item {
     quantity: number;
     image: HTMLImageElement | null;
-    static maxStackQty: number = 64;
+    static maxStackQty: number = 100;
     static itemName: string;
     static imageSrc: string;
 

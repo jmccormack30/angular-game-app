@@ -7,8 +7,8 @@ import { Tile } from "./tile";
 export class WheatTile extends Tile {
     private lastTime = -1;
     private active: boolean = true;
-    private respawnRate = 0.05;
-    private respawnIncreaseRate = 0.01;
+    private respawnRate = 0.025;
+    private respawnIncreaseRate = 0.06;
 
     constructor() {
         super('wheat', ImageService.getImage('assets/wheat_dirt.png'), true);
@@ -26,14 +26,13 @@ export class WheatTile extends Tile {
     override handlePlayerNoCollision(): void {
         if (!this.active) {
             const current = Date.now();
-            // Every one second, randomly decide if we should respawn or not
-            if (current - this.lastTime >= 5000) {
+            if (current - this.lastTime >= 12000) {
                 this.lastTime = current;
                 const randomFloat = Math.random();
                 if (randomFloat < this.respawnRate) {
                     this.active = true;
-                    this.respawnRate = 0.03;
-                    this.respawnIncreaseRate = 0.01;
+                    this.respawnRate = 0.025;
+                    this.respawnIncreaseRate = 0.006;
                     this.image = ImageService.getImage('assets/wheat_dirt.png');
                 }
                 else {
