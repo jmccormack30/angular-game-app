@@ -18,11 +18,11 @@
 }
 
 .no-select {
-    user-select: none;
-    /* -webkit-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none; */
-    pointer-events: none;
+    user-select: none !important;
+    -webkit-user-select: none !important;
+    -moz-user-select: none !important;
+    -ms-user-select: none !important;
+    pointer-events: none !important;
 }
 
 .no-user-select {
@@ -208,5 +208,8 @@
     padding: 5px;
     border-radius: 4px;
     pointer-events: none; /* Prevents the popup from interfering with mouse events */
-    z-index: 1001;
+    z-index: 1000;
+    outline: none !important;
+    box-shadow: none !important;
+    transition: none;
 }

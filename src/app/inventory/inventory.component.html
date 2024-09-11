@@ -1,4 +1,4 @@
-  <div class="inventory-window">
+  <div class="inventory-window ">
     <div class="inventory-header">
       <h3 class="no-select">Inventory</h3>
     </div>
@@ -51,16 +51,19 @@
             (mouseenter)="onMouseEnter(item, $event)"
             (mouseleave)="onMouseLeave()">
             <ng-container *ngIf="item && item !== itemToMove">
-              <div class="image-wrapper">
+              <div class="image-wrapper no-select">
                 <div class="no-select" [innerHTML]="getImageHtml(item)"></div>
-                <p class="quantity-text" *ngIf="item.quantity > 1">{{item.quantity}}</p>
+                <p class="quantity-text no-select" *ngIf="item.quantity > 1">{{item.quantity}}</p>
               </div>
             </ng-container>
         </div>
       </div>
     </div>
-    <div class="item-popup" *ngIf="hoveredItem" [style.left.px]="popupPosition.x" [style.top.px]="popupPosition.y">
-        {{ hoveredItem.getItemName() }}
-      </div>
+    <div class="item-popup no-select"
+    [ngStyle]="{ display: hoveredItem ? 'block' : 'none' }"
+    [style.left.px]="popupPosition.x"
+    [style.top.px]="popupPosition.y">
+      {{ hoveredItem?.getItemName() }}
+    </div>
   </div>
   <div class="drag-overlay" *ngIf="isInventoryOpen"></div>

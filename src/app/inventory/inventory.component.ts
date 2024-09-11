@@ -138,12 +138,9 @@ export class InventoryComponent {
   moveItemToInventory(item: Item) {
     const maxQtyForItem = (item.constructor as typeof Item).maxStackQty;
     let qtyToMove = item.quantity;
-    console.log("maxQtyForItem: " + maxQtyForItem + ", qtyToMove: " + qtyToMove);
     let slot = this.getNextSlotForItem(item);
-    console.log("Initial Slot: " + slot);
 
     while (qtyToMove > 0 && slot !== null) {
-      console.log("inside first loop");
       const targetItem = this.items[slot[1]][slot[0]];
       if (targetItem) {
         const qty = Math.min(qtyToMove, (maxQtyForItem - targetItem.quantity));
@@ -188,7 +185,7 @@ export class InventoryComponent {
   }
 
   onOutputClick(item: Item | null, event: MouseEvent) {
-    if (!item || event.button !== 0 || item.quantity === 0) {
+    if (!item || event.button !== 0 || item.quantity === 0 || !this.output) {
       return;
     }
 
@@ -210,6 +207,11 @@ export class InventoryComponent {
     }
     else {
       if (!this.itemToMove.equals(item)) {
+        return;
+      }
+      const outputQty = this.output?.quantity;
+      const maxQtyForItem = (this.itemToMove.constructor as typeof Item).maxStackQty;
+      if (outputQty > maxQtyForItem - this.itemToMove.quantity) {
         return;
       }
       this.itemToMove.quantity += this.output?.quantity;
@@ -247,7 +249,7 @@ export class InventoryComponent {
     const isTargetCrafting = targetItemGridType === 'crafting';
 
     if (this.itemToMove) {
-      const qtyToMove = this.getQuantityToMove(event);
+      let qtyToMove = this.getQuantityToMove(event);
 
       if (qtyToMove === -1) {
         return;
@@ -280,13 +282,27 @@ export class InventoryComponent {
 
       if (item) {
         if (item.isSameItemType(this.itemToMove)) {
+          const maxQtyForItem = (this.itemToMove.constructor as typeof Item).maxStackQty;
           if (isMoveFullQty) {
-            const newQty = item.quantity + qtyToMove;
-            item.quantity = newQty;
-            this.clearItemToMove();
-            this.removeFloatingItem();
+            qtyToMove = Math.min(qtyToMove, maxQtyForItem - item.quantity);
+            if (qtyToMove <= 0) {
+              return;
+            }
+            item.quantity += qtyToMove;
+            this.itemToMove.quantity -= qtyToMove;
+            if (this.itemToMove.quantity === 0) {
+              this.clearItemToMove();
+              this.removeFloatingItem();
+              return;
+            }
+            else {
+              this.updateFloatingItemQuantity(this.itemToMove.quantity);
+            }
           }
           else if (isMoveSingleQty) {
+            if (item.quantity === maxQtyForItem) {
+              return;
+            }
             this.itemToMove.quantity -= 1;
             this.updateFloatingItemQuantity(this.itemToMove.quantity);
             item.quantity += 1;
@@ -471,17 +487,19 @@ export class InventoryComponent {
     this.renderer.setProperty(element, 'textContent', quantity.toString());
   }
 
-  getSortedItemsAscendingQty(itemToMove: Item): { item: Item; col: number; row: number }[] {
+  getSortedItemsAscendingQty(itemToMove: Item, grid: (Item | null)[][]): { item: Item; col: number; row: number }[] {
     const itemList: { item: Item; col: number; row: number }[] = [];
 
-    for (let i_row = 0; i_row < 3; i_row++) {
-      for (let i_col = 0; i_col < 10; i_col++) {
-        const item = this.items[i_col][i_row];
+    for (let i_col = 0; i_col < grid.length; i_col++) {
+      for (let i_row = 0; i_row < grid[i_col].length; i_row++) {
+        const item = grid[i_col][i_row];
         if (item && item.isSameItemType(itemToMove)) {
           itemList.push({ item: item, col: i_col, row: i_row });
         }
       }
     }
+
+    console.log(itemList);
 
     const sortedItems = itemList.sort((a, b) => {
       return a.item.quantity - b.item.quantity;
@@ -500,20 +518,42 @@ export class InventoryComponent {
       return itemToMove;
     }
 
-    const itemList: { item: Item; col: number; row: number }[] = this.getSortedItemsAscendingQty(itemToMove);
+    const craftingItemList: { item: Item; col: number; row: number }[] = this.getSortedItemsAscendingQty(itemToMove, this.crafting);
 
-    itemLoop: for (const { item, col, row} of itemList) {
+    craftingLoop: for (const { item, col, row} of craftingItemList) {
       if (item && item.isSameItemType(itemToMove)) {
         if (item.quantity <= qtyToMove) {
           qtyToMove -= item.quantity;
           totalQty += item.quantity;
-          this.items[col][row] = null;
+          this.crafting[col][row] = null;
+          crafting_updated = true;
         }
         else {
           item.quantity -= qtyToMove;
           totalQty += qtyToMove;
           qtyToMove = 0;
-          break itemLoop;
+          crafting_updated = true;
+          break craftingLoop;
+        }
+      }
+    }
+
+    if (qtyToMove > 0) {
+      const inventoryItemList: { item: Item; col: number; row: number }[] = this.getSortedItemsAscendingQty(itemToMove, this.items);
+
+      itemLoop: for (const { item, col, row} of inventoryItemList) {
+        if (item && item.isSameItemType(itemToMove)) {
+          if (item.quantity <= qtyToMove) {
+            qtyToMove -= item.quantity;
+            totalQty += item.quantity;
+            this.items[col][row] = null;
+          }
+          else {
+            item.quantity -= qtyToMove;
+            totalQty += qtyToMove;
+            qtyToMove = 0;
+            break itemLoop;
+          }
         }
       }
     }
@@ -524,42 +564,6 @@ export class InventoryComponent {
 
     itemToMove.quantity += totalQty;
     return itemToMove;
-
-    // outerLoop: for (let i_row = 0; i_row < 3; i_row++) {
-    //   for (let i_col = 0; i_col < 10; i_col++) {
-    //     const item = this.items[i_col][i_row];
-    //     if (item && item.isSameItemType(itemToMove)) {
-    //       if (item.quantity + total_qty <= qtyToMove) {
-    //         total_qty += item.quantity;
-    //         this.items[i_col][i_row] = null;
-    //       }
-    //       else {
-    //         item.quantity -= (qtyToMove - total_qty);
-    //         total_qty += (qtyToMove - total_qty);
-    //         break outerLoop;
-    //       }
-    //     }
-    //   }
-    // }
-
-    // outerLoop: for (let c_row = 0; c_row < 3; c_row++) {
-    //   for (let c_col = 0; c_col < 3; c_col++) {
-    //     const item = this.crafting[c_col][c_row];
-    //     if (item && item.isSameItemType(itemToMove)) {
-    //       if (item.quantity + total_qty <= qtyToMove) {
-    //         total_qty += item.quantity;
-    //         crafting_updated = true;
-    //         this.crafting[c_col][c_row] = null;
-    //       }
-    //       else {
-    //         total_qty += (qtyToMove - total_qty);
-    //         item.quantity -= (qtyToMove - total_qty);
-    //         crafting_updated = true;
-    //         break outerLoop;
-    //       }
-    //     }
-    //   }
-    // }
   }
 
   updateCraftingOutput() {
