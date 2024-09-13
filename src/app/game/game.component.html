@@ -1,7 +1,7 @@
 <div class="canvas-wrapper" oncontextmenu="return false;">
   <div class="canvas-container">
     <canvas #gameCanvas width="1300" height="950"></canvas>
-    <!-- <div class="overlay" *ngIf="inventoryComponent.isInventoryOpen"></div>  -->
+    <div class="overlay" *ngIf="inventoryComponent.isInventoryOpen"></div> 
     <app-inventory
       #inventoryComponent
       [ngClass]="{'hidden': !inventoryComponent.isInventoryOpen}"

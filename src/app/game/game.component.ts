@@ -115,9 +115,16 @@ export class GameComponent implements AfterViewInit, OnDestroy {
 
     const currentTime = performance.now();
     const elapsedTime = currentTime - this.lastUpdateTime;
+    const diff = elapsedTime - this.frameInterval;
+    console.log("Elapsed time = " + elapsedTime);
 
     if (elapsedTime >= this.frameInterval) {
+      const diff = elapsedTime - this.frameInterval;
+      console.log("Updating game. Time difference = " + diff);
+      const curTime2 = performance.now();
       this.update();
+      const elapsedTime2 = performance.now() - curTime2;
+      //console.log("update() method took: " + elapsedTime2);
       this.lastUpdateTime = currentTime - (elapsedTime % this.frameInterval);
     }
 
@@ -125,22 +132,9 @@ export class GameComponent implements AfterViewInit, OnDestroy {
   }
 
   update() {
-    // if (this.inventoryComponent.isInventoryOpen) {
-    //   return;
-    // }
-    this.ctx.clearRect(0, 0, this.width, this.height);
-    // if (this.player !== undefined) {
-    //   this.renderMap(this.player.xPos, this.player.yPos);
-    // }
-    // const grass = ImageService.getImage('assets/grass_2.jpg');
-    // if (grass) {
-    //   this.ctx.drawImage(grass, -25, 450);
-    //   const pattern = this.ctx.createPattern(grass, 'repeat');
-    //   if (pattern) {
-    //     this.ctx.fillStyle = pattern;
-    //     this.ctx.fillRect(0, 0, this.width, this.height);
-    //   }
-    // }
+    if (this.inventoryComponent.isInventoryOpen) {
+      return;
+    }
 
     const {startCol, startRow, width, height } = this.getVisibleTiles(this.canvas_xPos, this.canvas_yPos);
 
@@ -149,9 +143,6 @@ export class GameComponent implements AfterViewInit, OnDestroy {
 
     let xPos = xPosOriginal;
     let yPos = yPosOriginal;
-
-    // console.log("startCol: " + startCol + ", startRow: " + startRow + ", width: " + width + ", height: " + height);
-    // console.log("xPos: " + xPos + ", yPos: " + yPos); 
 
     this.ctx.strokeStyle = 'black';
 
@@ -179,7 +170,7 @@ export class GameComponent implements AfterViewInit, OnDestroy {
               }
             }
           }
-          //this.ctx.strokeRect(xPos, yPos, this.cell_size, this.cell_size);
+          this.ctx.strokeRect(xPos, yPos, this.cell_size, this.cell_size);
           yPos += 50;
       }
       xPos += 50;
