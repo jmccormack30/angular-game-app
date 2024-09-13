@@ -45,7 +45,7 @@
       </div>
       <div class="inventory-grid" #inventoryGrid data-grid="inventory">
         <div class="inventory-row" *ngFor="let row of items; let rowIndex = index">
-          <div class="inventory-item no-user-select column" *ngFor="let item of row; let colIndex = index"
+          <div class="inventory-item no-user-select column items-cell" *ngFor="let item of row; let colIndex = index"
             (click)="onCellClick(item, $event, colIndex, rowIndex)"
             (contextmenu)="onCellClick(item, $event, colIndex, rowIndex)"
             (mouseenter)="onMouseEnter(item, $event)"
@@ -58,6 +58,21 @@
             </ng-container>
         </div>
       </div>
+      <!-- <div class="hotbar-inventory" #inventoryGrid data-grid="hotbarInventory">
+        <div class="inventory-row" *ngFor="let row of items; let rowIndex = index">
+          <div class="inventory-item no-user-select column" *ngFor="let item of row | slice: 0:1; let colIndex = index"
+            (click)="onCellClick(item, $event, colIndex, rowIndex)"
+            (contextmenu)="onCellClick(item, $event, colIndex, rowIndex)"
+            (mouseenter)="onMouseEnter(item, $event)"
+            (mouseleave)="onMouseLeave()">
+            <ng-container *ngIf="item && item !== itemToMove">
+              <div class="image-wrapper no-select">
+                <div class="no-select" [innerHTML]="getImageHtml(item)"></div>
+                <p class="quantity-text no-select" *ngIf="item.quantity > 1">{{item.quantity}}</p>
+              </div>
+            </ng-container>
+        </div>
+      </div> -->
     </div>
     <div class="item-popup no-select"
     [ngStyle]="{ display: hoveredItem ? 'block' : 'none' }"

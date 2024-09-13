@@ -4,6 +4,9 @@ import { Recipe } from '../crafting/recipe';
 import { Recipes } from '../crafting/recipes';
 import { ItemFactory } from '../items/itemfactory';
 import { KeyService } from '../keyservice';
+import { Bread } from '../items/bread';
+import { WheatItem } from '../items/wheat_item';
+import { max } from 'rxjs';
 
 
 @Component({
@@ -38,7 +41,7 @@ export class InventoryComponent {
 
   constructor(private renderer: Renderer2, private el: ElementRef) {
     this.armor = Array(4).fill(null);
-    this.items = Array.from({ length: 10 }, () => Array(3).fill(null));
+    this.items = Array.from({ length: 9 }, () => Array(4).fill(null));
     this.crafting = Array.from({ length: 3 }, () => Array(3).fill(null));
     this.output = null;
   }
@@ -64,13 +67,11 @@ export class InventoryComponent {
       if (this.floatingItem) {
         this.renderer.removeChild(document.body, this.floatingItem);
       }
-      if (this.moveCraftingToInventory()) {
-        this.isInventoryOpen = false;
-        this.close.emit();
-      }
-      else {
+      if (!this.moveCraftingToInventory()) {
         console.log("Failed to move crafting to inventory!!!!!");
       }
+      this.isInventoryOpen = false;
+        this.close.emit();
     }
   }
 
@@ -101,7 +102,7 @@ export class InventoryComponent {
     let inv_row = 0;
     let inv_col = 0;
 
-    while (inv_row < 3) {
+    while (inv_row < 4) {
       const targetItem = this.items[inv_col][inv_row];
       if (targetItem) {
         const maxQtyForItem = (targetItem.constructor as typeof Item).maxStackQty;
@@ -110,7 +111,7 @@ export class InventoryComponent {
         }
       }
       inv_col++;
-      if (inv_col > 9) {
+      if (inv_col > 8) {
         inv_col = 0;
         inv_row++;
       }
@@ -122,17 +123,39 @@ export class InventoryComponent {
     let inv_row = 0;
     let inv_col = 0;
 
-    while (inv_row < 3) {
+    while (inv_row < 4) {
       if (this.items[inv_col][inv_row] === null)  {
         return [inv_row, inv_col];
       }
       inv_col++;
-      if (inv_col > 9) {
+      if (inv_col > 8) {
         inv_col = 0;
         inv_row++;
       }
     }
     return null;
+  }
+
+  getSpaceForItem(item: Item): number {
+    const maxQtyForItem = (item.constructor as typeof Item).maxStackQty;
+    let totalQty = 0;
+
+    for (let i_col = 0; i_col < this.items.length; i_col++) {
+      for (let i_row = 0; i_row < this.items[i_col].length; i_row++) {
+        const inv_item = this.items[i_col][i_row];
+        if (inv_item) {
+          if (inv_item.isSameItemType(item)) {
+            const availQty = maxQtyForItem - inv_item.quantity;
+            totalQty += availQty;
+          }
+        }
+        else {
+          totalQty += maxQtyForItem;
+        }
+      }
+    }
+
+    return totalQty;  
   }
 
   moveItemToInventory(item: Item) {
@@ -146,6 +169,7 @@ export class InventoryComponent {
         const qty = Math.min(qtyToMove, (maxQtyForItem - targetItem.quantity));
         targetItem.quantity += qty;
         qtyToMove -= qty;
+        item.quantity -= qty;
         
         if (qtyToMove > 0) {
           slot = this.getNextSlotForItem(item);
@@ -167,16 +191,18 @@ export class InventoryComponent {
         const newItem = ItemFactory.clone(item);
         newItem.quantity = qty;
         this.items[slot[1]][slot[0]] = newItem;
+        qtyToMove -= qty;
         item.quantity -= qty;
         slot = this.getNextOpenSlot();
       }
       else {
         this.items[slot[1]][slot[0]] = item;
+        qtyToMove = 0;
         slot = null;
       }
     }
 
-    if (qtyToMove === 0) {
+    if (qtyToMove <= 0) {
       return true;
     }
 
@@ -190,10 +216,17 @@ export class InventoryComponent {
     }
 
     if (KeyService.isKeyPressed('Shift')) {
-      item.quantity = this.current_qty_craftable * item.quantity;
+      const maxQtyForItem = (item.constructor as typeof Item).maxStackQty;
+      let totalQtyRequested = this.current_qty_craftable * item.quantity;
+      const spaceForItem = this.getSpaceForItem(item);
+      let totalQtyToCraft = Math.min(spaceForItem, totalQtyRequested);
+      totalQtyToCraft -= totalQtyToCraft % item.quantity;
+      let qtyToCraft = totalQtyToCraft / item.quantity;
+
+      item.quantity = totalQtyToCraft
       this.moveItemToInventory(item);
       this.output = null;
-      this.useCraftingItems(this.current_qty_craftable);
+      this.useCraftingItems(qtyToCraft);
       this.updateCraftingOutput();
       return;
     }

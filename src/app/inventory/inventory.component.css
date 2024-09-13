@@ -55,7 +55,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    width: 150px;
+    width: 125px;
     height: 210px;
     margin-top: 11px;
     margin-bottom:6px;
@@ -67,6 +67,7 @@
 .crafting-grid {
     display: grid;
     margin-top: 30px;
+    margin-right: 4px;
     width: 162px;
     grid-template-columns: repeat(3, 50px); /* 3 columns of 50px each */
     grid-template-rows: repeat(3, 50px); /* 3 rows of 50px each */
@@ -94,6 +95,7 @@
     height: 26px;
     margin-top: 114px;
     margin-bottom:6px;
+    margin-right: 9px;
 }
 
 .arrow-image {
@@ -110,7 +112,7 @@
     gap: 8px; /* Space between grid items */
     padding: 12px; /* Space around the grid inside the container */
     margin-top: 88px;
-    margin-right: 16px;
+    margin-right: 4px;
     padding-left: 0px;
     z-index: 20;
   }
@@ -121,17 +123,21 @@
     align-items: center;
     margin-right: 5px;
 }
-  
+
 .inventory-grid {
     display: grid;
-    grid-template-columns: repeat(10, 50px); /* 10 columns of 50px each */
-    grid-template-rows: repeat(3, 50px); /* 3 rows of 50px each */
+    grid-template-columns: repeat(9, 50px); /* 9 columns of 50px each */
+    grid-template-rows: repeat(4, 50px); /* 3 rows of 50px each */
     gap: 8px; /* Space between grid items */
     padding: 12px; /* Space around the grid inside the container */
     overflow: hidden; /* Scroll if the content overflows */
     margin-top: 1%;
     z-index: 20;
 }
+
+.items-cell:nth-child(4) {
+    margin-top: 8px; /* Extra space between the second-to-last and last row */
+  }
 
 .inventory-item {
     width: 50px;

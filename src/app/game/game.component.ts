@@ -7,6 +7,7 @@ import { PlayerFactoryService } from '../entities/playerfactory';
 import { KeyService } from '../keyservice';
 import { WheatTile } from '../entities/wheat_tile';
 import { Grass } from '../entities/grass';
+import { ImageService } from '../imageservice';
 
 @Component({
   selector: 'app-game',
@@ -14,6 +15,7 @@ import { Grass } from '../entities/grass';
   styleUrl: './game.component.css'
 })
 export class GameComponent implements AfterViewInit, OnDestroy {
+  ImageService = ImageService;
   @ViewChild('gameCanvas') gameCanvas!: ElementRef<HTMLCanvasElement>;
   private ctx!: CanvasRenderingContext2D;
 

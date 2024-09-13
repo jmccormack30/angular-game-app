@@ -3,13 +3,15 @@
 1. Hold down right click with an item in the mouse to add 1 to a cell automatically. This will allow you to slide the mouse over multiple cells to add 1 to each one without having
 to let go and press right click multiple times. Need to make sure this does not continuously add +1 to a cell many times if you are holding down.
 
-2. Add a max stack quantity (maybe 100?) - this needs to be accounted for in several places in the logic
-
 3. Eventually refactor inventory.component.ts 
 
 4. Add a 4th inventory row which wil be the hot bar. Add it at the bottom of the game screen and the ability to slide / select which item is selected
 
 5. Enhance the tooltip when hovering over an item in the inventory. 
+    . Fix bug with being able to highlight tooltip
+    . Fix bug with being able to highlight cell
+
+6. Figure out what to do if there are more items than space when closing the inventory
 
 // ANIMATION
 

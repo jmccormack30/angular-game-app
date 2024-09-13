@@ -1,4 +1,5 @@
 import { Observable, from } from "rxjs";
+import { Item } from "./items/item";
 
 export class ImageService {
     public static imageCache: { [key: string]: HTMLImageElement } = {};
@@ -83,4 +84,12 @@ export class ImageService {
     public static getImage(src: string): HTMLImageElement | null {
         return this.imageCache[src];
     }
+
+    public static getImageHtml(item: Item | null): string {
+        let img = null;
+        if (item) {
+            img = item.image;
+        }
+        return img ? img.outerHTML : '';
+      }
 }
