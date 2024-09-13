@@ -1,4 +1,4 @@
-import { ImageService } from "../imageservice";
+import { ImageService } from "../service/imageservice";
 import { InventoryComponent } from "../inventory/inventory.component";
 import { Tile } from "./tile";
 

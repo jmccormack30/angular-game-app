@@ -3,10 +3,12 @@ import { Item } from '../items/item';
 import { Recipe } from '../crafting/recipe';
 import { Recipes } from '../crafting/recipes';
 import { ItemFactory } from '../items/itemfactory';
-import { KeyService } from '../keyservice';
+import { KeyService } from '../service/keyservice';
 import { Bread } from '../items/bread';
 import { WheatItem } from '../items/wheat_item';
 import { max } from 'rxjs';
+import { InventoryService } from '../service/inventoryservice';
+import { ImageService } from '../service/imageservice';
 
 
 @Component({
@@ -16,6 +18,7 @@ import { max } from 'rxjs';
 })
 export class InventoryComponent {
   @Output() close = new EventEmitter<void>();
+  ImageService = ImageService;
 
   private floatingItem: HTMLElement | null = null;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -29,7 +32,7 @@ export class InventoryComponent {
   pickUpThreshold: number = 250; // Time window in milliseconds
 
   armor: (Item | null)[];
-  items: (Item | null)[][];
+  items: (Item | null)[][] = [];
   crafting: (Item | null)[][];
   output: Item | null;
 
@@ -39,9 +42,12 @@ export class InventoryComponent {
   hoveredItem: Item | null = null; // To track the item being hovered over
   popupPosition = { x: 0, y: 0 }; // To track the position of the popup
 
-  constructor(private renderer: Renderer2, private el: ElementRef) {
+  constructor(private renderer: Renderer2, private el: ElementRef, private inventoryService: InventoryService) {
     this.armor = Array(4).fill(null);
-    this.items = Array.from({ length: 9 }, () => Array(4).fill(null));
+    this.inventoryService.inventory$.subscribe(items => {
+      this.items = items;
+    });
+    // this.items = Array.from({ length: 9 }, () => Array(4).fill(null));
     this.crafting = Array.from({ length: 3 }, () => Array(3).fill(null));
     this.output = null;
   }
@@ -168,6 +174,8 @@ export class InventoryComponent {
       if (targetItem) {
         const qty = Math.min(qtyToMove, (maxQtyForItem - targetItem.quantity));
         targetItem.quantity += qty;
+        console.log("update inventory!");
+        this.inventoryService.updateInventory(slot[1], slot[0], targetItem);
         qtyToMove -= qty;
         item.quantity -= qty;
         
@@ -190,13 +198,17 @@ export class InventoryComponent {
       if (qty < qtyToMove) {
         const newItem = ItemFactory.clone(item);
         newItem.quantity = qty;
-        this.items[slot[1]][slot[0]] = newItem;
+        console.log("update inventory!");
+        this.inventoryService.updateInventory(slot[1], slot[0], newItem);
+        //this.items[slot[1]][slot[0]] = newItem;
         qtyToMove -= qty;
         item.quantity -= qty;
         slot = this.getNextOpenSlot();
       }
       else {
-        this.items[slot[1]][slot[0]] = item;
+        //this.items[slot[1]][slot[0]] = item;
+        console.log("update inventory!");
+        this.inventoryService.updateInventory(slot[1], slot[0], item);
         qtyToMove = 0;
         slot = null;
       }
@@ -579,7 +591,8 @@ export class InventoryComponent {
           if (item.quantity <= qtyToMove) {
             qtyToMove -= item.quantity;
             totalQty += item.quantity;
-            this.items[col][row] = null;
+            this.inventoryService.updateInventory(col, row, null);
+            //this.items[col][row] = null;
           }
           else {
             item.quantity -= qtyToMove;

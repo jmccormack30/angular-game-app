@@ -1,5 +1,5 @@
 import { Observable, from } from "rxjs";
-import { Item } from "./items/item";
+import { Item } from "../items/item";
 
 export class ImageService {
     public static imageCache: { [key: string]: HTMLImageElement } = {};

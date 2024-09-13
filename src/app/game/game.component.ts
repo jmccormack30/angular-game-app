@@ -4,10 +4,11 @@ import { Subject } from 'rxjs';
 import { debounceTime } from 'rxjs/operators'
 import { InventoryComponent } from '../inventory/inventory.component';
 import { PlayerFactoryService } from '../entities/playerfactory';
-import { KeyService } from '../keyservice';
+import { KeyService } from '../service/keyservice';
 import { WheatTile } from '../entities/wheat_tile';
 import { Grass } from '../entities/grass';
-import { ImageService } from '../imageservice';
+import { ImageService } from '../service/imageservice';
+import { HotbarComponent } from '../hotbar/hotbar.component';
 
 @Component({
   selector: 'app-game',
@@ -56,6 +57,7 @@ export class GameComponent implements AfterViewInit, OnDestroy {
   private enterKeySubject = new Subject<void>();
 
   @ViewChild('inventoryComponent') inventoryComponent!: InventoryComponent;
+  @ViewChild('hotbarComponent') hotbarComponent!: HotbarComponent;
   isInventoryOpen = false;
   player: Player | undefined;
 

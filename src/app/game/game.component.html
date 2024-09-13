@@ -1,29 +1,12 @@
 <div class="canvas-wrapper" oncontextmenu="return false;">
   <div class="canvas-container">
     <canvas #gameCanvas width="1300" height="950"></canvas>
-    <div class="overlay" *ngIf="inventoryComponent.isInventoryOpen"></div>
+    <!-- <div class="overlay" *ngIf="inventoryComponent.isInventoryOpen"></div>  -->
     <app-inventory
       #inventoryComponent
       [ngClass]="{'hidden': !inventoryComponent.isInventoryOpen}"
       (close)="onInventoryClose()">
     </app-inventory>
-    <div class="hotbar-grid"
-     #hotbarGrid
-     data-grid="hotbar">
-      <div class="inventory-row" #hotbarGrid data-grid="hotbar"
-      [ngClass]="{'hidden': inventoryComponent.isInventoryOpen}"
-      *ngFor="let row of inventoryComponent.items; let rowIndex = index">
-        <div class="inventory-item no-user-select column items-cell">
-          <ng-container *ngIf="row[row.length - 1] as lastItem">
-            <div class="image-wrapper no-select">
-              <div class="no-select" [innerHTML]="ImageService.getImageHtml(lastItem)"></div>
-              <p class="quantity-text no-select" *ngIf="lastItem.quantity > 1">{{lastItem.quantity}}</p>
-            </div>
-          </ng-container>
-      </div>
-    </div>
-  </div>
-  <div class="drag-overlay" *ngIf="inventoryComponent.itemToMove"
-     (click)="onOverlayClick()">
+    <app-hotbar #hotbarComponent></app-hotbar>
   </div>
 </div>

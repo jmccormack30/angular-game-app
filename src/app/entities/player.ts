@@ -1,8 +1,8 @@
 import { PlayerWalkLeftRightAnimation } from "../animations/player-walk-left-right-animation";
 import { PlayerWalkUpDownAnimation } from "../animations/player-walk-up-down-animation";
 import { GameComponent } from "../game/game.component";
-import { ImageService } from "../imageservice";
-import { KeyService } from "../keyservice";
+import { ImageService } from "../service/imageservice";
+import { KeyService } from "../service/keyservice";
 
 export class Player {
     xPos: number;

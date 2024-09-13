@@ -1,0 +1,56 @@
+.hidden {
+    display: none;
+}
+  
+.hotbar-window {
+    width: 100%; /* Adjust as needed */
+  }
+  
+.hotbar-row {
+    position: absolute; /* Position absolute within the .canvas-container */
+    display: grid;
+    grid-template-columns: repeat(9, 50px); /* 9 columns of 50px each */
+    grid-template-rows: repeat(1, 50px);
+    gap: 8px;
+    width: 522px;
+    height: 58px;
+    overflow: hidden;
+}
+
+.inventory-item {
+    width: 50px;
+    height: 50px;
+    background: #eee;
+    gap: 8px;
+    border: 4px solid #ccc;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+  
+.image-wrapper {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+  
+.quantity-text {
+    position: absolute;
+    bottom: -20px; /* Adjust spacing from the bottom */
+    right: -2px; /* Adjust spacing from the right */
+    color: white; /* Text color */
+    padding: 2px 5px; /* Padding around the text */
+    border-radius: 3px; /* Rounded corners */
+    font-size: 17px; /* Adjust font size */
+    font-weight: bold; /* Make text bold */
+    text-shadow: 
+        1px 1px 0 black, 
+        -1px -1px 0 black,
+        1px -1px 0 black,
+        -1px 1px 0 black;
+}
+  
+.inventory-item:hover {
+    border-color: #555; /* Change border color on hover */
+}

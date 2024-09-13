@@ -5,9 +5,10 @@ import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { GameComponent } from './game/game.component';
 import { InventoryComponent } from './inventory/inventory.component';
-import { ImageService } from './imageservice';
+import { ImageService } from './service/imageservice';
 import { Observable } from 'rxjs';
-import { KeyService } from './keyservice';
+import { KeyService } from './service/keyservice';
+import { HotbarComponent } from './hotbar/hotbar.component';
 
 // Load all images on start
 export function initializeApp() {
@@ -23,6 +24,7 @@ export function initializeApp() {
     AppComponent,
     GameComponent,
     InventoryComponent,
+    HotbarComponent,
   ],
   imports: [
     BrowserModule,

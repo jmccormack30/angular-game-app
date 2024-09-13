@@ -1,5 +1,5 @@
 import { Injectable } from "@angular/core";
-import { ImageService } from "../imageservice";
+import { ImageService } from "../service/imageservice";
 import { Item } from "./item";
 
 export type ItemConstructor<T extends Item> = new (quantity: number, image: HTMLImageElement | null) => T;
