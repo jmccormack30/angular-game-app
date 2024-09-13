@@ -1,6 +1,6 @@
 import { AfterViewInit, Component, ElementRef, OnDestroy, ViewChild } from '@angular/core';
 import { Player } from '../entities/player';
-import { Observable, Subject, Subscription } from 'rxjs';
+import { Subject, Subscription } from 'rxjs';
 import { debounceTime } from 'rxjs/operators'
 import { InventoryComponent } from '../inventory/inventory.component';
 import { PlayerFactoryService } from '../entities/playerfactory';
@@ -56,6 +56,8 @@ export class GameComponent implements AfterViewInit, OnDestroy {
 
   private enterKeySubject = new Subject<void>();
 
+  public isHotBarOnTop = false;
+
   @ViewChild('inventoryComponent') inventoryComponent!: InventoryComponent;
   @ViewChild('hotbarComponent') hotbarComponent!: HotbarComponent;
   isInventoryOpen = false;
@@ -64,13 +66,13 @@ export class GameComponent implements AfterViewInit, OnDestroy {
   private enterSubscriber: Subscription = new Subscription;
   private escapeSubscriber: Subscription = new Subscription;
 
-  constructor(private playerFactory: PlayerFactoryService) {}
+  constructor(private playerFactory: PlayerFactoryService, private keyService: KeyService) {}
 
   ngAfterViewInit(): void {
-    this.enterSubscriber = KeyService.enterKey$.pipe(debounceTime(250)).subscribe(() => {
+    this.enterSubscriber = this.keyService.enterKey$.pipe(debounceTime(250)).subscribe(() => {
       this.inventoryComponent.toggleInventory();
     });
-    this.escapeSubscriber = KeyService.escapeKey$.pipe(debounceTime(250)).subscribe(() => {
+    this.escapeSubscriber = this.keyService.escapeKey$.pipe(debounceTime(250)).subscribe(() => {
       this.inventoryComponent.closeInventory();
     });
 
@@ -97,7 +99,7 @@ export class GameComponent implements AfterViewInit, OnDestroy {
   startGameLoop() {
     this.isRunning = true;
     this.lastUpdateTime = performance.now();
-    this.gameLoop();
+    requestAnimationFrame(() => this.gameLoop());
   }
 
   stopGameLoop() {
@@ -120,16 +122,9 @@ export class GameComponent implements AfterViewInit, OnDestroy {
 
     const currentTime = performance.now();
     const elapsedTime = currentTime - this.lastUpdateTime;
-    const diff = elapsedTime - this.frameInterval;
-    console.log("Elapsed time = " + elapsedTime);
 
     if (elapsedTime >= this.frameInterval) {
-      const diff = elapsedTime - this.frameInterval;
-      console.log("Updating game. Time difference = " + diff);
-      const curTime2 = performance.now();
       this.update();
-      const elapsedTime2 = performance.now() - curTime2;
-      //console.log("update() method took: " + elapsedTime2);
       this.lastUpdateTime = currentTime - (elapsedTime % this.frameInterval);
     }
 
@@ -163,7 +158,7 @@ export class GameComponent implements AfterViewInit, OnDestroy {
             if (this.player) {
               const playerMapY = this.canvas_yPos + this.player?.yPos;
               const playerMapX = this.canvas_xPos + this.player?.xPos;
-              if (playerMapY && playerMapX) {
+              if (playerMapY >= 0 && playerMapX >= 0) {
                 if (tile.isCheckCollision) {
                   if (tile.isPlayerCollision(col * 50, row * 50, playerMapX, playerMapY)) {
                     tile.handlePlayerCollision(this.inventoryComponent);
@@ -196,9 +191,14 @@ export class GameComponent implements AfterViewInit, OnDestroy {
       if (!this.inventoryComponent.isInventoryOpen) {
         this.player.update();
       }
+
+      // if the player is on the bottom of the screen, hotbar goes to the top
+      this.isHotBarOnTop = this.player.yPos >= 575;
+
       this.player.draw(this.ctx);
       if (!this.inventoryComponent.isInventoryOpen) {
-        const input = KeyService.getPlayerDirection();
+        const input = this.keyService.getPlayerDirection();
+        // console.log("Player Direction: " + input);
         if (input === "up") {
           if (this.canvas_yPos === 0 || this.player.yPos > 443) {
             this.player.updatePlayerPosition('up');
@@ -290,6 +290,23 @@ export class GameComponent implements AfterViewInit, OnDestroy {
     }
     else {
       return 0;
+    }
+  }
+
+  getHotBarStyle() {
+    if (this.isHotBarOnTop) {
+      return "hotbar-top";
+      console.log("hotbar on top");
+      return {
+      'bottom': 500,
+      };
+    }
+    else {
+      return "hotbar-bottom";
+      console.log("hotbar on bottom");
+      return {
+        'bottom': 80,
+        };
     }
   }
 }

@@ -18,7 +18,7 @@ export class Player {
 
     private keyState: { [key: string]: boolean } = {};
   
-    constructor(xPos: number, yPos: number, speed: number, direction: string) {
+    constructor(xPos: number, yPos: number, speed: number, direction: string, private keyService: KeyService) {
       this.xPos = xPos;
       this.yPos = yPos;
       this.speed = speed;
@@ -26,7 +26,7 @@ export class Player {
     }
 
     update() {
-        const input = KeyService.getPlayerDirection();
+        const input = this.keyService.getPlayerDirection();
         
         if (input === undefined) {
             this.animation = undefined;
@@ -37,7 +37,7 @@ export class Player {
             this.animation = undefined;
         }
 
-        const shift = KeyService.isKeyPressed('Shift');
+        const shift = this.keyService.isKeyPressed('Shift');
 
         this.direction = input;
         this.updateSpeed(shift);

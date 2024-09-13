@@ -1,4 +1,4 @@
-import { Component, Input, ViewChild } from '@angular/core';
+import { Component } from '@angular/core';
 import { Item } from '../items/item';
 import { InventoryService } from '../service/inventoryservice';
 import { ImageService } from '../service/imageservice';
@@ -11,6 +11,8 @@ import { ImageService } from '../service/imageservice';
 export class HotbarComponent {
   ImageService = ImageService;
   items: (Item | null)[] = []
+  public isHotBarOnTop = false;
+  selectedItem: Item | null = null;
 
   constructor(private inventoryService: InventoryService) {
     this.inventoryService.inventory$.subscribe((inventory: (Item | null)[][]) => {

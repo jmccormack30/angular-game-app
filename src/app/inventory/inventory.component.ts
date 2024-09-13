@@ -4,11 +4,9 @@ import { Recipe } from '../crafting/recipe';
 import { Recipes } from '../crafting/recipes';
 import { ItemFactory } from '../items/itemfactory';
 import { KeyService } from '../service/keyservice';
-import { Bread } from '../items/bread';
-import { WheatItem } from '../items/wheat_item';
-import { Subscriber, Subscription, max } from 'rxjs';
 import { InventoryService } from '../service/inventoryservice';
 import { ImageService } from '../service/imageservice';
+import { Subscription } from 'rxjs';
 
 
 @Component({
@@ -44,7 +42,7 @@ export class InventoryComponent implements OnDestroy {
 
   private inventorySubscriber: Subscription = new Subscription;
 
-  constructor(private renderer: Renderer2, private el: ElementRef, private inventoryService: InventoryService) {
+  constructor(private renderer: Renderer2, private el: ElementRef, private inventoryService: InventoryService, private keyService: KeyService) {
     this.armor = Array(4).fill(null);
     this.inventorySubscriber = this.inventoryService.inventory$.subscribe(items => {
       this.items = items;
@@ -180,7 +178,6 @@ export class InventoryComponent implements OnDestroy {
       if (targetItem) {
         const qty = Math.min(qtyToMove, (maxQtyForItem - targetItem.quantity));
         targetItem.quantity += qty;
-        console.log("update inventory!");
         this.inventoryService.updateInventory(slot[1], slot[0], targetItem);
         qtyToMove -= qty;
         item.quantity -= qty;
@@ -213,7 +210,6 @@ export class InventoryComponent implements OnDestroy {
       }
       else {
         //this.items[slot[1]][slot[0]] = item;
-        console.log("update inventory!");
         this.inventoryService.updateInventory(slot[1], slot[0], item);
         qtyToMove = 0;
         slot = null;
@@ -233,13 +229,12 @@ export class InventoryComponent implements OnDestroy {
       return;
     }
 
-    if (KeyService.isKeyPressed('Shift')) {
-      const maxQtyForItem = (item.constructor as typeof Item).maxStackQty;
-      let totalQtyRequested = this.current_qty_craftable * item.quantity;
+    if (this.keyService.isKeyPressed('Shift')) {
+      const totalQtyRequested = this.current_qty_craftable * item.quantity;
       const spaceForItem = this.getSpaceForItem(item);
       let totalQtyToCraft = Math.min(spaceForItem, totalQtyRequested);
       totalQtyToCraft -= totalQtyToCraft % item.quantity;
-      let qtyToCraft = totalQtyToCraft / item.quantity;
+      const qtyToCraft = totalQtyToCraft / item.quantity;
 
       item.quantity = totalQtyToCraft
       this.moveItemToInventory(item);
@@ -311,7 +306,12 @@ export class InventoryComponent implements OnDestroy {
 
       if (!item) {
         if (isMoveFullQty) {
-          targetGrid[colIndex][rowIndex] = this.itemToMove;
+          if (targetItemGridType === 'inventory') {
+            this.inventoryService.updateInventory(colIndex, rowIndex, this.itemToMove);
+          }
+          else {
+            targetGrid[colIndex][rowIndex] = this.itemToMove;
+          }
           this.clearItemToMove();
           this.removeFloatingItem();
         }
@@ -320,7 +320,12 @@ export class InventoryComponent implements OnDestroy {
           this.updateFloatingItemQuantity(this.itemToMove.quantity);
           const splitItem = this.itemToMove.clone();
           splitItem.quantity = 1;
-          targetGrid[colIndex][rowIndex] = splitItem;
+          if (targetItemGridType === 'inventory') {
+            this.inventoryService.updateInventory(colIndex, rowIndex, splitItem);
+          }
+          else {
+            targetGrid[colIndex][rowIndex] = splitItem;
+          }
         }
         else {
           return;
@@ -340,6 +345,9 @@ export class InventoryComponent implements OnDestroy {
               return;
             }
             item.quantity += qtyToMove;
+            if (targetItemGridType === 'inventory') {
+              this.inventoryService.updateInventory(colIndex, rowIndex, item);
+            }
             this.itemToMove.quantity -= qtyToMove;
             if (this.itemToMove.quantity === 0) {
               this.clearItemToMove();
@@ -357,6 +365,9 @@ export class InventoryComponent implements OnDestroy {
             this.itemToMove.quantity -= 1;
             this.updateFloatingItemQuantity(this.itemToMove.quantity);
             item.quantity += 1;
+            if (targetItemGridType === 'inventory') {
+              this.inventoryService.updateInventory(colIndex, rowIndex, item);
+            }
           }
           else {
             return;
@@ -364,7 +375,12 @@ export class InventoryComponent implements OnDestroy {
         }
         else {
           // swap floating item with item in cell
-          targetGrid[colIndex][rowIndex] = this.itemToMove
+          if (targetItemGridType === 'inventory') {
+            this.inventoryService.updateInventory(colIndex, rowIndex, this.itemToMove);
+          }
+          else {
+            targetGrid[colIndex][rowIndex] = this.itemToMove;
+          }
           this.clearItemToMove();
           this.removeFloatingItem();
           this.createFloatingItem(item, event);
@@ -394,12 +410,23 @@ export class InventoryComponent implements OnDestroy {
         }
         else if (item.quantity === 1) {
           this.itemToMove = item;
-          targetGrid[colIndex][rowIndex] = null;
+          if (targetItemGridType === 'inventory') {
+            this.inventoryService.updateInventory(colIndex, rowIndex, null);
+          }
+          else {
+            targetGrid[colIndex][rowIndex] = null;
+          }
         }
         else {
           const splitQty = Math.floor(item.quantity / 2);
           const remQty = item.quantity - splitQty;
           item.quantity = remQty;
+          if (targetItemGridType === 'inventory') {
+            this.inventoryService.updateInventory(colIndex, rowIndex, item);
+          }
+          else {
+            targetGrid[colIndex][rowIndex] = item;
+          }
           const splitItem = item.clone();
           splitItem.quantity = splitQty;
           this.itemToMove = splitItem;
@@ -410,7 +437,12 @@ export class InventoryComponent implements OnDestroy {
         this.lastItemPickUpTime = Date.now();
         // clear the item from the cell if we picked it up
         this.itemToMove = item;
-        targetGrid[colIndex][rowIndex] = null;
+        if (targetItemGridType === 'inventory') {
+          this.inventoryService.updateInventory(colIndex, rowIndex, null);
+        }
+        else {
+          targetGrid[colIndex][rowIndex] = null;
+        }
       }
 
       if (isTargetCrafting) {

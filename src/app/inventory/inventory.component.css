@@ -219,3 +219,19 @@
     box-shadow: none !important;
     transition: none;
 }
+
+.slot-number {
+    position: absolute;
+    top: -12px; /* Adjust spacing from the bottom */
+    left: -2px; /* Adjust spacing from the right */
+    color: white; /* Text color */
+    padding: 2px 5px; /* Padding around the text */
+    border-radius: 3px; /* Rounded corners */
+    font-size: 11px; /* Adjust font size */
+    font-weight: bold; /* Make text bold */
+    text-shadow: 
+        1px 1px 0 black, 
+        -1px -1px 0 black,
+        1px -1px 0 black,
+        -1px 1px 0 black;
+}

@@ -1,60 +1,93 @@
+import { Injectable } from "@angular/core";
 import { Subject } from "rxjs";
 
+@Injectable({
+    providedIn: 'root'
+})
 export class KeyService {
-    private static keyState: { [key: string]: boolean } = {};
+    private keyState: { [key: string]: boolean } = {};
+    // private static modifierKeyState: { [key: string]: boolean } = {};
 
-    private static enterKeySubject = new Subject<void>();
-    private static escapeKeySubject = new Subject<void>();
+    public enterKeySubject = new Subject<void>();
+    public escapeKeySubject = new Subject<void>();
 
-    public static enterKey$ = KeyService.enterKeySubject.asObservable();
-    public static escapeKey$ = KeyService.escapeKeySubject.asObservable();
+    public enterKey$ = this.enterKeySubject.asObservable();
+    public escapeKey$ = this.escapeKeySubject.asObservable();
 
-    private static initialized = false;
-
-    static initialize() {
-        if (this.initialized) return;
+    constructor() {
         window.addEventListener('keydown', this.handleKeyDown.bind(this));
         window.addEventListener('keyup', this.handleKeyUp.bind(this));
-        this.initialized = true;
-      }
+        // window.addEventListener('keypress', this.handleKeyPress.bind(this));
+    }
 
-    private static handleKeyDown(event: KeyboardEvent) {
-        KeyService.keyState[event.key] = true;
+    private handleKeyPress(event: KeyboardEvent) {
+        const key = event.key.toLowerCase();
+        if (key === 'Shift') return;
+        console.log("Key DOWN: " + key + ", isShift = " + event.shiftKey);
+
+        this.keyState[key] = true;
+        this.keyState['Shift'] = event.shiftKey;
 
         if (event.key === 'Enter') {
-            KeyService.enterKeySubject.next();
+            this.enterKeySubject.next();
         }
-
         if (event.key === 'Escape') {
-            KeyService.escapeKeySubject.next();
+            this.escapeKeySubject.next();
         }
     }
 
-    private static handleKeyUp(event: KeyboardEvent) {
-        KeyService.keyState[event.key] = false;
+    private handleKeyDown(event: KeyboardEvent) {
+        const key = event.key.toLowerCase();
+        if (key === 'Shift') return;
+        console.log("Key DOWN: " + key + ", isShift = " + event.shiftKey);
+
+        this.keyState[key] = true;
+        this.keyState['Shift'] = event.shiftKey;
+
+        if (event.key === 'Enter') {
+            this.enterKeySubject.next();
+        }
+        if (event.key === 'Escape') {
+            this.escapeKeySubject.next();
+        }
     }
 
-    public static isKeyPressed(key: string): boolean {
-        return !!KeyService.keyState[key];
+    private handleKeyUp(event: KeyboardEvent) {
+        const key = event.key.toLowerCase();
+        if (key === 'Shift') return;
+
+        console.log("Key UP: " + key);
+        console.log(this.keyState[key]);
+
+        this.keyState[key] = false;
+        this.keyState['Shift'] = event.shiftKey;
+
+        console.log(this.keyState[event.key]);
+    }
+
+    public isKeyPressed(key: string): boolean {
+        key = key.toLowerCase();
+        return !!this.keyState[key];
       }
 
-    public static getPlayerDirection() {
+    public getPlayerDirection() {
         let direction = "";
         let total = 0;
 
-        if (KeyService.keyState['ArrowUp'] || KeyService.keyState['W'] || KeyService.keyState['w']) {
+        if (!!this.keyState['arrowup'] || !!this.keyState['w']) {
             direction = "up";
             total++;
         }
-        if (KeyService.keyState['ArrowDown'] || KeyService.keyState['S'] || KeyService.keyState['s']) {
+        if (!!this.keyState['arrowdown'] || !!this.keyState['s']) {
             direction = "down";
             total++;
         }
-        if (KeyService.keyState['ArrowLeft'] || KeyService.keyState['A'] || KeyService.keyState['a']) {
+        if (!!this.keyState['arrowleft'] || !!this.keyState['a']) {
             direction = "left";
             total++;
         }
-        if (KeyService.keyState['ArrowRight'] || KeyService.keyState['D'] || KeyService.keyState['d']) {
+        if (!!this.keyState['arrowright'] || !!this.keyState['d']) {
+            console.log('ArrowRight = ' + !!this.keyState['ArrowRight'] + ", d = " + !!this.keyState['d']);
             direction = "right";
             total++;
         }

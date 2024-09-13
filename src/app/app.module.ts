@@ -14,7 +14,6 @@ import { HotbarComponent } from './hotbar/hotbar.component';
 export function initializeApp() {
   return (): Observable<void[]> => {
     // Initialize images or other resources here
-    KeyService.initialize();
     return ImageService.preloadImages();
   };
 }

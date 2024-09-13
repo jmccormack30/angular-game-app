@@ -26,18 +26,18 @@ export class WheatTile extends Tile {
     override handlePlayerNoCollision(): void {
         if (!this.active) {
             const current = Date.now();
-            if (current - this.lastTime >= 12000) {
+            if (current - this.lastTime >= 11000) {
                 this.lastTime = current;
                 const randomFloat = Math.random();
                 if (randomFloat < this.respawnRate) {
                     this.active = true;
-                    this.respawnRate = 0.025;
-                    this.respawnIncreaseRate = 0.006;
+                    this.respawnRate = 0.023;
+                    this.respawnIncreaseRate = 0.007;
                     this.image = ImageService.getImage('assets/wheat_dirt.png');
                 }
                 else {
                     this.respawnRate += this.respawnIncreaseRate;
-                    this.respawnIncreaseRate += 0.003
+                    this.respawnIncreaseRate += 0.004;
                 }
             }
         }

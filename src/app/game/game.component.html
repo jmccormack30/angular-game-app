@@ -7,6 +7,13 @@
       [ngClass]="{'hidden': !inventoryComponent.isInventoryOpen}"
       (close)="onInventoryClose()">
     </app-inventory>
-    <app-hotbar #hotbarComponent></app-hotbar>
+    <app-hotbar
+      #hotbarComponent
+      [ngClass]="{
+        'hidden': inventoryComponent.isInventoryOpen,
+        'app-hotbar-default': !this.isHotBarOnTop,
+        'app-hotbar-alt': this.isHotBarOnTop
+      }">
+    </app-hotbar>
   </div>
 </div>

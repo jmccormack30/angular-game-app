@@ -1,11 +1,14 @@
 <div class="hotbar-window">
     <div class="hotbar-row" data-grid="hotbar">
     <!-- Use *ngFor correctly to iterate over items -->
-        <div class="inventory-item no-user-select column items-cell" *ngFor="let item of items">
-            <ng-container *ngIf="item">
+        <div class="inventory-item no-user-select column items-cell" *ngFor="let item of items; let i = index">
+            <ng-container>
             <div class="image-wrapper no-select">
-                <div class="no-select" [innerHTML]="ImageService.getImageHtml(item)"></div>
-                <p class="quantity-text no-select" *ngIf="item.quantity > 1">{{ item.quantity }}</p>
+                <p class="slot-number no-select">{{ i + 1 }}</p>
+                <div class="item-wrapper" *ngIf="item">
+                    <div class="image no-select" [innerHTML]="ImageService.getImageHtml(item)"></div>
+                    <p class="quantity-text no-select" *ngIf="item.quantity > 1">{{ item.quantity }}</p>
+                </div>
             </div>
             </ng-container>
         </div>
