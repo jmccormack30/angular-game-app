@@ -1,4 +1,4 @@
-import { Component, Output, EventEmitter, Renderer2, ElementRef } from '@angular/core';
+import { Component, Output, EventEmitter, Renderer2, ElementRef, OnDestroy } from '@angular/core';
 import { Item } from '../items/item';
 import { Recipe } from '../crafting/recipe';
 import { Recipes } from '../crafting/recipes';
@@ -6,7 +6,7 @@ import { ItemFactory } from '../items/itemfactory';
 import { KeyService } from '../service/keyservice';
 import { Bread } from '../items/bread';
 import { WheatItem } from '../items/wheat_item';
-import { max } from 'rxjs';
+import { Subscriber, Subscription, max } from 'rxjs';
 import { InventoryService } from '../service/inventoryservice';
 import { ImageService } from '../service/imageservice';
 
@@ -16,7 +16,7 @@ import { ImageService } from '../service/imageservice';
   templateUrl: './inventory.component.html',
   styleUrls: ['./inventory.component.css']
 })
-export class InventoryComponent {
+export class InventoryComponent implements OnDestroy {
   @Output() close = new EventEmitter<void>();
   ImageService = ImageService;
 
@@ -42,14 +42,20 @@ export class InventoryComponent {
   hoveredItem: Item | null = null; // To track the item being hovered over
   popupPosition = { x: 0, y: 0 }; // To track the position of the popup
 
+  private inventorySubscriber: Subscription = new Subscription;
+
   constructor(private renderer: Renderer2, private el: ElementRef, private inventoryService: InventoryService) {
     this.armor = Array(4).fill(null);
-    this.inventoryService.inventory$.subscribe(items => {
+    this.inventorySubscriber = this.inventoryService.inventory$.subscribe(items => {
       this.items = items;
     });
     // this.items = Array.from({ length: 9 }, () => Array(4).fill(null));
     this.crafting = Array.from({ length: 3 }, () => Array(3).fill(null));
     this.output = null;
+  }
+
+  ngOnDestroy(): void {
+    this.inventorySubscriber.unsubscribe();
   }
 
   toggleInventory() {

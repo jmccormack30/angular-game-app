@@ -1,6 +1,6 @@
 import { AfterViewInit, Component, ElementRef, OnDestroy, ViewChild } from '@angular/core';
 import { Player } from '../entities/player';
-import { Subject } from 'rxjs';
+import { Observable, Subject, Subscription } from 'rxjs';
 import { debounceTime } from 'rxjs/operators'
 import { InventoryComponent } from '../inventory/inventory.component';
 import { PlayerFactoryService } from '../entities/playerfactory';
@@ -61,13 +61,16 @@ export class GameComponent implements AfterViewInit, OnDestroy {
   isInventoryOpen = false;
   player: Player | undefined;
 
+  private enterSubscriber: Subscription = new Subscription;
+  private escapeSubscriber: Subscription = new Subscription;
+
   constructor(private playerFactory: PlayerFactoryService) {}
 
   ngAfterViewInit(): void {
-    KeyService.enterKey$.pipe(debounceTime(250)).subscribe(() => {
+    this.enterSubscriber = KeyService.enterKey$.pipe(debounceTime(250)).subscribe(() => {
       this.inventoryComponent.toggleInventory();
     });
-    KeyService.escapeKey$.pipe(debounceTime(250)).subscribe(() => {
+    this.escapeSubscriber = KeyService.escapeKey$.pipe(debounceTime(250)).subscribe(() => {
       this.inventoryComponent.closeInventory();
     });
 
@@ -86,6 +89,8 @@ export class GameComponent implements AfterViewInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.enterSubscriber.unsubscribe();
+    this.escapeSubscriber.unsubscribe();
     this.stopGameLoop();
   }
 
