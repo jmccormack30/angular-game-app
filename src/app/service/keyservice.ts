@@ -6,63 +6,65 @@ import { Subject } from "rxjs";
 })
 export class KeyService {
     private keyState: { [key: string]: boolean } = {};
-    // private static modifierKeyState: { [key: string]: boolean } = {};
 
     public enterKeySubject = new Subject<void>();
     public escapeKeySubject = new Subject<void>();
 
+    public hotbarSubject = new Subject<string>();
+    public hotbarKey$ = this.hotbarSubject.asObservable();
+
+    public oneKeySubject = new Subject<void>();
+    public twoKeySubject = new Subject<void>();
+    public threeKeySubject = new Subject<void>();
+    public fourKeySubject = new Subject<void>();
+    public fiveKeySubject = new Subject<void>();
+    public sixKeySubject = new Subject<void>();
+    public sevenKeySubject = new Subject<void>();
+    public eightKeySubject = new Subject<void>();
+    public nineKeySubject = new Subject<void>();
+
     public enterKey$ = this.enterKeySubject.asObservable();
     public escapeKey$ = this.escapeKeySubject.asObservable();
+
+    public oneKey$ = this.escapeKeySubject.asObservable();
+    public twoKey$ = this.escapeKeySubject.asObservable();
+    public threeKey$ = this.escapeKeySubject.asObservable();
+    public fourKey$ = this.escapeKeySubject.asObservable();
+    public fiveKey$ = this.escapeKeySubject.asObservable();
+    public sixKey$ = this.escapeKeySubject.asObservable();
+    public sevenKey$ = this.escapeKeySubject.asObservable();
+    public eightKey$ = this.escapeKeySubject.asObservable();
+    public nineKey$ = this.escapeKeySubject.asObservable();
 
     constructor() {
         window.addEventListener('keydown', this.handleKeyDown.bind(this));
         window.addEventListener('keyup', this.handleKeyUp.bind(this));
-        // window.addEventListener('keypress', this.handleKeyPress.bind(this));
-    }
-
-    private handleKeyPress(event: KeyboardEvent) {
-        const key = event.key.toLowerCase();
-        if (key === 'Shift') return;
-        console.log("Key DOWN: " + key + ", isShift = " + event.shiftKey);
-
-        this.keyState[key] = true;
-        this.keyState['Shift'] = event.shiftKey;
-
-        if (event.key === 'Enter') {
-            this.enterKeySubject.next();
-        }
-        if (event.key === 'Escape') {
-            this.escapeKeySubject.next();
-        }
     }
 
     private handleKeyDown(event: KeyboardEvent) {
         const key = event.key.toLowerCase();
-        if (key === 'Shift') return;
-        console.log("Key DOWN: " + key + ", isShift = " + event.shiftKey);
+        if (key === 'shift') return;
 
         this.keyState[key] = true;
-        this.keyState['Shift'] = event.shiftKey;
+        this.keyState['shift'] = event.shiftKey;
 
-        if (event.key === 'Enter') {
+        if (key === 'enter') {
             this.enterKeySubject.next();
         }
-        if (event.key === 'Escape') {
+        else if (key === 'escape') {
             this.escapeKeySubject.next();
+        }
+        else if (this.isHotbarNumber(key)) {
+            this.hotbarSubject.next(key);
         }
     }
 
     private handleKeyUp(event: KeyboardEvent) {
         const key = event.key.toLowerCase();
-        if (key === 'Shift') return;
-
-        console.log("Key UP: " + key);
-        console.log(this.keyState[key]);
+        if (key === 'shift') return;
 
         this.keyState[key] = false;
-        this.keyState['Shift'] = event.shiftKey;
-
-        console.log(this.keyState[event.key]);
+        this.keyState['shift'] = event.shiftKey;
     }
 
     public isKeyPressed(key: string): boolean {
@@ -87,7 +89,6 @@ export class KeyService {
             total++;
         }
         if (!!this.keyState['arrowright'] || !!this.keyState['d']) {
-            console.log('ArrowRight = ' + !!this.keyState['ArrowRight'] + ", d = " + !!this.keyState['d']);
             direction = "right";
             total++;
         }
@@ -98,5 +99,10 @@ export class KeyService {
         else {
             return direction;
         }
+    }
+
+    private isHotbarNumber(key: string) {
+        const num = Number(key);
+        return !isNaN(num) && Number.isInteger(num) && num >= 1 && num < 10;
     }
 }

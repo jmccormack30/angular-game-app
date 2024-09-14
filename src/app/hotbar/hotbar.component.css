@@ -68,6 +68,6 @@
         -1px 1px 0 black;
 }
   
-.inventory-item:hover {
+.inventory-item-selected {
     border-color: #555; /* Change border color on hover */
 }

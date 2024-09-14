@@ -60,7 +60,6 @@ export class GameComponent implements AfterViewInit, OnDestroy {
 
   @ViewChild('inventoryComponent') inventoryComponent!: InventoryComponent;
   @ViewChild('hotbarComponent') hotbarComponent!: HotbarComponent;
-  isInventoryOpen = false;
   player: Player | undefined;
 
   private enterSubscriber: Subscription = new Subscription;
@@ -70,10 +69,14 @@ export class GameComponent implements AfterViewInit, OnDestroy {
 
   ngAfterViewInit(): void {
     this.enterSubscriber = this.keyService.enterKey$.pipe(debounceTime(250)).subscribe(() => {
+      console.log("enter pressed to open inv in game comp!");
       this.inventoryComponent.toggleInventory();
+      // if inventory is open, hot bar disabled - if inventory closed, hot bar is enabled
+      this.hotbarComponent.enabled = !this.inventoryComponent.isInventoryOpen;
     });
     this.escapeSubscriber = this.keyService.escapeKey$.pipe(debounceTime(250)).subscribe(() => {
       this.inventoryComponent.closeInventory();
+      this.hotbarComponent.enabled = true;
     });
 
     for (let col = 1; col < 25; col++) {
@@ -107,14 +110,6 @@ export class GameComponent implements AfterViewInit, OnDestroy {
     if (this.timerId) {
       clearTimeout(this.timerId);
     }
-  }
-
-  toggleInventory() {
-    this.isInventoryOpen = !this.isInventoryOpen;
-  }
-
-  onInventoryClose() {
-    this.isInventoryOpen = false;
   }
 
   gameLoop() {

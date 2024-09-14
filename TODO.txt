@@ -5,7 +5,7 @@ to let go and press right click multiple times. Need to make sure this does not 
 
 3. Eventually refactor inventory.component.ts 
 
-4. Add a 4th inventory row which wil be the hot bar. Add it at the bottom of the game screen and the ability to slide / select which item is selected
+4. Add ability to use the mouse scroll wheel to move the selected item in the hotbar. Implement wrapping around.
 
 5. Enhance the tooltip when hovering over an item in the inventory. 
     . Fix bug with being able to highlight tooltip
@@ -22,6 +22,7 @@ to let go and press right click multiple times. Need to make sure this does not 
 1. Wheat harvesting
 
     a. Add wheat textures for different stages of growth. Add logic for different stages of growth.
+        . Idk if I want to do this
     e. Long term goal: Add a hoe, and a swing animation for harvesting wheat
 
 2. Add other crops

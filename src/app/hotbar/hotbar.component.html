@@ -1,7 +1,8 @@
 <div class="hotbar-window">
     <div class="hotbar-row" data-grid="hotbar">
-    <!-- Use *ngFor correctly to iterate over items -->
-        <div class="inventory-item no-user-select column items-cell" *ngFor="let item of items; let i = index">
+        <div class="inventory-item no-user-select column items-cell"
+        *ngFor="let item of items; let i = index"
+        [ngClass]="{'inventory-item-selected': i === selectedItemIndex}">
             <ng-container>
             <div class="image-wrapper no-select">
                 <p class="slot-number no-select">{{ i + 1 }}</p>

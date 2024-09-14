@@ -4,13 +4,12 @@
     <div class="overlay" *ngIf="inventoryComponent.isInventoryOpen"></div> 
     <app-inventory
       #inventoryComponent
-      [ngClass]="{'hidden': !inventoryComponent.isInventoryOpen}"
-      (close)="onInventoryClose()">
+      [ngClass]="{'hidden': !inventoryComponent.isInventoryOpen}">
     </app-inventory>
     <app-hotbar
       #hotbarComponent
       [ngClass]="{
-        'hidden': inventoryComponent.isInventoryOpen,
+        'hidden': !hotbarComponent.enabled,
         'app-hotbar-default': !this.isHotBarOnTop,
         'app-hotbar-alt': this.isHotBarOnTop
       }">
