@@ -1,17 +1,12 @@
-import { InventoryComponent } from "../inventory/inventory.component";
-
 export abstract class Tile {
-    private width = 50;
-    private height = 50;
-
     public tileName: string;
     public image: HTMLImageElement | null = null;
-    public isCheckCollision: boolean;
+    public backgroundImage: HTMLImageElement | null = null;
 
-    constructor(tileName: string, image: HTMLImageElement | null, isCheckCollision: boolean) {
+    constructor(tileName: string, image: HTMLImageElement | null, backgroundImage: HTMLImageElement | null) {
         this.tileName = tileName;
         this.image = image;
-        this.isCheckCollision = isCheckCollision;
+        this.backgroundImage = backgroundImage;
     }
 
     isPlayerCollision(tileX: number, tileY: number, playerX: number, playerY: number): boolean {
@@ -42,7 +37,14 @@ export abstract class Tile {
         return false;
     }
 
-    abstract handlePlayerCollision(inventoryComponent: InventoryComponent): void;
+    draw(ctx: CanvasRenderingContext2D, xPos: number, yPos: number): void {
+        if (this.backgroundImage !== null) {
+            ctx.drawImage(this.backgroundImage, xPos, yPos);
+        }
+        if (this.image !== null) {
+            ctx.drawImage(this.image, xPos, yPos);
+        }
+    }
 
-    abstract handlePlayerNoCollision(): void;
+    abstract handlePlayerCollision(tileX: number, tileY: number, playerX: number, playerY: number): void;
 }

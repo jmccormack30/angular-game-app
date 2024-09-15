@@ -95,7 +95,8 @@ export class InventoryComponent implements OnDestroy {
       for (let c_col = 0; c_col < 3; c_col++) {
         const item = this.crafting[c_col][c_row];
         if (item) {
-          if (this.moveItemToInventory(item)) {
+          // if (this.moveItemToInventory(item)) {
+          if (this.inventoryService.addItem(item)) {
             this.crafting[c_col][c_row] = null;
           }
           else {
@@ -108,43 +109,43 @@ export class InventoryComponent implements OnDestroy {
     return true;
   }
 
-  getNextSlotForItem = (item: Item) => {
-    let inv_row = 0;
-    let inv_col = 0;
+  // getNextSlotForItem = (item: Item) => {
+  //   let inv_row = 0;
+  //   let inv_col = 0;
 
-    while (inv_row < 4) {
-      const targetItem = this.items[inv_col][inv_row];
-      if (targetItem) {
-        const maxQtyForItem = (targetItem.constructor as typeof Item).maxStackQty;
-        if (targetItem.quantity < maxQtyForItem && targetItem.isSameItemType(item)) {
-          return [inv_row, inv_col];
-        }
-      }
-      inv_col++;
-      if (inv_col > 8) {
-        inv_col = 0;
-        inv_row++;
-      }
-    }
-    return null;
-  }
+  //   while (inv_row < 4) {
+  //     const targetItem = this.items[inv_col][inv_row];
+  //     if (targetItem) {
+  //       const maxQtyForItem = (targetItem.constructor as typeof Item).maxStackQty;
+  //       if (targetItem.quantity < maxQtyForItem && targetItem.isSameItemType(item)) {
+  //         return [inv_row, inv_col];
+  //       }
+  //     }
+  //     inv_col++;
+  //     if (inv_col > 8) {
+  //       inv_col = 0;
+  //       inv_row++;
+  //     }
+  //   }
+  //   return null;
+  // }
 
-  getNextOpenSlot = () => {
-    let inv_row = 0;
-    let inv_col = 0;
+  // getNextOpenSlot = () => {
+  //   let inv_row = 0;
+  //   let inv_col = 0;
 
-    while (inv_row < 4) {
-      if (this.items[inv_col][inv_row] === null)  {
-        return [inv_row, inv_col];
-      }
-      inv_col++;
-      if (inv_col > 8) {
-        inv_col = 0;
-        inv_row++;
-      }
-    }
-    return null;
-  }
+  //   while (inv_row < 4) {
+  //     if (this.items[inv_col][inv_row] === null)  {
+  //       return [inv_row, inv_col];
+  //     }
+  //     inv_col++;
+  //     if (inv_col > 8) {
+  //       inv_col = 0;
+  //       inv_row++;
+  //     }
+  //   }
+  //   return null;
+  // }
 
   getSpaceForItem(item: Item): number {
     const maxQtyForItem = (item.constructor as typeof Item).maxStackQty;
@@ -168,68 +169,68 @@ export class InventoryComponent implements OnDestroy {
     return totalQty;  
   }
 
-  moveItemToInventory(item: Item) {
-    const maxQtyForItem = (item.constructor as typeof Item).maxStackQty;
-    let qtyToMove = item.quantity;
-    let slot = this.getNextSlotForItem(item);
+  // moveItemToInventory(item: Item) {
+  //   const maxQtyForItem = (item.constructor as typeof Item).maxStackQty;
+  //   let qtyToMove = item.quantity;
+  //   let slot = this.getNextSlotForItem(item);
 
-    while (qtyToMove > 0 && slot !== null) {
-      const targetItem = this.items[slot[1]][slot[0]];
-      if (targetItem) {
-        const qty = Math.min(qtyToMove, (maxQtyForItem - targetItem.quantity));
-        targetItem.quantity += qty;
-        this.inventoryService.updateInventory(slot[1], slot[0], targetItem);
-        qtyToMove -= qty;
-        item.quantity -= qty;
+  //   while (qtyToMove > 0 && slot !== null) {
+  //     const targetItem = this.items[slot[1]][slot[0]];
+  //     if (targetItem) {
+  //       const qty = Math.min(qtyToMove, (maxQtyForItem - targetItem.quantity));
+  //       targetItem.quantity += qty;
+  //       this.inventoryService.updateInventory(slot[1], slot[0], targetItem);
+  //       qtyToMove -= qty;
+  //       item.quantity -= qty;
         
-        if (qtyToMove > 0) {
-          slot = this.getNextSlotForItem(item);
-        }
-        else {
-          slot = null;
-        }
-      }
-    }
+  //       if (qtyToMove > 0) {
+  //         slot = this.getNextSlotForItem(item);
+  //       }
+  //       else {
+  //         slot = null;
+  //       }
+  //     }
+  //   }
 
-    if (qtyToMove === 0) {
-      return true;
-    }
+  //   if (qtyToMove === 0) {
+  //     return true;
+  //   }
 
-    slot = this.getNextOpenSlot();
-    while (qtyToMove > 0 && slot !== null) {
-      const qty = Math.min(qtyToMove, maxQtyForItem);
-      if (qty < qtyToMove) {
-        const newItem = ItemFactory.clone(item);
-        newItem.quantity = qty;
-        console.log("update inventory!");
-        this.inventoryService.updateInventory(slot[1], slot[0], newItem);
-        //this.items[slot[1]][slot[0]] = newItem;
-        qtyToMove -= qty;
-        item.quantity -= qty;
-        slot = this.getNextOpenSlot();
-      }
-      else {
-        //this.items[slot[1]][slot[0]] = item;
-        this.inventoryService.updateInventory(slot[1], slot[0], item);
-        qtyToMove = 0;
-        slot = null;
-      }
-    }
+  //   slot = this.getNextOpenSlot();
+  //   while (qtyToMove > 0 && slot !== null) {
+  //     const qty = Math.min(qtyToMove, maxQtyForItem);
+  //     if (qty < qtyToMove) {
+  //       const newItem = ItemFactory.clone(item);
+  //       newItem.quantity = qty;
+  //       console.log("update inventory!");
+  //       this.inventoryService.updateInventory(slot[1], slot[0], newItem);
+  //       //this.items[slot[1]][slot[0]] = newItem;
+  //       qtyToMove -= qty;
+  //       item.quantity -= qty;
+  //       slot = this.getNextOpenSlot();
+  //     }
+  //     else {
+  //       //this.items[slot[1]][slot[0]] = item;
+  //       this.inventoryService.updateInventory(slot[1], slot[0], item);
+  //       qtyToMove = 0;
+  //       slot = null;
+  //     }
+  //   }
 
-    if (qtyToMove <= 0) {
-      return true;
-    }
+  //   if (qtyToMove <= 0) {
+  //     return true;
+  //   }
 
-    console.log("No available slots found in the inventory!!!");
-    return false;
-  }
+  //   console.log("No available slots found in the inventory!!!");
+  //   return false;
+  // }
 
   onOutputClick(item: Item | null, event: MouseEvent) {
     if (!item || event.button !== 0 || item.quantity === 0 || !this.output) {
       return;
     }
 
-    if (this.keyService.isKeyPressed('Shift')) {
+    if (this.keyService.isKeyPressed('shift')) {
       const totalQtyRequested = this.current_qty_craftable * item.quantity;
       const spaceForItem = this.getSpaceForItem(item);
       let totalQtyToCraft = Math.min(spaceForItem, totalQtyRequested);
@@ -237,7 +238,8 @@ export class InventoryComponent implements OnDestroy {
       const qtyToCraft = totalQtyToCraft / item.quantity;
 
       item.quantity = totalQtyToCraft
-      this.moveItemToInventory(item);
+      this.inventoryService.addItem(item);
+      //this.moveItemToInventory(item);
       this.output = null;
       this.useCraftingItems(qtyToCraft);
       this.updateCraftingOutput();

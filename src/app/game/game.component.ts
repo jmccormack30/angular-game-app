@@ -9,6 +9,8 @@ import { WheatTile } from '../entities/wheat_tile';
 import { Grass } from '../entities/grass';
 import { ImageService } from '../service/imageservice';
 import { HotbarComponent } from '../hotbar/hotbar.component';
+import { Rock } from '../entities/rock';
+import { InventoryService } from '../service/inventoryservice';
 
 @Component({
   selector: 'app-game',
@@ -65,7 +67,7 @@ export class GameComponent implements AfterViewInit, OnDestroy {
   private enterSubscriber: Subscription = new Subscription;
   private escapeSubscriber: Subscription = new Subscription;
 
-  constructor(private playerFactory: PlayerFactoryService, private keyService: KeyService) {}
+  constructor(private playerFactory: PlayerFactoryService, private keyService: KeyService, private inventoryService: InventoryService) {}
 
   ngAfterViewInit(): void {
     this.enterSubscriber = this.keyService.enterKey$.pipe(debounceTime(250)).subscribe(() => {
@@ -81,10 +83,21 @@ export class GameComponent implements AfterViewInit, OnDestroy {
 
     for (let col = 1; col < 25; col++) {
       for (let row = 1; row < 9; row++) {
-        const wheat = new WheatTile();
+        const wheat = new WheatTile(this.inventoryService);
         this.map[col][row] = wheat;
       }
     }
+
+    const rock1 = new Rock();
+    const rock2 = new Rock();
+    const rock3 = new Rock();
+    const rock4 = new Rock();
+    const rock5 = new Rock();
+    this.map[3][12] = rock1;
+    this.map[3][11] = rock2;
+    this.map[3][10] = rock3;
+    this.map[2][11] = rock4;
+    this.map[4][11] = rock5;
 
     const canvas = this.gameCanvas.nativeElement;
     this.ctx = canvas.getContext('2d')!;
@@ -131,114 +144,20 @@ export class GameComponent implements AfterViewInit, OnDestroy {
       return;
     }
 
-    const {startCol, startRow, width, height } = this.getVisibleTiles(this.canvas_xPos, this.canvas_yPos);
-
-    const xPosOriginal = this.getXPos(startCol);
-    const yPosOriginal = this.getYPos(startRow);
-
-    let xPos = xPosOriginal;
-    let yPos = yPosOriginal;
-
-    this.ctx.strokeStyle = 'black';
-
-    for (let col = startCol; col < startCol + width; col++) {
-      yPos = yPosOriginal;
-      for (let row = startRow; row < startRow + height; row++) {
-          const tile = this.map[col][row];
-          if (tile) {
-            const image = tile.image;
-            if (image) {
-              this.ctx.drawImage(image, xPos, yPos);
-            }
-            if (this.player) {
-              const playerMapY = this.canvas_yPos + this.player?.yPos;
-              const playerMapX = this.canvas_xPos + this.player?.xPos;
-              if (playerMapY >= 0 && playerMapX >= 0) {
-                if (tile.isCheckCollision) {
-                  if (tile.isPlayerCollision(col * 50, row * 50, playerMapX, playerMapY)) {
-                    tile.handlePlayerCollision(this.inventoryComponent);
-                  }
-                  else {
-                    tile.handlePlayerNoCollision();
-                  }
-                }
-              }
-            }
-          }
-          this.ctx.strokeRect(xPos, yPos, this.cell_size, this.cell_size);
-          yPos += 50;
-      }
-      xPos += 50;
-    }
-
-    //Draw the grid lines
-    // this.ctx.strokeStyle = 'black'; // Set line color for grid outlines
-
-    // for (let row = 0; row < this.rows; row++) {
-    //   for (let col = 0; col < this.cols; col++) {
-    //     const x = col * this.cell_size;
-    //     const y = row * this.cell_size;
-    //     this.ctx.strokeRect(x, y, this.cell_size, this.cell_size);  // Draw the outline of each cell
-    //   } 
-    // }
-
-    if (this.player !== undefined) {
+    if (this.player) {
       if (!this.inventoryComponent.isInventoryOpen) {
         this.player.update();
+        this.updatePlayerPosition();
       }
+    }
 
+    const {startCol, startRow, width, height } = this.getVisibleTiles(this.canvas_xPos, this.canvas_yPos);
+    this.drawTiles(startCol, startRow, width, height, true);
+
+    if (this.player) {
       // if the player is on the bottom of the screen, hotbar goes to the top
       this.isHotBarOnTop = this.player.yPos >= 575;
-
       this.player.draw(this.ctx);
-      if (!this.inventoryComponent.isInventoryOpen) {
-        const input = this.keyService.getPlayerDirection();
-        // console.log("Player Direction: " + input);
-        if (input === "up") {
-          if (this.canvas_yPos === 0 || this.player.yPos > 443) {
-            this.player.updatePlayerPosition('up');
-          }
-          else {
-            this.canvas_yPos -= this.player.speed;
-          }
-          if (this.canvas_yPos < 0) {
-            this.canvas_yPos = 0;
-          }
-        }
-        else if (input === "down") {
-          if (this.canvas_yPos >= this.map_pixel_height - this.height || this.player.yPos < 443) {
-            this.player.updatePlayerPosition('down');
-          }
-          else {
-            this.canvas_yPos += this.player.speed;
-          }
-          if (this.canvas_yPos > this.map_pixel_height - this.height) {
-            this.canvas_yPos = this.map_pixel_height - this.height;
-          }
-        }
-        else if (input === 'left') {
-          if (this.canvas_xPos === 0 || this.player.xPos > 625) {
-            this.player.updatePlayerPosition('left');
-          }
-          else {
-            this.canvas_xPos -= this.player.speed;
-          }
-          if (this.canvas_xPos < 0) {
-            this.canvas_xPos = 0;
-          }
-        }
-        else if (input === 'right') {
-          if (this.canvas_xPos >= this.map_pixel_width - this.width || this.player.xPos < 625) {
-            this.player.updatePlayerPosition('right');
-          }
-          else {
-            this.canvas_xPos += this.player.speed;
-          }
-          if (this.canvas_xPos > this.map_pixel_width - this.width) {
-            this.canvas_xPos = this.map_pixel_width - this.width;
-          }
-        }
-      }
     }
   }
   
@@ -288,20 +207,87 @@ export class GameComponent implements AfterViewInit, OnDestroy {
     }
   }
 
-  getHotBarStyle() {
-    if (this.isHotBarOnTop) {
-      return "hotbar-top";
-      console.log("hotbar on top");
-      return {
-      'bottom': 500,
-      };
+  drawTiles(startCol: number, startRow: number, width: number, height: number, drawGridlines: boolean) {
+    const xPosOriginal = this.getXPos(startCol);
+    const yPosOriginal = this.getYPos(startRow);
+
+    let xPos = xPosOriginal;
+    let yPos = yPosOriginal;
+
+    this.ctx.strokeStyle = 'black';
+
+    for (let col = startCol; col < startCol + width; col++) {
+      const tileX = col * 50;
+      yPos = yPosOriginal;
+      for (let row = startRow; row < startRow + height; row++) {
+          const tileY = row * 50;
+          const tile = this.map[col][row];
+          if (tile) {
+            tile.draw(this.ctx, xPos, yPos);
+            if (this.player) {
+              const playerMapY = this.canvas_yPos + this.player?.yPos;
+              const playerMapX = this.canvas_xPos + this.player?.xPos;
+              if (playerMapY >= 0 && playerMapX >= 0) {
+                tile.handlePlayerCollision(tileX, tileY, playerMapX, playerMapY)
+              }
+            }
+          }
+          if (drawGridlines) {
+            this.ctx.strokeRect(xPos, yPos, this.cell_size, this.cell_size);
+          }
+          yPos += 50;
+      }
+      xPos += 50;
     }
-    else {
-      return "hotbar-bottom";
-      console.log("hotbar on bottom");
-      return {
-        'bottom': 80,
-        };
+  }
+
+  updatePlayerPosition() {
+    if (this.player) {
+      const input = this.keyService.getPlayerDirection();
+      if (input === "up") {
+        if (this.canvas_yPos === 0 || this.player.yPos > 443) {
+          this.player.updatePlayerPosition('up');
+        }
+        else {
+          this.canvas_yPos -= this.player.speed;
+        }
+        if (this.canvas_yPos < 0) {
+          this.canvas_yPos = 0;
+        }
+      }
+      else if (input === "down") {
+        if (this.canvas_yPos >= this.map_pixel_height - this.height || this.player.yPos < 443) {
+          this.player.updatePlayerPosition('down');
+        }
+        else {
+          this.canvas_yPos += this.player.speed;
+        }
+        if (this.canvas_yPos > this.map_pixel_height - this.height) {
+          this.canvas_yPos = this.map_pixel_height - this.height;
+        }
+      }
+      else if (input === 'left') {
+        if (this.canvas_xPos === 0 || this.player.xPos > 625) {
+          this.player.updatePlayerPosition('left');
+        }
+        else {
+          this.canvas_xPos -= this.player.speed;
+        }
+        if (this.canvas_xPos < 0) {
+          this.canvas_xPos = 0;
+        }
+      }
+      else if (input === 'right') {
+        if (this.canvas_xPos >= this.map_pixel_width - this.width || this.player.xPos < 625) {
+          this.player.updatePlayerPosition('right');
+        }
+        else {
+          this.canvas_xPos += this.player.speed;
+        }
+        if (this.canvas_xPos > this.map_pixel_width - this.width) {
+          this.canvas_xPos = this.map_pixel_width - this.width;
+        }
+      }
     }
   }
 }

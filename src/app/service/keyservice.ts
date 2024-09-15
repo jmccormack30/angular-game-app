@@ -43,10 +43,10 @@ export class KeyService {
 
     private handleKeyDown(event: KeyboardEvent) {
         const key = event.key.toLowerCase();
-        if (key === 'shift') return;
+        //if (key === 'shift') return;
 
         this.keyState[key] = true;
-        this.keyState['shift'] = event.shiftKey;
+        //this.keyState['shift'] = event.shiftKey;
 
         if (key === 'enter') {
             this.enterKeySubject.next();
@@ -61,10 +61,10 @@ export class KeyService {
 
     private handleKeyUp(event: KeyboardEvent) {
         const key = event.key.toLowerCase();
-        if (key === 'shift') return;
+        //if (key === 'shift') return;
 
         this.keyState[key] = false;
-        this.keyState['shift'] = event.shiftKey;
+        //this.keyState['shift'] = event.shiftKey;
     }
 
     public isKeyPressed(key: string): boolean {

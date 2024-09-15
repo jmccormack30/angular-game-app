@@ -37,7 +37,7 @@ export class Player {
             this.animation = undefined;
         }
 
-        const shift = this.keyService.isKeyPressed('Shift');
+        const shift = this.keyService.isKeyPressed('shift');
 
         this.direction = input;
         this.updateSpeed(shift);

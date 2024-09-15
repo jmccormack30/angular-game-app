@@ -62,7 +62,8 @@ export class ImageService {
             'assets/dirt.png',
             'assets/wheat_inv.png',
             'assets/bread.png',
-            'assets/wheat_inv_2.png'
+            'assets/wheat_inv_2.png',
+            'assets/rock.png'
         ]
 
         const promises = imageSources.map(src => this.loadImage(src));
