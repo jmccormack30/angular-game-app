@@ -3,6 +3,8 @@ import { Tile } from "./tile";
 import { InventoryService } from "../service/inventoryservice";
 import { ItemFactory } from "../items/itemfactory";
 import { WheatItem } from "../items/wheat_item";
+import { Player } from "./player";
+import { GameStateService } from "../service/gamestateservice";
 
 export class WheatTile extends Tile {
     private lastTime = -1;
@@ -10,11 +12,14 @@ export class WheatTile extends Tile {
     private respawnRate = 0.025;
     private respawnIncreaseRate = 0.06;
 
-    constructor(private inventoryService: InventoryService) {
+    constructor(private inventoryService: InventoryService, private gameStateService: GameStateService) {
         super('wheat', ImageService.getImage('assets/wheat_dirt.png'), ImageService.getImage('assets/dirt.png'));
     }
 
-    override handlePlayerCollision(tileX: number, tileY: number, playerX: number, playerY: number): void {
+    override handlePlayerCollision(tileX: number, tileY: number, player: Player): void {
+        const playerY = this.gameStateService.getCanvasYPos() + player.yPos;
+        const playerX = this.gameStateService.getCanvasXPos() + player.xPos;
+
         const isCollision = this.isPlayerCollision(tileX, tileY, playerX, playerY);
 
         if (isCollision) {
@@ -25,22 +30,28 @@ export class WheatTile extends Tile {
                 this.addWheatToInventory();
             }
         }
-        else {
-            if (!this.active) {
-                const current = Date.now();
-                if (current - this.lastTime >= 11000) {
-                    this.lastTime = current;
-                    const randomFloat = Math.random();
-                    if (randomFloat < this.respawnRate) {
-                        this.active = true;
-                        this.respawnRate = 0.023;
-                        this.respawnIncreaseRate = 0.007;
-                        this.image = ImageService.getImage('assets/wheat_dirt.png');
-                    }
-                    else {
-                        this.respawnRate += this.respawnIncreaseRate;
-                        this.respawnIncreaseRate += 0.004;
-                    }
+    }
+
+    override update(tileX: number, tileY: number, player: Player): void {
+        const playerY = this.gameStateService.getCanvasYPos() + player.yPos;
+        const playerX = this.gameStateService.getCanvasXPos() + player.xPos;
+        
+        const isCollision = this.isPlayerCollision(tileX, tileY, playerX, playerY);
+
+        if (!isCollision && !this.active) {
+            const current = Date.now();
+            if (current - this.lastTime >= 11000) {
+                this.lastTime = current;
+                const randomFloat = Math.random();
+                if (randomFloat < this.respawnRate) {
+                    this.active = true;
+                    this.respawnRate = 0.023;
+                    this.respawnIncreaseRate = 0.007;
+                    this.image = ImageService.getImage('assets/wheat_dirt.png');
+                }
+                else {
+                    this.respawnRate += this.respawnIncreaseRate;
+                    this.respawnIncreaseRate += 0.004;
                 }
             }
         }

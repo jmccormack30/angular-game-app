@@ -1,8 +1,13 @@
+import { PlayerPickAxeLeftRightAnimation } from "../animations/player-pickaxe-left-right-animation";
 import { PlayerWalkLeftRightAnimation } from "../animations/player-walk-left-right-animation";
 import { PlayerWalkUpDownAnimation } from "../animations/player-walk-up-down-animation";
 import { GameComponent } from "../game/game.component";
 import { ImageService } from "../service/imageservice";
 import { KeyService } from "../service/keyservice";
+
+enum PlayerAction {
+    PICK_AXE_SWING
+}
 
 export class Player {
     xPos: number;
@@ -14,7 +19,8 @@ export class Player {
     playerImages: { [key: string]: string } = {};
     private imageCache: { [key: string]: HTMLImageElement } = {};
 
-    animation : PlayerWalkUpDownAnimation | PlayerWalkLeftRightAnimation | undefined;
+    animation : PlayerWalkUpDownAnimation | PlayerWalkLeftRightAnimation | PlayerPickAxeLeftRightAnimation | undefined;
+    action: PlayerAction | null = null;
 
     private keyState: { [key: string]: boolean } = {};
   
@@ -26,6 +32,16 @@ export class Player {
     }
 
     update() {
+        const isXPressed = this.keyService.isKeyPressed('x');
+        if (isXPressed && this.action === null) {
+            this.action = PlayerAction.PICK_AXE_SWING;
+            this.animation = new PlayerPickAxeLeftRightAnimation();
+            return;
+        }
+        if (this.action === PlayerAction.PICK_AXE_SWING) {
+            return;
+        }
+
         const input = this.keyService.getPlayerDirection();
         
         if (input === undefined) {
@@ -46,25 +62,46 @@ export class Player {
         if (this.animation === undefined) {
             if (this.direction === "up" || this.direction === "down") {
                 this.animation = new PlayerWalkUpDownAnimation();
+                return;
             }
             else if (this.direction === "left" || this.direction === "right") {
                 this.animation = new PlayerWalkLeftRightAnimation();
+                return;
+            }
+            
+            if (this.keyService.isKeyPressed('x')) {
+                console.log("X pressed!");
             }
         }
     }
 
     draw(ctx: CanvasRenderingContext2D) {
         if (this.animation !== undefined) {
-            const src = this.animation.getImage(this.direction);
+            const { src, xOffset, yOffset} = this.animation.getImage(this.direction);
+            const isAnimationFinished = this.animation.isAnimationFinished();
+            if (isAnimationFinished) {
+                this.animation = undefined;
+                this.action = null;
+            }
+
             this.image = ImageService.getImage(src);
+
+            const newXPos = this.xPos + xOffset;
+            const newYPos = this.yPos + yOffset;
+
+            console.log("src: " + src + ", xOffset: " + xOffset + ", yOffset: " + yOffset);
+
+            if (this.image) {
+                ctx.drawImage(this.image, newXPos, newYPos);
+            }
         }
         else {
             const src = this.getDefaultImageSrc(this.direction);
             this.image = ImageService.getImage(src);
-        }
-        
-        if (this.image) {
-            ctx.drawImage(this.image, this.xPos, this.yPos);
+
+            if (this.image) {
+                ctx.drawImage(this.image, this.xPos, this.yPos);
+            }
         }
     }
 

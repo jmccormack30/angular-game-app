@@ -1,3 +1,5 @@
+import { Player } from "./player";
+
 export abstract class Tile {
     public tileName: string;
     public image: HTMLImageElement | null = null;
@@ -10,11 +12,13 @@ export abstract class Tile {
     }
 
     isPlayerCollision(tileX: number, tileY: number, playerX: number, playerY: number): boolean {
-        const playerStartY = playerY + 46;
+        const playerStartY = playerY + 49;
         const playerEndY = playerY + 96;
 
-        const playerStartX = playerX;
-        const playerEndX = playerX + 48;
+        const playerStartX = playerX + 1;
+        const playerEndX = playerX + 47;
+
+        // console.log("playerStartX: " + playerStartX + ", playerStartY: " + playerStartY + ", tileX: " + tileX + ", tileY: " + tileY);
 
         return (this.isXCollision(playerStartX, playerEndX, tileX) && this.isYCollision(playerStartY, playerEndY, tileY));
     }
@@ -46,5 +50,7 @@ export abstract class Tile {
         }
     }
 
-    abstract handlePlayerCollision(tileX: number, tileY: number, playerX: number, playerY: number): void;
+    abstract handlePlayerCollision(tileX: number, tileY: number, player: Player): void;
+
+    abstract update(tileX: number, tileY: number, player: Player): void;
 }

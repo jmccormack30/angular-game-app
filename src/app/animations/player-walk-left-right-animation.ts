@@ -54,24 +54,28 @@ export class PlayerWalkLeftRightAnimation {
         this.actionImageMapLeft.set(Action.NEUTRAL, 'assets/player_ps_left.png');
     }
 
-    getImage(direction: string | undefined) {
+    getImage(direction: string | undefined): {src: string, xOffset: number, yOffset: number} {
         const defaultAction: Action = Action.WALK7;
         const action: Action = this.actionFrameMap.get(this.frameIndex) ?? defaultAction;
-        let image = "assets/player_left.png";
+        let src = "assets/player_left.png";
     
         if (action !== undefined) {
           if (direction === "left") {
-            image = this.actionImageMapLeft.get(action) as Action;
+            src = this.actionImageMapLeft.get(action) as Action;
           }
           else if (direction === "right") {
-            image = this.actionImageMapRight.get(action) as Action;
+            src = this.actionImageMapRight.get(action) as Action;
           }
     
           this.frameIndex++;
-          if (this.frameIndex >= this.totalFrames) this.frameIndex = 0;
-          return image;
+          if (this.frameIndex >= this.totalFrames) this.frameIndex = -1;
+          return {src: src, xOffset: 0, yOffset: 0};
         }
     
         throw new Error("Invalid action / frame during animation");
-      }
+    }
+
+    isAnimationFinished(): boolean {
+        return this.frameIndex === -1;
+    }
 }
