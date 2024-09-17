@@ -1,4 +1,4 @@
-enum Action {
+export enum Action {
     NEUTRAL = "NEUTRAL",
     PICK_AXE_1 = "pickaxe_1",
     PICK_AXE_2 = "pickaxe_2",
@@ -68,10 +68,10 @@ export class PlayerPickAxeLeftRightAnimation {
         this.actionOffsetMapRightY.set(Action.PICK_AXE_4, 0);
     }
 
-    getImage(direction: string | undefined): {src: string, xOffset: number, yOffset: number} {
+    getImage(direction: string | undefined): {src: string, xOffset: number, yOffset: number, action: Action} {
         const defaultAction: Action = Action.NEUTRAL;
         const action: Action = this.actionFrameMap.get(this.frameIndex) ?? defaultAction;
-        let src = "assets/player_left.png";
+        let src = (direction === 'right') ? "assets/player_ps_right.png" : "assets/player_ps_left.png";
     
         if (action !== undefined) {
           let xOffset = 0;
@@ -92,7 +92,7 @@ export class PlayerPickAxeLeftRightAnimation {
     
           this.frameIndex++;
           if (this.frameIndex >= this.totalFrames) this.frameIndex = -1;
-          return { src, xOffset, yOffset };
+          return { src, xOffset, yOffset, action };
         }
     
         throw new Error("Invalid action / frame during animation");

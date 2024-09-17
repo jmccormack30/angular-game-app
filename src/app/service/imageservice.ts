@@ -72,6 +72,7 @@ export class ImageService {
             'assets/player_right_axe_2.png',
             'assets/player_right_axe_3.png',
             'assets/player_right_axe_4.png',
+            'assets/pickaxe.png',
         ]
 
         const promises = imageSources.map(src => this.loadImage(src));

@@ -9,6 +9,13 @@ import { ItemFactory } from "../items/itemfactory";
 export class InventoryService {
     private invSubject: BehaviorSubject<(Item | null)[][]> = new BehaviorSubject<Array<(Item | null)[]>>(Array.from({ length: 9 }, () => Array(4).fill(null)));
     inventory$ = this.invSubject.asObservable();
+
+    private selectedItem: BehaviorSubject<Item | null> = new BehaviorSubject<Item | null>(null);
+    selectedItem$ = this.selectedItem.asObservable();
+
+    setSelectedItem(item: Item | null) {
+        this.selectedItem.next(item);
+    }
     
     updateInventory(col: number, row: number, item: Item | null) {
         const currentInventory = this.invSubject.getValue();

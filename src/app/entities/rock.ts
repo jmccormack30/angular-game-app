@@ -1,11 +1,16 @@
+import { RockHitAnimation } from "../animations/rock-hit-animation";
 import { GameStateService } from "../service/gamestateservice";
 import { ImageService } from "../service/imageservice";
 import { Player } from "./player";
 import { Tile } from "./tile";
 
 export class Rock extends Tile {
+
+    animation : RockHitAnimation | null;
+
     constructor(private gameStateService: GameStateService) {
         super('rock', ImageService.getImage('assets/rock.png'), ImageService.getImage('assets/grass_2.jpg'));
+        this.animation = new RockHitAnimation();
     }
 
     override handlePlayerCollision(tileX: number, tileY: number, player: Player): void {
@@ -13,9 +18,8 @@ export class Rock extends Tile {
         const playerX = this.gameStateService.getCanvasXPos() + player.xPos;
         
         if (this.isPlayerCollision(tileX, tileY, playerX, playerY)) {
-            console.log("Colliding with rock!");
             if (player.direction === 'up') {
-                const yAdjustment = playerY + 49 - tileY + 50;
+                const yAdjustment = playerY + 54 - tileY + 50;
                 this.gameStateService.updateMapPositionForPlayer(0, yAdjustment, player);
             }
             else if (player.direction === 'left') {
@@ -37,5 +41,31 @@ export class Rock extends Tile {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     override update(tileX: number, tileY: number, player: Player): void {
         return;
+    }
+
+    override draw(ctx: CanvasRenderingContext2D, xPos: number, yPos: number): void {
+        if (this.backgroundImage !== null) {
+            ctx.drawImage(this.backgroundImage, xPos, yPos);
+        }
+        //console.log(this.animation);
+        if (this.animation !== null) {
+            if (this.animation.isAnimationFinished()) {
+                this.animation = null;
+                if (this.image !== null) {
+                    ctx.drawImage(this.image, xPos, yPos);
+                }
+                return;
+            }
+            const {src, xOffset, yOffset}= this.animation.getImage();
+            const animationImage = ImageService.getImage(src);
+            //console.log("xOffset: " + xOffset + ", yOffset: " + yOffset + " yPos: " + yPos);
+            if (animationImage) {
+                ctx.drawImage(animationImage, xPos + xOffset, yPos + yOffset);
+            }
+            return;
+        }
+        if (this.image !== null) {
+            ctx.drawImage(this.image, xPos, yPos);
+        }
     }
 }

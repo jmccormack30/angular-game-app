@@ -12,7 +12,7 @@ export abstract class Tile {
     }
 
     isPlayerCollision(tileX: number, tileY: number, playerX: number, playerY: number): boolean {
-        const playerStartY = playerY + 49;
+        const playerStartY = playerY + 54;
         const playerEndY = playerY + 96;
 
         const playerStartX = playerX + 1;
@@ -20,7 +20,11 @@ export abstract class Tile {
 
         // console.log("playerStartX: " + playerStartX + ", playerStartY: " + playerStartY + ", tileX: " + tileX + ", tileY: " + tileY);
 
-        return (this.isXCollision(playerStartX, playerEndX, tileX) && this.isYCollision(playerStartY, playerEndY, tileY));
+        const value = (this.isXCollision(playerStartX, playerEndX, tileX) && this.isYCollision(playerStartY, playerEndY, tileY));
+        if (value) {
+            //console.log("tileX: " + tileX + ", tileY: " + tileY + ", playerX: " + playerX + ", playerStartY: " + playerStartY + ", playerEndY: " + playerEndY + ", playerY: " + playerY);
+        }
+        return value;
     }
 
     isXCollision(playerStartX: number, playerEndX: number, tileX: number): boolean {

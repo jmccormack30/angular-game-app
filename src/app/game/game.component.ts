@@ -178,6 +178,7 @@ export class GameComponent implements AfterViewInit, OnDestroy {
     // #3 - Draw the map tiles
     const {startCol2, startRow2, width2, height2 } = this.getVisibleTiles(this.canvasXPos, this.canvasYPos);
     this.drawTiles(startCol2, startRow2, width2, height2, true);
+    this.drawPlayerPickAxeTile();
 
     // #4 - Finally, draw the player
     if (this.player) {
@@ -290,6 +291,16 @@ export class GameComponent implements AfterViewInit, OnDestroy {
     }
   }
 
+  drawPlayerPickAxeTile() {
+    if (this.player) {
+      const {col, row} = this.player.getPickAxeTile();
+      this.ctx.strokeStyle = 'red';
+      const x = (col * 50) - this.canvasXPos;
+      const y = (row * 50) - this.canvasYPos;
+      this.ctx.strokeRect(x, y, this.cell_size, this.cell_size);
+    }
+  }
+
   drawTiles(startCol: number, startRow: number, width: number, height: number, drawGridlines: boolean) {
     const xPosOriginal = this.getXPos(startCol);
     const yPosOriginal = this.getYPos(startRow);
@@ -336,60 +347,5 @@ export class GameComponent implements AfterViewInit, OnDestroy {
 
       this.gameStateService.updateMapPositionForPlayer(xAdjustment, yAdjustment, this.player);
     }
-    // if (this.player) {
-    //   const input = this.keyService.getPlayerDirection();
-    //   if (input === "up") {
-    //     if (this.canvasYPos === 0 || this.player.yPos > 443) {
-    //       this.player.updatePlayerPosition('up');
-    //     }
-    //     else {
-    //       this.gameStateService.updateCanvasYPos(this.canvasYPos -= this.player.speed);
-    //       //this.canvasYPos -= this.player.speed;
-    //     }
-    //     if (this.canvasYPos < 0) {
-    //       this.gameStateService.updateCanvasYPos(0);
-    //       //this.canvasYPos = 0;
-    //     }
-    //   }
-    //   else if (input === "down") {
-    //     if (this.canvasYPos >= this.map_pixel_height - this.height || this.player.yPos < 443) {
-    //       this.player.updatePlayerPosition('down');
-    //     }
-    //     else {
-    //       this.gameStateService.updateCanvasYPos(this.canvasYPos + this.player.speed);
-    //       //this.canvasYPos += this.player.speed;
-    //     }
-    //     if (this.canvasYPos > this.map_pixel_height - this.height) {
-    //       this.gameStateService.updateCanvasYPos(this.map_pixel_height - this.height);
-    //       // this.canvasYPos = this.map_pixel_height - this.height;
-    //     }
-    //   }
-    //   else if (input === 'left') {
-    //     if (this.canvasXPos === 0 || this.player.xPos > 625) {
-    //       this.player.updatePlayerPosition('left');
-    //     }
-    //     else {
-    //       this.gameStateService.updateCanvasXPos(this.canvasXPos - this.player.speed);
-    //       //this.canvasXPos -= this.player.speed;
-    //     }
-    //     if (this.canvasXPos < 0) {
-    //       this.gameStateService.updateCanvasXPos(0);
-    //       //this.canvasXPos = 0;
-    //     }
-    //   }
-    //   else if (input === 'right') {
-    //     if (this.canvasXPos >= this.map_pixel_width - this.width || this.player.xPos < 625) {
-    //       this.player.updatePlayerPosition('right');
-    //     }
-    //     else {
-    //       this.gameStateService.updateCanvasXPos(this.canvasXPos + this.player.speed);
-    //       //this.canvasXPos += this.player.speed;
-    //     }
-    //     if (this.canvasXPos > this.map_pixel_width - this.width) {
-    //       this.gameStateService.updateCanvasXPos(this.map_pixel_width - this.width);
-    //       //this.canvasXPos = this.map_pixel_width - this.width;
-    //     }
-    //   }
-    // }
   }
 }

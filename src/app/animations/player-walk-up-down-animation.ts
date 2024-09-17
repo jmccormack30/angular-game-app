@@ -55,10 +55,10 @@ export class PlayerWalkUpDownAnimation {
     this.actionImageMapUp.set(Action.NEUTRAL,'assets/player_ps_up.png');
   }
 
-  getImage(direction: string | undefined): {src: string, xOffset: number, yOffset: number} {
+  getImage(direction: string | undefined): {src: string, xOffset: number, yOffset: number, action: Action} {
     const defaultAction: Action = Action.WALK1;
     const action: Action = this.actionFrameMap.get(this.frameIndex) ?? defaultAction;
-    let image = "assets/player_down.png";
+    let image = (direction === 'up') ? "assets/player_ps_up.png" : "assets/player_ps_down.png";
 
     if (action !== undefined) {
       if (direction === "up") {
@@ -70,7 +70,7 @@ export class PlayerWalkUpDownAnimation {
 
       this.frameIndex++;
       if (this.frameIndex >= this.totalFrames) this.frameIndex = -1;
-      return { src: image, xOffset: 0, yOffset: 0};
+      return { src: image, xOffset: 0, yOffset: 0, action};
     }
 
     throw new Error("Invalid action / frame during animation");

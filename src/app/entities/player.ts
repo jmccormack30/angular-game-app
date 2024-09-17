@@ -1,9 +1,14 @@
-import { PlayerPickAxeLeftRightAnimation } from "../animations/player-pickaxe-left-right-animation";
+import { Subscription } from "rxjs";
+import { Action, PlayerPickAxeLeftRightAnimation } from "../animations/player-pickaxe-left-right-animation";
 import { PlayerWalkLeftRightAnimation } from "../animations/player-walk-left-right-animation";
 import { PlayerWalkUpDownAnimation } from "../animations/player-walk-up-down-animation";
 import { GameComponent } from "../game/game.component";
 import { ImageService } from "../service/imageservice";
 import { KeyService } from "../service/keyservice";
+import { InventoryService } from "../service/inventoryservice";
+import { Item } from "../items/item";
+import { PickAxe } from "../items/pickaxe";
+import { GameStateService } from "../service/gamestateservice";
 
 enum PlayerAction {
     PICK_AXE_SWING
@@ -23,17 +28,23 @@ export class Player {
     action: PlayerAction | null = null;
 
     private keyState: { [key: string]: boolean } = {};
-  
-    constructor(xPos: number, yPos: number, speed: number, direction: string, private keyService: KeyService) {
+    private selectedItemSubscriber: Subscription = new Subscription;
+    private selectedItem: Item | null = null;
+
+    constructor(xPos: number, yPos: number, speed: number, direction: string, private keyService: KeyService, private inventoryService: InventoryService, private gameStateService: GameStateService) {
       this.xPos = xPos;
       this.yPos = yPos;
       this.speed = speed;
       this.direction = direction;
+
+      this.selectedItemSubscriber = this.inventoryService.selectedItem$.subscribe((item: Item | null) => {
+        this.selectedItem = item;
+    });
     }
 
     update() {
         const isXPressed = this.keyService.isKeyPressed('x');
-        if (isXPressed && this.action === null) {
+        if (isXPressed && this.action === null && this.selectedItem instanceof PickAxe) {
             this.action = PlayerAction.PICK_AXE_SWING;
             this.animation = new PlayerPickAxeLeftRightAnimation();
             return;
@@ -57,7 +68,6 @@ export class Player {
 
         this.direction = input;
         this.updateSpeed(shift);
-        //this.updatePlayerPosition(this.direction);
 
         if (this.animation === undefined) {
             if (this.direction === "up" || this.direction === "down") {
@@ -77,7 +87,12 @@ export class Player {
 
     draw(ctx: CanvasRenderingContext2D) {
         if (this.animation !== undefined) {
-            const { src, xOffset, yOffset} = this.animation.getImage(this.direction);
+            const { src, xOffset, yOffset, action } = this.animation.getImage(this.direction);
+
+            if (this.animation instanceof PlayerPickAxeLeftRightAnimation && action === Action.PICK_AXE_4) {
+                const tile = this.getPickAxeTile();
+            }
+
             const isAnimationFinished = this.animation.isAnimationFinished();
             if (isAnimationFinished) {
                 this.animation = undefined;
@@ -88,8 +103,6 @@ export class Player {
 
             const newXPos = this.xPos + xOffset;
             const newYPos = this.yPos + yOffset;
-
-            console.log("src: " + src + ", xOffset: " + xOffset + ", yOffset: " + yOffset);
 
             if (this.image) {
                 ctx.drawImage(this.image, newXPos, newYPos);
@@ -153,5 +166,35 @@ export class Player {
 
     updateSpeed(shift: boolean) {
         this.speed = shift ? 5 : 3;
+    }
+
+    getPickAxeTile(): {col: number, row: number} {
+        const canvasXPos = this.gameStateService.getCanvasXPos();
+        const canvasYPos = this.gameStateService.getCanvasYPos();
+
+        const playerMapXPos = this.xPos + canvasXPos;
+        const playerMapYPos = this.yPos + canvasYPos;
+
+        if (this.direction === 'left') {
+            const pickAxeXPos = playerMapXPos - 35;
+            const pickAxeYPos = playerMapYPos + 65;
+
+            const tileCol = Math.floor(pickAxeXPos / 50);
+            const tileRow = Math.floor(pickAxeYPos / 50);
+
+            // console.log("col: " + tileCol + ", row: " + tileRow);
+            return {col: tileCol, row: tileRow};
+        }
+        else if (this.direction === 'right') {
+            const pickAxeXPos = playerMapXPos + 79;
+            const pickAxeYPos = playerMapYPos + 65;
+
+            const tileCol = Math.floor(pickAxeXPos / 50);
+            const tileRow = Math.floor(pickAxeYPos / 50);
+
+            // console.log("col: " + tileCol + ", row: " + tileRow);
+            return {col: tileCol, row: tileRow};
+        }
+        return {col: 0, row: 0};
     }
 }

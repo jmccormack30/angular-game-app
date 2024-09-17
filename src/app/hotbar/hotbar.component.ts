@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, OnDestroy } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Item } from '../items/item';
 import { InventoryService } from '../service/inventoryservice';
 import { ImageService } from '../service/imageservice';
@@ -10,7 +10,7 @@ import { debounceTime, Subscription } from 'rxjs';
   templateUrl: './hotbar.component.html',
   styleUrl: './hotbar.component.css'
 })
-export class HotbarComponent implements AfterViewInit, OnDestroy {
+export class HotbarComponent implements OnInit, OnDestroy {
   ImageService = ImageService;
   items: (Item | null)[] = []
   public isHotBarOnTop = false;
@@ -20,13 +20,9 @@ export class HotbarComponent implements AfterViewInit, OnDestroy {
   private inventorySubscriber: Subscription = new Subscription;
   private hotbarSubscriber: Subscription = new Subscription;
 
-  constructor(private inventoryService: InventoryService, private keyService: KeyService) {
-    this.inventoryService.inventory$.subscribe((inventory: (Item | null)[][]) => {
-      this.items = inventory.map(row => row[row.length - 1] || null);
-    });
-  }
+  constructor(private inventoryService: InventoryService, private keyService: KeyService) {}
 
-  ngAfterViewInit(): void {
+  ngOnInit(): void {
     this.inventorySubscriber = this.inventoryService.inventory$.subscribe((inventory: (Item | null)[][]) => {
       this.items = inventory.map(row => row[row.length - 1] || null);
     });
@@ -36,6 +32,7 @@ export class HotbarComponent implements AfterViewInit, OnDestroy {
       const num = parseInt(data, 10) - 1;
       if (num !== this.selectedItemIndex) {
         this.selectedItemIndex = num;
+        this.inventoryService.setSelectedItem(this.items[num]);
       }
     });
   }

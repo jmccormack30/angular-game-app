@@ -1,4 +1,4 @@
-import { Component, Output, EventEmitter, Renderer2, ElementRef, OnDestroy } from '@angular/core';
+import { Component, Output, EventEmitter, Renderer2, ElementRef, OnDestroy, OnInit } from '@angular/core';
 import { Item } from '../items/item';
 import { Recipe } from '../crafting/recipe';
 import { Recipes } from '../crafting/recipes';
@@ -7,14 +7,14 @@ import { KeyService } from '../service/keyservice';
 import { InventoryService } from '../service/inventoryservice';
 import { ImageService } from '../service/imageservice';
 import { Subscription } from 'rxjs';
-
+import { PickAxe } from '../items/pickaxe';
 
 @Component({
   selector: 'app-inventory',
   templateUrl: './inventory.component.html',
   styleUrls: ['./inventory.component.css']
 })
-export class InventoryComponent implements OnDestroy {
+export class InventoryComponent implements OnInit, OnDestroy {
   @Output() close = new EventEmitter<void>();
   ImageService = ImageService;
 
@@ -44,12 +44,18 @@ export class InventoryComponent implements OnDestroy {
 
   constructor(private renderer: Renderer2, private el: ElementRef, private inventoryService: InventoryService, private keyService: KeyService) {
     this.armor = Array(4).fill(null);
+    this.crafting = Array.from({ length: 3 }, () => Array(3).fill(null));
+    this.output = null;
+  }
+
+  ngOnInit(): void {
     this.inventorySubscriber = this.inventoryService.inventory$.subscribe(items => {
       this.items = items;
     });
-    // this.items = Array.from({ length: 9 }, () => Array(4).fill(null));
-    this.crafting = Array.from({ length: 3 }, () => Array(3).fill(null));
-    this.output = null;
+
+    const pickaxe = ItemFactory.createItem(PickAxe, 1);
+    this.items[0][3] = pickaxe;
+    this.inventoryService.setSelectedItem(pickaxe);
   }
 
   ngOnDestroy(): void {
@@ -109,44 +115,6 @@ export class InventoryComponent implements OnDestroy {
     return true;
   }
 
-  // getNextSlotForItem = (item: Item) => {
-  //   let inv_row = 0;
-  //   let inv_col = 0;
-
-  //   while (inv_row < 4) {
-  //     const targetItem = this.items[inv_col][inv_row];
-  //     if (targetItem) {
-  //       const maxQtyForItem = (targetItem.constructor as typeof Item).maxStackQty;
-  //       if (targetItem.quantity < maxQtyForItem && targetItem.isSameItemType(item)) {
-  //         return [inv_row, inv_col];
-  //       }
-  //     }
-  //     inv_col++;
-  //     if (inv_col > 8) {
-  //       inv_col = 0;
-  //       inv_row++;
-  //     }
-  //   }
-  //   return null;
-  // }
-
-  // getNextOpenSlot = () => {
-  //   let inv_row = 0;
-  //   let inv_col = 0;
-
-  //   while (inv_row < 4) {
-  //     if (this.items[inv_col][inv_row] === null)  {
-  //       return [inv_row, inv_col];
-  //     }
-  //     inv_col++;
-  //     if (inv_col > 8) {
-  //       inv_col = 0;
-  //       inv_row++;
-  //     }
-  //   }
-  //   return null;
-  // }
-
   getSpaceForItem(item: Item): number {
     const maxQtyForItem = (item.constructor as typeof Item).maxStackQty;
     let totalQty = 0;
@@ -168,62 +136,6 @@ export class InventoryComponent implements OnDestroy {
 
     return totalQty;  
   }
-
-  // moveItemToInventory(item: Item) {
-  //   const maxQtyForItem = (item.constructor as typeof Item).maxStackQty;
-  //   let qtyToMove = item.quantity;
-  //   let slot = this.getNextSlotForItem(item);
-
-  //   while (qtyToMove > 0 && slot !== null) {
-  //     const targetItem = this.items[slot[1]][slot[0]];
-  //     if (targetItem) {
-  //       const qty = Math.min(qtyToMove, (maxQtyForItem - targetItem.quantity));
-  //       targetItem.quantity += qty;
-  //       this.inventoryService.updateInventory(slot[1], slot[0], targetItem);
-  //       qtyToMove -= qty;
-  //       item.quantity -= qty;
-        
-  //       if (qtyToMove > 0) {
-  //         slot = this.getNextSlotForItem(item);
-  //       }
-  //       else {
-  //         slot = null;
-  //       }
-  //     }
-  //   }
-
-  //   if (qtyToMove === 0) {
-  //     return true;
-  //   }
-
-  //   slot = this.getNextOpenSlot();
-  //   while (qtyToMove > 0 && slot !== null) {
-  //     const qty = Math.min(qtyToMove, maxQtyForItem);
-  //     if (qty < qtyToMove) {
-  //       const newItem = ItemFactory.clone(item);
-  //       newItem.quantity = qty;
-  //       console.log("update inventory!");
-  //       this.inventoryService.updateInventory(slot[1], slot[0], newItem);
-  //       //this.items[slot[1]][slot[0]] = newItem;
-  //       qtyToMove -= qty;
-  //       item.quantity -= qty;
-  //       slot = this.getNextOpenSlot();
-  //     }
-  //     else {
-  //       //this.items[slot[1]][slot[0]] = item;
-  //       this.inventoryService.updateInventory(slot[1], slot[0], item);
-  //       qtyToMove = 0;
-  //       slot = null;
-  //     }
-  //   }
-
-  //   if (qtyToMove <= 0) {
-  //     return true;
-  //   }
-
-  //   console.log("No available slots found in the inventory!!!");
-  //   return false;
-  // }
 
   onOutputClick(item: Item | null, event: MouseEvent) {
     if (!item || event.button !== 0 || item.quantity === 0 || !this.output) {

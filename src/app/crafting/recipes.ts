@@ -1,5 +1,7 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { Blue } from "../items/blue";
 import { Bread } from "../items/bread";
+import { PickAxe } from "../items/pickaxe";
 import { Red } from "../items/red";
 import { WheatItem } from "../items/wheat_item";
 import { Recipe } from "./recipe";
@@ -40,5 +42,7 @@ export class Recipes {
         BREAD_01.setOutput(BREAD);
 
         this.recipeList.set(BREAD_01.getRecipeName(), BREAD_01);
+
+        const PICKAXE = new PickAxe(1, null);
     }
 }

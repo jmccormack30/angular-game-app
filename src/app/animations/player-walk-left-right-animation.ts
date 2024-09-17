@@ -54,7 +54,7 @@ export class PlayerWalkLeftRightAnimation {
         this.actionImageMapLeft.set(Action.NEUTRAL, 'assets/player_ps_left.png');
     }
 
-    getImage(direction: string | undefined): {src: string, xOffset: number, yOffset: number} {
+    getImage(direction: string | undefined): {src: string, xOffset: number, yOffset: number, action: Action} {
         const defaultAction: Action = Action.WALK7;
         const action: Action = this.actionFrameMap.get(this.frameIndex) ?? defaultAction;
         let src = "assets/player_left.png";
@@ -69,7 +69,7 @@ export class PlayerWalkLeftRightAnimation {
     
           this.frameIndex++;
           if (this.frameIndex >= this.totalFrames) this.frameIndex = -1;
-          return {src: src, xOffset: 0, yOffset: 0};
+          return {src: src, xOffset: 0, yOffset: 0, action};
         }
     
         throw new Error("Invalid action / frame during animation");
