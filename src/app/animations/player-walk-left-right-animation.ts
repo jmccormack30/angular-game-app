@@ -1,81 +1,59 @@
+import { Animation } from "./animation";
+
 enum Action {
-    NEUTRAL = "NEUTRAL",
-    WALK7 = "walk_7",
-    WALK9 = "walk_9",
-    WALK8 = "walk_8",
-    WALK10 = "walk10"
+  NEUTRAL,
+  WALK_7,
+  WALK_8,
+  WALK_9,
+  WALK_10,
 }
   
-export class PlayerWalkLeftRightAnimation {
-    frameIndex = 0;
-    totalFrames = 48;
+export class PlayerWalkLeftRightAnimation extends Animation<Action> {
 
-    actionFrameMap: Map<number, Action> = new Map<number, Action>();
+  actionImageMapLeft: Map<Action, string> = new Map<Action, string>();
+  actionImageMapRight: Map<Action, string> = new Map<Action, string>();
 
-    actionImageMapLeft: Map<Action, string> = new Map<Action, string>();
-    actionImageMapRight: Map<Action, string> = new Map<Action, string>();
+  constructor() {
+    super(0, 48);
 
-    constructor() {
-        for (let i = 0; i < 6; i++) {
-            this.actionFrameMap.set(i, Action.WALK7)
-        }
-        for (let i = 6; i < 13; i++) {
-            this.actionFrameMap.set(i, Action.WALK9);
-        }
-        for (let i = 13; i < 18; i++) {
-            this.actionFrameMap.set(i, Action.WALK7)
-        }
-        for (let i = 18; i < 24; i++) {
-            this.actionFrameMap.set(i, Action.NEUTRAL);
-        }
-        for (let i = 24; i < 30; i++) {
-            this.actionFrameMap.set(i, Action.WALK10);
-        }
-        for (let i = 30; i < 37; i++) {
-            this.actionFrameMap.set(i, Action.WALK8);
-        }
-        for (let i = 37; i < 42; i++) {
-            this.actionFrameMap.set(i, Action.WALK10);
-        }
-        for (let i = 42; i < 48; i++) {
-            this.actionFrameMap.set(i, Action.NEUTRAL);
-        }
+    this.addFrameActionForRange(0, 6, Action.WALK_7);
+    this.addFrameActionForRange(6, 13, Action.WALK_9);
+    this.addFrameActionForRange(13, 18, Action.WALK_7);
+    this.addFrameActionForRange(18, 24, Action.NEUTRAL);
+    this.addFrameActionForRange(24, 30, Action.WALK_10);
+    this.addFrameActionForRange(30, 37, Action.WALK_8);
+    this.addFrameActionForRange(37, 42, Action.WALK_10);
+    this.addFrameActionForRange(42, 48, Action.NEUTRAL);
 
-        this.actionImageMapRight.set(Action.WALK7, 'assets/player_ps_right_walk_7.png');
-        this.actionImageMapRight.set(Action.WALK8, 'assets/player_ps_right_walk_8.png');
-        this.actionImageMapRight.set(Action.WALK9, 'assets/player_ps_right_walk_9.png');
-        this.actionImageMapRight.set(Action.WALK10, 'assets/player_ps_right_walk_10.png');
-        this.actionImageMapRight.set(Action.NEUTRAL, 'assets/player_ps_right.png');
+    this.actionImageMapRight.set(Action.WALK_7, 'assets/player_ps_right_walk_7.png');
+    this.actionImageMapRight.set(Action.WALK_8, 'assets/player_ps_right_walk_8.png');
+    this.actionImageMapRight.set(Action.WALK_9, 'assets/player_ps_right_walk_9.png');
+    this.actionImageMapRight.set(Action.WALK_10, 'assets/player_ps_right_walk_10.png');
+    this.actionImageMapRight.set(Action.NEUTRAL, 'assets/player_ps_right.png');
 
-        this.actionImageMapLeft.set(Action.WALK7, 'assets/player_ps_left_walk_7.png');
-        this.actionImageMapLeft.set(Action.WALK8, 'assets/player_ps_left_walk_8.png');
-        this.actionImageMapLeft.set(Action.WALK9, 'assets/player_ps_left_walk_9.png');
-        this.actionImageMapLeft.set(Action.WALK10, 'assets/player_ps_left_walk_10.png');
-        this.actionImageMapLeft.set(Action.NEUTRAL, 'assets/player_ps_left.png');
+    this.actionImageMapLeft.set(Action.WALK_7, 'assets/player_ps_left_walk_7.png');
+    this.actionImageMapLeft.set(Action.WALK_8, 'assets/player_ps_left_walk_8.png');
+    this.actionImageMapLeft.set(Action.WALK_9, 'assets/player_ps_left_walk_9.png');
+    this.actionImageMapLeft.set(Action.WALK_10, 'assets/player_ps_left_walk_10.png');
+    this.actionImageMapLeft.set(Action.NEUTRAL, 'assets/player_ps_left.png');
+  }
+
+  getImage(direction: string | undefined): {source: string, xOffset: number, yOffset: number, action: Action} {
+    const action: Action = this.getFrameAction(this.frameIndex);
+    let source: string;
+
+    // Can we decouple direction from the caller each time for getImage, and instead have it set in the constructor when the animation first starts?
+
+    if (direction === "left") {
+        source = this.actionImageMapLeft.get(action)!;
+    }
+    else {
+        // direction === "right"
+        source = this.actionImageMapRight.get(action)!;
     }
 
-    getImage(direction: string | undefined): {src: string, xOffset: number, yOffset: number, action: Action} {
-        const defaultAction: Action = Action.WALK7;
-        const action: Action = this.actionFrameMap.get(this.frameIndex) ?? defaultAction;
-        let src = "assets/player_left.png";
-    
-        if (action !== undefined) {
-          if (direction === "left") {
-            src = this.actionImageMapLeft.get(action) as Action;
-          }
-          else if (direction === "right") {
-            src = this.actionImageMapRight.get(action) as Action;
-          }
-    
-          this.frameIndex++;
-          if (this.frameIndex >= this.totalFrames) this.frameIndex = -1;
-          return {src: src, xOffset: 0, yOffset: 0, action};
-        }
-    
-        throw new Error("Invalid action / frame during animation");
-    }
-
-    isAnimationFinished(): boolean {
-        return this.frameIndex === -1;
-    }
+    this.frameIndex++;
+    if (this.frameIndex >= this.totalFrames) this.frameIndex = -1;
+    return { source, xOffset: 0, yOffset: 0, action };
+  }
 }

@@ -43,12 +43,6 @@ export class GameComponent implements AfterViewInit, OnDestroy {
   public static mapPixelWidth = 2600;
   public static mapPixelHeight = 1900;
 
-  private map_cell_width = 52;
-  private map_cell_height = 38
-
-  // [col][row]
-  private map = new Array(this.map_cell_width).fill(this.grassTile).map(() => new Array(this.map_cell_height).fill(this.grassTile));
-
   private fps: number = 60;
   private frameInterval: number = 1000 / this.fps; // Interval in milliseconds
   private lastUpdateTime: number = 0;
@@ -59,7 +53,7 @@ export class GameComponent implements AfterViewInit, OnDestroy {
 
   @ViewChild('inventoryComponent') inventoryComponent!: InventoryComponent;
   @ViewChild('hotbarComponent') hotbarComponent!: HotbarComponent;
-  player: Player | undefined;
+  private player: Player;
 
   private enterSubscriber: Subscription = new Subscription;
   private escapeSubscriber: Subscription = new Subscription;
@@ -70,7 +64,9 @@ export class GameComponent implements AfterViewInit, OnDestroy {
     private inventoryService: InventoryService,
     private gameStateService: GameStateService
   )
-  {}
+  {
+    this.player = this.playerFactory.createPlayer(625, 457, 6, "down");
+  }
 
   ngAfterViewInit(): void {
     this.enterSubscriber = this.keyService.enterKey$.pipe(debounceTime(250)).subscribe(() => {
@@ -90,23 +86,7 @@ export class GameComponent implements AfterViewInit, OnDestroy {
       this.canvasYPos = value;
     });
 
-    for (let col = 1; col < 25; col++) {
-      for (let row = 1; row < 9; row++) {
-        const wheat = new WheatTile(this.inventoryService, this.gameStateService);
-        this.map[col][row] = wheat;
-      }
-    }
-
-    const rock1 = new Rock(this.gameStateService);
-    const rock2 = new Rock(this.gameStateService);
-    const rock3 = new Rock(this.gameStateService);
-    const rock4 = new Rock(this.gameStateService);
-    const rock5 = new Rock(this.gameStateService);
-    this.map[3][12] = rock1;
-    this.map[3][11] = rock2;
-    this.map[3][10] = rock3;
-    this.map[2][11] = rock4;
-    this.map[4][11] = rock5;
+    this.gameStateService.initializeGameMap();
 
     const canvas = this.gameCanvas.nativeElement;
     this.ctx = canvas.getContext('2d')!;
@@ -154,7 +134,6 @@ export class GameComponent implements AfterViewInit, OnDestroy {
     }
 
     // #1 - Determine the position of the map / player
-    if (this.player) {
       if (!this.inventoryComponent.isInventoryOpen) {
         // Update player position based on keyboard input
         this.player.update();
@@ -164,13 +143,12 @@ export class GameComponent implements AfterViewInit, OnDestroy {
 
         // Handle tile collisions with the player
         // This will handle updating the player position if necessary based on collisions too
-        const result = this.getPlayerSurroundingTiles(this.player.xPos, this.player.yPos);
+        const result = this.getPlayerSurroundingTiles(this.player.x, this.player.y);
         if (result) {
           const {startCol1, startRow1, width1, height1} = result;
           this.handleTileCollision(startCol1, startRow1, width1, height1);
         }
       }
-    }
 
     // #2 - Update the map tiles
     this.updateMapTiles();
@@ -183,7 +161,7 @@ export class GameComponent implements AfterViewInit, OnDestroy {
     // #4 - Finally, draw the player
     if (this.player) {
       // if the player is on the bottom of the screen, hotbar goes to the top
-      this.isHotBarOnTop = this.player.yPos >= 575;
+      this.isHotBarOnTop = this.player.y >= 575;
       this.player.draw(this.ctx);
     }
   }
@@ -206,8 +184,8 @@ export class GameComponent implements AfterViewInit, OnDestroy {
     const startRow1 = Math.floor(playerTotalY / this.cell_size);
     let endRow = Math.floor(playerEndY / this.cell_size);
 
-    if (endCol >= this.map_cell_width) endCol = this.map_cell_width - 1;
-    if (endRow >= this.map_cell_height) endRow = this.map_cell_height - 1;
+    if (endCol >= this.gameStateService.map_cell_width) endCol = this.gameStateService.map_cell_width - 1;
+    if (endRow >= this.gameStateService.map_cell_height) endRow = this.gameStateService.map_cell_height - 1;
 
     const width1 = endCol - startCol1 + 1;
     const height1 = endRow - startRow1 + 1;
@@ -226,8 +204,8 @@ export class GameComponent implements AfterViewInit, OnDestroy {
     const startRow2 = Math.floor(canvasY / this.cell_size);
     let endRow = Math.floor(bottomSideYPos / this.cell_size);
 
-    if (endCol >= this.map_cell_width) endCol = this.map_cell_width - 1;
-    if (endRow >= this.map_cell_height) endRow = this.map_cell_height - 1;
+    if (endCol >= this.gameStateService.map_cell_width) endCol = this.gameStateService.map_cell_width - 1;
+    if (endRow >= this.gameStateService.map_cell_height) endRow = this.gameStateService.map_cell_height - 1;
 
     // Calculate width and height in terms of number of tiles
     const width2 = endCol - startCol2 + 1;
@@ -257,18 +235,16 @@ export class GameComponent implements AfterViewInit, OnDestroy {
   }
 
   updateMapTiles(): void {
-    for (let col = 0; col < this.map_cell_width; col++) {
+    for (let col = 0; col < this.gameStateService.map_cell_width; col++) {
       const tileX = col * 50;
-      for (let row = 0; row < this.map_cell_height; row++) {
+      for (let row = 0; row < this.gameStateService.map_cell_height; row++) {
         const tileY = row * 50;
-        const tile = this.map[col][row];
+        const tile = this.gameStateService.map[col][row];
         if (tile) {
-          if (this.player) {
-            const playerMapY = this.canvasYPos + this.player?.yPos;
-            const playerMapX = this.canvasXPos + this.player?.xPos;
-            if (playerMapY >= 0 && playerMapX >= 0) {
-              tile.update(tileX, tileY, playerMapX, playerMapY)
-            }
+          const playerMapY = this.canvasYPos + this.player.y;
+          const playerMapX = this.canvasXPos + this.player.x;
+          if (playerMapY >= 0 && playerMapX >= 0) {
+            tile.update(tileX, tileY, playerMapX, playerMapY)
           }
         }
       }
@@ -281,7 +257,9 @@ export class GameComponent implements AfterViewInit, OnDestroy {
       const tileX = col * 50;
       for (let row = startRow; row < startRow + height; row++) {
         const tileY = row * 50;
-        const tile = this.map[col][row];
+        //console.log(this.gameStateService);
+        //console.log(this.gameStateService.map);
+        const tile = this.gameStateService.map[col][row];
         if (tile) {
           if (this.player) {
             tile.handlePlayerCollision(tileX, tileY, this.player)
@@ -313,7 +291,7 @@ export class GameComponent implements AfterViewInit, OnDestroy {
     for (let col = startCol; col < startCol + width; col++) {
       yPos = yPosOriginal;
       for (let row = startRow; row < startRow + height; row++) {
-          const tile = this.map[col][row];
+          const tile = this.gameStateService.map[col][row];
           if (tile) {
             tile.draw(this.ctx, xPos, yPos);
           }
