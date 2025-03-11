@@ -1,4 +1,4 @@
-import { Item } from "../items/item";
+import { Item } from "../items/Item";
 
 export class Recipe {
   private recipeName: string;

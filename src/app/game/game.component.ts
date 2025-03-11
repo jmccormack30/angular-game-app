@@ -61,7 +61,6 @@ export class GameComponent implements AfterViewInit, OnDestroy {
   constructor(
     private playerFactory: PlayerFactoryService,
     private keyService: KeyService,
-    private inventoryService: InventoryService,
     private gameStateService: GameStateService
   )
   {
@@ -70,9 +69,7 @@ export class GameComponent implements AfterViewInit, OnDestroy {
 
   ngAfterViewInit(): void {
     this.enterSubscriber = this.keyService.enterKey$.pipe(debounceTime(250)).subscribe(() => {
-      console.log("enter pressed to open inv in game comp!");
       this.inventoryComponent.toggleInventory();
-      // if inventory is open, hot bar disabled - if inventory closed, hot bar is enabled
       this.hotbarComponent.enabled = !this.inventoryComponent.isInventoryOpen;
     });
     this.escapeSubscriber = this.keyService.escapeKey$.pipe(debounceTime(250)).subscribe(() => {
@@ -156,7 +153,7 @@ export class GameComponent implements AfterViewInit, OnDestroy {
     // #3 - Draw the map tiles
     const {startCol2, startRow2, width2, height2 } = this.getVisibleTiles(this.canvasXPos, this.canvasYPos);
     this.drawTiles(startCol2, startRow2, width2, height2, true);
-    this.drawPlayerPickAxeTile();
+    this.drawPlayerActionTile();
 
     // #4 - Finally, draw the player
     if (this.player) {
@@ -252,13 +249,10 @@ export class GameComponent implements AfterViewInit, OnDestroy {
   }
 
   handleTileCollision(startCol: number, startRow: number, width: number, height: number) {
-    // console.log("startCol: " + startCol + ", startRow: " + startRow + ", width: " + width + ", height: " + height);
     for (let col = startCol; col < startCol + width; col++) {
       const tileX = col * 50;
       for (let row = startRow; row < startRow + height; row++) {
         const tileY = row * 50;
-        //console.log(this.gameStateService);
-        //console.log(this.gameStateService.map);
         const tile = this.gameStateService.map[col][row];
         if (tile) {
           if (this.player) {
@@ -269,7 +263,7 @@ export class GameComponent implements AfterViewInit, OnDestroy {
     }
   }
 
-  drawPlayerPickAxeTile() {
+  drawPlayerActionTile() {
     if (this.player) {
       const {col, row} = this.player.getPickAxeTile();
       this.ctx.strokeStyle = 'red';

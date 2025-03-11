@@ -1,26 +1,19 @@
-import { ItemConstructor, ItemFactory } from "./itemfactory";
-
-export class Item {
+export abstract class Item {
   quantity: number;
   image: HTMLImageElement | null;
-  static maxStackQty: number = 100;
-  static itemName: string;
-  static imageSrc: string;
+  maxStackQty: number = 100;
+  abstract itemName: string;
 
   constructor(quantity: number, image: HTMLImageElement | null) {
+    if (quantity > this.maxStackQty) {
+      throw new Error(`Can't create ${this.getItemName()} with quantity ${quantity}, max is ${this.maxStackQty}.`)
+    }
     this.quantity = quantity;
     this.image = image;
-    ItemFactory.register(this.getItemName(), this.constructor as ItemConstructor<Item>);
   }
 
-  // Static method to get the item name of the class
-  static getItemName(): string {
-    return this.itemName;
-  }
-
-  // Instance method to get the item name of the class
   getItemName(): string {
-    return (this.constructor as typeof Item).getItemName();
+    return this.itemName;
   }
 
   // Method to convert to string
@@ -34,11 +27,5 @@ export class Item {
           this.getItemName() === other.getItemName();
   }
 
-  equals(other: Item): boolean {
-    return other !== null && other instanceof Item && this.getItemName() === other.getItemName();
-  }
-
-  clone(): Item {
-    return ItemFactory.clone(this);
-  }
+  abstract clone(): Item
 }

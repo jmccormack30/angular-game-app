@@ -1,3 +1,4 @@
+import { PLAYER_DEFAULT_IMAGES } from "../../config/constants";
 import { Animation } from "./animation";
 
 enum Action {
@@ -29,13 +30,13 @@ export class PlayerWalkUpDownAnimation extends Animation<Action> {
     this.actionImageMapDown.set(Action.WALK_2, 'assets/player_ps_down_run_3.png');
     this.actionImageMapDown.set(Action.WALK_3, "assets/player_ps_down_run_4.png");
     this.actionImageMapDown.set(Action.WALK_4, 'assets/player_ps_down_run_5.png');
-    this.actionImageMapDown.set(Action.NEUTRAL, 'assets/player_sd_down.png');
+    this.actionImageMapDown.set(Action.NEUTRAL, PLAYER_DEFAULT_IMAGES.DOWN);
 
     this.actionImageMapUp.set(Action.WALK_1, 'assets/player_ps_up_run_2.png');
     this.actionImageMapUp.set(Action.WALK_2, 'assets/player_ps_up_run_3.png');
     this.actionImageMapUp.set(Action.WALK_3, 'assets/player_ps_up_run_4.png');
     this.actionImageMapUp.set(Action.WALK_4, 'assets/player_ps_up_run_5.png');
-    this.actionImageMapUp.set(Action.NEUTRAL,'assets/player_ps_up.png');
+    this.actionImageMapUp.set(Action.NEUTRAL, PLAYER_DEFAULT_IMAGES.UP);
   }
 
   getImage(direction: string | undefined): {source: string, xOffset: number, yOffset: number, action: Action} {

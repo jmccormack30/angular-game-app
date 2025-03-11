@@ -1,3 +1,4 @@
+import { TILE_IMAGES } from "../../config/constants";
 import { Animation } from "./animation";
 
 enum Action {
@@ -17,8 +18,8 @@ export class RockHitAnimation extends Animation<Action> {
     this.addFrameActionForRange(0, 8, Action.ROCK_1);
     this.addFrameActionForRange(8, 16, Action.ROCK_2);
 
-    this.actionImageMap.set(Action.ROCK_1, 'assets/rock.png');
-    this.actionImageMap.set(Action.ROCK_2, 'assets/rock.png');
+    this.actionImageMap.set(Action.ROCK_1, TILE_IMAGES.ROCK);
+    this.actionImageMap.set(Action.ROCK_2, TILE_IMAGES.ROCK);
 
     this.actionOffsetMapX.set(Action.ROCK_1, 0);
     this.actionOffsetMapY.set(Action.ROCK_1, 2);

@@ -1,3 +1,4 @@
+import { TILE_IMAGES } from "../../config/constants";
 import { RockHitAnimation } from "../animations/rock-hit-animation";
 import { GameStateService } from "../service/gamestateservice";
 import { ImageService } from "../service/imageservice";
@@ -9,7 +10,7 @@ export class Rock extends Tile {
   animation : RockHitAnimation | null = null;
 
   constructor(private gameStateService: GameStateService) {
-    super('rock', ImageService.getImage('assets/rock.png'), ImageService.getImage('assets/grass_2.jpg'));
+    super('rock', ImageService.getImage('assets/rock.png'), ImageService.getImage(TILE_IMAGES.GRASS));
   }
 
   override handlePlayerCollision(tileX: number, tileY: number, player: Player): void {

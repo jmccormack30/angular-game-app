@@ -1,5 +1,5 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { Item } from '../items/item';
+import { Item } from '../items/Item';
 import { InventoryService } from '../service/inventoryservice';
 import { ImageService } from '../service/imageservice';
 import { KeyService } from '../service/keyservice';

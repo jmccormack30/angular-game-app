@@ -1,19 +1,19 @@
 import { ImageService } from "../service/imageservice";
 import { Tile } from "./tile";
 import { InventoryService } from "../service/inventoryservice";
-import { ItemFactory } from "../items/itemfactory";
-import { WheatItem } from "../items/wheat_item";
+import { WheatItem } from "../items/WheatItem";
 import { Player } from "./player";
 import { GameStateService } from "../service/gamestateservice";
+import { TILE_IMAGES } from "../../config/constants";
 
 export class WheatTile extends Tile {
   private lastTime = -1;
   private active: boolean = true;
-  private respawnRate = 0.025;
+  private respawnRate = 0.023;
   private respawnIncreaseRate = 0.06;
 
   constructor(private inventoryService: InventoryService, private gameStateService: GameStateService) {
-    super('wheat', ImageService.getImage('assets/wheat_dirt.png'), ImageService.getImage('assets/dirt.png'));
+    super('Wheat', ImageService.getImage(TILE_IMAGES.WHEAT_DIRT), ImageService.getImage(TILE_IMAGES.DIRT));
   }
 
   override handlePlayerCollision(tileX: number, tileY: number, player: Player): void {
@@ -24,7 +24,7 @@ export class WheatTile extends Tile {
 
     if (isCollision) {
       if (this.active) {
-        this.image = ImageService.getImage('assets/dirt.png');
+        this.image = ImageService.getImage(TILE_IMAGES.DIRT);
         this.lastTime = Date.now();
         this.active = false;
         this.addWheatToInventory();
@@ -47,7 +47,7 @@ export class WheatTile extends Tile {
           this.active = true;
           this.respawnRate = 0.023;
           this.respawnIncreaseRate = 0.007;
-          this.image = ImageService.getImage('assets/wheat_dirt.png');
+          this.image = ImageService.getImage(TILE_IMAGES.WHEAT_DIRT);
         }
         else {
           this.respawnRate += this.respawnIncreaseRate;
@@ -61,6 +61,6 @@ export class WheatTile extends Tile {
     const randomFloat = Math.random();
     const qty = (randomFloat <= 0.20) ? 2 : 1;
     
-    this.inventoryService.addItem(ItemFactory.createItem(WheatItem, qty));
+    this.inventoryService.addItem(new WheatItem(qty));
   }
 }

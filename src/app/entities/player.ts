@@ -6,9 +6,10 @@ import { GameComponent } from "../game/game.component";
 import { ImageService } from "../service/imageservice";
 import { KeyService } from "../service/keyservice";
 import { InventoryService } from "../service/inventoryservice";
-import { Item } from "../items/item";
-import { PickAxe } from "../items/pickaxe";
+import { Item } from "../items/Item";
+import { PickAxeItem } from "../items/PickAxeItem";
 import { GameStateService } from "../service/gamestateservice";
+import { PLAYER_DEFAULT_IMAGES } from "../../config/constants";
 
 enum PlayerAction {
   PICK_AXE_SWING
@@ -84,7 +85,7 @@ export class Player {
 
   update() {
     const isXPressed = this.keyService.isKeyPressed('x');
-    if (isXPressed && this.action === null && this.selectedItem instanceof PickAxe) {
+    if (isXPressed && this.action === null && this.selectedItem instanceof PickAxeItem) {
       this.action = PlayerAction.PICK_AXE_SWING;
       const {col, row} = this.getPickAxeTile();
       const tile = 
@@ -158,16 +159,16 @@ export class Player {
 
   getDefaultImageSrc(direction: string | undefined) {
     if (direction === "up") {
-        return "assets/player_ps_up.png";
+        return PLAYER_DEFAULT_IMAGES.UP;
     }
     else if (direction === "down") {
-        return "assets/player_sd_down.png";
+        return PLAYER_DEFAULT_IMAGES.DOWN;
     }
     else if (direction === "left") {
-        return "assets/player_ps_left.png";
+        return PLAYER_DEFAULT_IMAGES.LEFT;
     }
     else if (direction === "right") {
-        return "assets/player_ps_right.png";
+        return PLAYER_DEFAULT_IMAGES.RIGHT;
     }
 
     throw new Error("Invalid direction set for player");
@@ -220,7 +221,6 @@ export class Player {
       const tileCol = Math.floor(pickAxeXPos / 50);
       const tileRow = Math.floor(pickAxeYPos / 50);
 
-      // console.log("col: " + tileCol + ", row: " + tileRow);
       return {col: tileCol, row: tileRow};
     }
     else if (this.direction === 'right') {
@@ -230,7 +230,6 @@ export class Player {
       const tileCol = Math.floor(pickAxeXPos / 50);
       const tileRow = Math.floor(pickAxeYPos / 50);
 
-      // console.log("col: " + tileCol + ", row: " + tileRow);
       return {col: tileCol, row: tileRow};
     }
     return {col: 0, row: 0};

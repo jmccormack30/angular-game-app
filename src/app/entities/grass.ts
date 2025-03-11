@@ -1,10 +1,11 @@
+import { TILE_IMAGES } from "../../config/constants";
 import { ImageService } from "../service/imageservice";
 import { Player } from "./player";
 import { Tile } from "./tile";
 
 export class Grass extends Tile {
   constructor() {
-    super('grass', ImageService.getImage('assets/grass_2.jpg'), null);
+    super('Grass', ImageService.getImage(TILE_IMAGES.GRASS), null);
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars

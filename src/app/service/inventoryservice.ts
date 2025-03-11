@@ -1,7 +1,6 @@
 import { Injectable } from "@angular/core";
-import { Item } from "../items/item";
+import { Item } from "../items/Item";
 import { BehaviorSubject } from "rxjs";
-import { ItemFactory } from "../items/itemfactory";
 
 @Injectable({
   providedIn: 'root'
@@ -30,7 +29,7 @@ export class InventoryService {
   addItem(item: Item) {
     const currentInventory = this.invSubject.getValue();
 
-    const maxQtyForItem = (item.constructor as typeof Item).maxStackQty;
+    const maxQtyForItem = item.maxStackQty;
     let qtyToMove = item.quantity;
     let slot = this.getNextSlotForItem(item);
 
@@ -60,17 +59,14 @@ export class InventoryService {
     while (qtyToMove > 0 && slot !== null) {
       const qty = Math.min(qtyToMove, maxQtyForItem);
       if (qty < qtyToMove) {
-        const newItem = ItemFactory.clone(item);
+        const newItem = item.clone();
         newItem.quantity = qty;
-        console.log("update inventory!");
         this.updateInventory(slot[1], slot[0], newItem);
-        //this.items[slot[1]][slot[0]] = newItem;
         qtyToMove -= qty;
         item.quantity -= qty;
         slot = this.getNextOpenSlot();
       }
       else {
-        //this.items[slot[1]][slot[0]] = item;
         this.updateInventory(slot[1], slot[0], item);
         qtyToMove = 0;
         slot = null;
@@ -94,7 +90,7 @@ export class InventoryService {
     while (inv_row < 4) {
       const targetItem = currentInventory[inv_col][inv_row];
       if (targetItem) {
-        const maxQtyForItem = (targetItem.constructor as typeof Item).maxStackQty;
+        const maxQtyForItem = targetItem.maxStackQty;
         if (targetItem.quantity < maxQtyForItem && targetItem.isSameItemType(item)) {
           return [inv_row, inv_col];
         }

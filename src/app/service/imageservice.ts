@@ -1,15 +1,16 @@
 import { Observable, from } from "rxjs";
-import { Item } from "../items/item";
+import { Item } from "../items/Item";
+import { ITEM_IMAGES, PICK_AXE_ANIMATION, PLAYER_DEFAULT_IMAGES, PLAYER_WALK_ANIMATION, TILE_IMAGES } from "../../config/constants";
 
 export class ImageService {
   public static imageCache: { [key: string]: HTMLImageElement } = {};
 
   public static preloadImages(): Observable<void[]> {
     const imageSources = [
-      'assets/grass_2.jpg',
-      'assets/wheat_dirt.png',
-      'assets/red_item.png',
-      'assets/blue_item.png',
+      TILE_IMAGES.DIRT,
+      TILE_IMAGES.GRASS,
+      TILE_IMAGES.WHEAT_DIRT,
+      TILE_IMAGES.ROCK,
       'assets/player_right.png',
       'assets/player_right_2.png',
       'assets/player_left.png',
@@ -34,45 +35,48 @@ export class ImageService {
       'assets/player_right_walk_1.png',
       'assets/player_right_walk_2.png',
       'assets/player_right_walk_3.png',
-      'assets/player_sd_down.png',
-      'assets/player_ps_left.png',
-      'assets/player_ps_right.png',
-      'assets/player_ps_up.png',
-      'assets/player_ps_down_run_2.png',
-      'assets/player_ps_down_run_3.png',
-      'assets/player_ps_down_run_4.png',
-      'assets/player_ps_down_run_5.png',
-      'assets/player_ps_up_run_2.png',
-      'assets/player_ps_up_run_3.png',
-      'assets/player_ps_up_run_4.png',
-      'assets/player_ps_up_run_5.png',
+      PLAYER_DEFAULT_IMAGES.UP,
+      PLAYER_DEFAULT_IMAGES.DOWN,
+      PLAYER_DEFAULT_IMAGES.LEFT,
+      PLAYER_DEFAULT_IMAGES.RIGHT,
+
+      PLAYER_WALK_ANIMATION.DOWN_1,
+      PLAYER_WALK_ANIMATION.DOWN_2,
+      PLAYER_WALK_ANIMATION.DOWN_3,
+      PLAYER_WALK_ANIMATION.DOWN_4,
+
+      PLAYER_WALK_ANIMATION.UP_1,
+      PLAYER_WALK_ANIMATION.UP_2,
+      PLAYER_WALK_ANIMATION.UP_3,
+      PLAYER_WALK_ANIMATION.UP_4,
       'assets/player_ps_right_incline.png',
       'assets/player_ps_right_run_2.png',
       'assets/player_ps_right_run_3.png',
       'assets/player_ps_right_run_4.png',
       'assets/player_ps_right_run_5.png',
-      'assets/player_ps_right_walk_7.png',
-      'assets/player_ps_right_walk_8.png',
-      'assets/player_ps_right_walk_9.png',
-      'assets/player_ps_right_walk_10.png',
-      'assets/player_ps_left_walk_7.png',
-      'assets/player_ps_left_walk_8.png',
-      'assets/player_ps_left_walk_9.png',
-      'assets/player_ps_left_walk_10.png',
-      'assets/dirt.png',
-      'assets/wheat_inv.png',
-      'assets/bread.png',
-      'assets/wheat_inv_2.png',
-      'assets/rock.png',
-      'assets/player_left_axe_1.png',
-      'assets/player_left_axe_2.png',
-      'assets/player_left_axe_3.png',
-      'assets/player_left_axe_4.png',
-      'assets/player_right_axe_1.png',
-      'assets/player_right_axe_2.png',
-      'assets/player_right_axe_3.png',
-      'assets/player_right_axe_4.png',
-      'assets/pickaxe.png',
+      PLAYER_WALK_ANIMATION.RIGHT_1,
+      PLAYER_WALK_ANIMATION.RIGHT_2,
+      PLAYER_WALK_ANIMATION.RIGHT_3,
+      PLAYER_WALK_ANIMATION.RIGHT_4,
+
+      PLAYER_WALK_ANIMATION.LEFT_1,
+      PLAYER_WALK_ANIMATION.LEFT_2,
+      PLAYER_WALK_ANIMATION.LEFT_3,
+      PLAYER_WALK_ANIMATION.LEFT_4,
+
+      PICK_AXE_ANIMATION.LEFT_1,
+      PICK_AXE_ANIMATION.LEFT_2,
+      PICK_AXE_ANIMATION.LEFT_3,
+      PICK_AXE_ANIMATION.LEFT_4,
+
+      PICK_AXE_ANIMATION.RIGHT_1,
+      PICK_AXE_ANIMATION.RIGHT_2,
+      PICK_AXE_ANIMATION.RIGHT_3,
+      PICK_AXE_ANIMATION.RIGHT_4,
+
+      ITEM_IMAGES.WHEAT,
+      ITEM_IMAGES.BREAD,
+      ITEM_IMAGES.PICKAXE,
     ]
 
     const promises = imageSources.map(src => this.loadImage(src));

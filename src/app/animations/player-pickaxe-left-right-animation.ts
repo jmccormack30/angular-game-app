@@ -1,3 +1,4 @@
+import { PICK_AXE_ANIMATION } from "../../config/constants";
 import { Animation } from "./animation";
 
 export enum Action {
@@ -26,15 +27,15 @@ export class PlayerPickAxeLeftRightAnimation extends Animation<Action>  {
     this.addFrameActionForRange(6, 9, Action.PICK_AXE_3);
     this.addFrameActionForRange(9, 30, Action.PICK_AXE_4);
 
-    this.actionImageMapLeft.set(Action.PICK_AXE_1, 'assets/player_left_axe_1.png');
-    this.actionImageMapLeft.set(Action.PICK_AXE_2, 'assets/player_left_axe_2.png');
-    this.actionImageMapLeft.set(Action.PICK_AXE_3, 'assets/player_left_axe_3.png');
-    this.actionImageMapLeft.set(Action.PICK_AXE_4, 'assets/player_left_axe_4.png');
+    this.actionImageMapLeft.set(Action.PICK_AXE_1, PICK_AXE_ANIMATION.LEFT_1);
+    this.actionImageMapLeft.set(Action.PICK_AXE_2, PICK_AXE_ANIMATION.LEFT_2);
+    this.actionImageMapLeft.set(Action.PICK_AXE_3, PICK_AXE_ANIMATION.LEFT_3);
+    this.actionImageMapLeft.set(Action.PICK_AXE_4, PICK_AXE_ANIMATION.LEFT_4);
 
-    this.actionImageMapRight.set(Action.PICK_AXE_1, 'assets/player_right_axe_1.png');
-    this.actionImageMapRight.set(Action.PICK_AXE_2, 'assets/player_right_axe_2.png');
-    this.actionImageMapRight.set(Action.PICK_AXE_3, 'assets/player_right_axe_3.png');
-    this.actionImageMapRight.set(Action.PICK_AXE_4, 'assets/player_right_axe_4.png');
+    this.actionImageMapRight.set(Action.PICK_AXE_1, PICK_AXE_ANIMATION.RIGHT_1);
+    this.actionImageMapRight.set(Action.PICK_AXE_2, PICK_AXE_ANIMATION.RIGHT_2);
+    this.actionImageMapRight.set(Action.PICK_AXE_3, PICK_AXE_ANIMATION.RIGHT_3);
+    this.actionImageMapRight.set(Action.PICK_AXE_4, PICK_AXE_ANIMATION.RIGHT_4);
 
     this.actionOffsetMapLeftX.set(Action.PICK_AXE_1, 0);
     this.actionOffsetMapLeftX.set(Action.PICK_AXE_2, -5);

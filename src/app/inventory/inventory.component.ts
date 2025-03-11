@@ -1,13 +1,12 @@
 import { Component, Output, EventEmitter, Renderer2, ElementRef, OnDestroy, OnInit } from '@angular/core';
-import { Item } from '../items/item';
+import { Item } from '../items/Item';
 import { Recipe } from '../crafting/recipe';
 import { Recipes } from '../crafting/recipes';
-import { ItemFactory } from '../items/itemfactory';
 import { KeyService } from '../service/keyservice';
 import { InventoryService } from '../service/inventoryservice';
 import { ImageService } from '../service/imageservice';
 import { Subscription } from 'rxjs';
-import { PickAxe } from '../items/pickaxe';
+import { PickAxeItem } from '../items/PickAxeItem';
 
 @Component({
   selector: 'app-inventory',
@@ -53,7 +52,7 @@ export class InventoryComponent implements OnInit, OnDestroy {
       this.items = items;
     });
 
-    const pickaxe = ItemFactory.createItem(PickAxe, 1);
+    const pickaxe = new PickAxeItem();
     this.items[0][3] = pickaxe;
     this.inventoryService.setSelectedItem(pickaxe);
   }
@@ -84,6 +83,7 @@ export class InventoryComponent implements OnInit, OnDestroy {
         this.renderer.removeChild(document.body, this.floatingItem);
       }
       if (!this.moveCraftingToInventory()) {
+        // TODO
         console.log("Failed to move crafting to inventory!!!!!");
       }
       this.isInventoryOpen = false;
@@ -101,11 +101,11 @@ export class InventoryComponent implements OnInit, OnDestroy {
       for (let c_col = 0; c_col < 3; c_col++) {
         const item = this.crafting[c_col][c_row];
         if (item) {
-          // if (this.moveItemToInventory(item)) {
           if (this.inventoryService.addItem(item)) {
             this.crafting[c_col][c_row] = null;
           }
           else {
+            // TODO
             console.log("Too many items in crafting grid to fit in inventory!!!!");
             return false;
           }
@@ -116,7 +116,7 @@ export class InventoryComponent implements OnInit, OnDestroy {
   }
 
   getSpaceForItem(item: Item): number {
-    const maxQtyForItem = (item.constructor as typeof Item).maxStackQty;
+    const maxQtyForItem = item.maxStackQty;
     let totalQty = 0;
 
     for (let i_col = 0; i_col < this.items.length; i_col++) {
@@ -170,7 +170,7 @@ export class InventoryComponent implements OnInit, OnDestroy {
         return;
       }
       const outputQty = this.output?.quantity;
-      const maxQtyForItem = (this.itemToMove.constructor as typeof Item).maxStackQty;
+      const maxQtyForItem = this.itemToMove.maxStackQty;
       if (outputQty > maxQtyForItem - this.itemToMove.quantity) {
         return;
       }
@@ -252,7 +252,7 @@ export class InventoryComponent implements OnInit, OnDestroy {
 
       if (item) {
         if (item.isSameItemType(this.itemToMove)) {
-          const maxQtyForItem = (this.itemToMove.constructor as typeof Item).maxStackQty;
+          const maxQtyForItem = this.itemToMove.maxStackQty;
           if (isMoveFullQty) {
             qtyToMove = Math.min(qtyToMove, maxQtyForItem - item.quantity);
             if (qtyToMove <= 0) {
@@ -507,7 +507,7 @@ export class InventoryComponent implements OnInit, OnDestroy {
 
   combineAllForSameItem(itemToMove: Item): Item | null {
     let crafting_updated = false;
-    const maxQtyForItem = (itemToMove.constructor as typeof Item).maxStackQty;
+    const maxQtyForItem = itemToMove.maxStackQty;
     let qtyToMove = maxQtyForItem - itemToMove.quantity;
     let totalQty = 0;
 
@@ -544,7 +544,6 @@ export class InventoryComponent implements OnInit, OnDestroy {
             qtyToMove -= item.quantity;
             totalQty += item.quantity;
             this.inventoryService.updateInventory(col, row, null);
-            //this.items[col][row] = null;
           }
           else {
             item.quantity -= qtyToMove;
@@ -580,7 +579,7 @@ export class InventoryComponent implements OnInit, OnDestroy {
     }
 
     const allRecipes = Array.from(Recipes.recipeList.values()).filter(recipe => 
-      crafting_items.every(item => recipe.getRequiredItems().some(requiredItem => requiredItem.equals(item))));
+      crafting_items.every(item => recipe.getRequiredItems().some(requiredItem => requiredItem.isSameItemType(item))));
 
     if (allRecipes.length == 0) {
       this.output = null;
@@ -601,8 +600,6 @@ export class InventoryComponent implements OnInit, OnDestroy {
           const recipe_item = recipe_crafting[col][row];
           const crafting_item = this.crafting[col][row];
 
-          // console.log("Row = " + row + ", Col = " + col + ", C: " + crafting_item + ", R: " + recipe_item);
-
           if (recipe_item === null && crafting_item === null) {
             continue;
           }
@@ -614,12 +611,12 @@ export class InventoryComponent implements OnInit, OnDestroy {
             validItem = false;
             break outerLoop;
           }
-          else if (recipe_item !== null && crafting_item !== null && !recipe_item.equals(crafting_item)) {
+          else if (recipe_item !== null && crafting_item !== null && !recipe_item.isSameItemType(crafting_item)) {
             validItem = false;
             break outerLoop;
           }
           else {
-            if (recipe_item !== null && crafting_item !== null && recipe_item.equals(crafting_item)) {
+            if (recipe_item !== null && crafting_item !== null && recipe_item.isSameItemType(crafting_item)) {
                 const crafting_item_qty = crafting_item.quantity;
                 const recipe_item_qty = recipe_item.quantity;
 
@@ -643,8 +640,7 @@ export class InventoryComponent implements OnInit, OnDestroy {
       if (validItem) {
         const outputItem = recipe.getOutput();
         if (outputItem) {
-          const ItemClass = outputItem.constructor as typeof Item;
-          const newItem = ItemFactory.createItem(ItemClass, outputItem.quantity);
+          const newItem = outputItem.clone();
           if (newItem) {
             this.output = newItem;
             this.currentRecipe = cur_recipe;
@@ -660,7 +656,6 @@ export class InventoryComponent implements OnInit, OnDestroy {
   }
 
   useCraftingItems(qty: number) {
-    // console.log("in useCraftingItems!");
     if (!this.currentRecipe) {
       return;
     }
@@ -670,8 +665,6 @@ export class InventoryComponent implements OnInit, OnDestroy {
       for (let col = 0; col < 3; col++) {
         const recipe_item = recipe_crafting[col][row];
         const crafting_item = this.crafting[col][row];
-
-        // console.log("Row = " + row + ", Col = " + col + ", C: " + crafting_item + ", R: " + recipe_item);
 
         if (recipe_item === null && crafting_item === null) {
           continue;
@@ -688,14 +681,14 @@ export class InventoryComponent implements OnInit, OnDestroy {
           this.currentRecipe = null;
           return;
         }
-        else if (recipe_item !== null && crafting_item !== null && !recipe_item.equals(crafting_item)) {
+        else if (recipe_item !== null && crafting_item !== null && !recipe_item.isSameItemType(crafting_item)) {
           console.log("Error: Trying to use crafting items but does not match with recipe");
           this.output = null;
           this.currentRecipe = null;
           return;
         }
         else {
-          if (recipe_item !== null && crafting_item !== null && recipe_item.equals(crafting_item)) {
+          if (recipe_item !== null && crafting_item !== null && recipe_item.isSameItemType(crafting_item)) {
             if (crafting_item.quantity < recipe_item.quantity * qty) {
               console.log("Error: Not enough quantity for recipe");
               this.output = null;
