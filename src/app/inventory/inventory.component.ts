@@ -230,6 +230,7 @@ export class InventoryComponent implements OnInit, OnDestroy {
           this.removeFloatingItem();
         }
         else if (isMoveSingleQty) {
+          console.log("Move single quantity!");
           this.itemToMove.quantity -= 1;
           this.updateFloatingItemQuantity(this.itemToMove.quantity);
           const splitItem = this.itemToMove.clone();

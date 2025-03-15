@@ -5,12 +5,9 @@ import { debounceTime } from 'rxjs/operators'
 import { InventoryComponent } from '../inventory/inventory.component';
 import { PlayerFactoryService } from '../entities/playerfactory';
 import { KeyService } from '../service/keyservice';
-import { WheatTile } from '../entities/wheat_tile';
 import { Grass } from '../entities/grass';
 import { ImageService } from '../service/imageservice';
 import { HotbarComponent } from '../hotbar/hotbar.component';
-import { Rock } from '../entities/rock';
-import { InventoryService } from '../service/inventoryservice';
 import { GameStateService } from '../service/gamestateservice';
 
 @Component({

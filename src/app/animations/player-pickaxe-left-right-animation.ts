@@ -1,4 +1,6 @@
 import { PICK_AXE_ANIMATION } from "../../config/constants";
+import { Rock } from "../entities/rock";
+import { Tile } from "../entities/tile";
 import { Animation } from "./animation";
 
 export enum Action {
@@ -10,6 +12,8 @@ export enum Action {
   
 export class PlayerPickAxeLeftRightAnimation extends Animation<Action>  {
 
+  tile: Rock | undefined;
+
   actionImageMapLeft: Map<Action, string> = new Map<Action, string>();
   actionImageMapRight: Map<Action, string> = new Map<Action, string>();
 
@@ -19,8 +23,9 @@ export class PlayerPickAxeLeftRightAnimation extends Animation<Action>  {
   actionOffsetMapRightX: Map<Action, number> = new Map<Action, number>();
   actionOffsetMapRightY: Map<Action, number> = new Map<Action, number>();
 
-  constructor() {
+  constructor(tile: Rock | undefined) {
     super(0, 30);
+    this.tile = tile;
 
     this.addFrameActionForRange(0, 3, Action.PICK_AXE_1);
     this.addFrameActionForRange(3, 6, Action.PICK_AXE_2);
@@ -77,6 +82,10 @@ export class PlayerPickAxeLeftRightAnimation extends Animation<Action>  {
         source = this.actionImageMapRight.get(action)!;
         xOffset = this.actionOffsetMapRightX.get(action)!;
         yOffset = this.actionOffsetMapRightY.get(action)!;
+    }
+
+    if (this.frameIndex === 20 && this.tile !== undefined) {
+      this.tile.mine();
     }
 
     this.frameIndex++;

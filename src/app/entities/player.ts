@@ -11,6 +11,7 @@ import { PickAxeItem } from "../items/PickAxeItem";
 import { GameStateService } from "../service/gamestateservice";
 import { PLAYER_DEFAULT_IMAGES } from "../../config/constants";
 import { PlayerPickAxeUpAnimation } from "../animations/player-pickaxe-up-animation";
+import { Rock } from "./rock";
 
 enum PlayerAction {
   PICK_AXE_SWING
@@ -88,11 +89,14 @@ export class Player {
     const isXPressed = this.keyService.isKeyPressed('x');
     if (isXPressed && this.action === null && this.selectedItem instanceof PickAxeItem) {
       this.action = PlayerAction.PICK_AXE_SWING;
+      const {col, row} = this.getPickAxeTile();
+      const mapTile = this.gameStateService.map[col][row];
+      const tile = (mapTile !== undefined && mapTile instanceof Rock) ? mapTile : undefined;
       if (this.direction === "left" || this.direction === "right") {
-        this.animation = new PlayerPickAxeLeftRightAnimation();
+        this.animation = new PlayerPickAxeLeftRightAnimation(tile);
       }
       else if (this.direction === "up") {
-        this.animation = new PlayerPickAxeUpAnimation();
+        this.animation = new PlayerPickAxeUpAnimation(tile);
       }
       return;
     }

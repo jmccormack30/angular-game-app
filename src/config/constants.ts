@@ -2,6 +2,7 @@ export const ITEM_IMAGES = {
   WHEAT: 'assets/wheat_inv_2.png',
   BREAD: 'assets/bread.png',
   PICKAXE: 'assets/pickaxe.png',
+  ROCK: 'assets/rock.png'
 };
 
 export const TILE_IMAGES = {

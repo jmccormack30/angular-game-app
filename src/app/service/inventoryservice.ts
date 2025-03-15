@@ -84,10 +84,21 @@ export class InventoryService {
   getNextSlotForItem(item: Item) {
     const currentInventory = this.invSubject.getValue();
 
+    // check bottom row hotbar first
+    for (let c = 0; c < 9; c++) {
+      const targetItem = currentInventory[c][3];
+      if (targetItem) {
+        const maxQtyForItem = targetItem.maxStackQty;
+        if (targetItem.quantity < maxQtyForItem && targetItem.isSameItemType(item)) {
+          return [3, c];
+        }
+      }
+    }
+
     let inv_row = 0;
     let inv_col = 0;
 
-    while (inv_row < 4) {
+    while (inv_row < 3) {
       const targetItem = currentInventory[inv_col][inv_row];
       if (targetItem) {
         const maxQtyForItem = targetItem.maxStackQty;
@@ -107,10 +118,17 @@ export class InventoryService {
   getNextOpenSlot() {
     const currentInventory = this.invSubject.getValue();
 
+    // check bottom row hotbar first
+    for (let c = 0; c < 9; c++) {
+      if (currentInventory[c][3] === null) {
+        return [3, c];
+      }
+    }
+
     let inv_row = 0;
     let inv_col = 0;
 
-    while (inv_row < 4) {
+    while (inv_row < 3) {
       if (currentInventory[inv_col][inv_row] === null)  {
         return [inv_row, inv_col];
       }

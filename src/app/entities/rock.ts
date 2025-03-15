@@ -1,7 +1,9 @@
 import { TILE_IMAGES } from "../../config/constants";
 import { RockHitAnimation } from "../animations/rock-hit-animation";
+import { RockItem } from "../items/RockItem";
 import { GameStateService } from "../service/gamestateservice";
 import { ImageService } from "../service/imageservice";
+import { InventoryService } from "../service/inventoryservice";
 import { Player } from "./player";
 import { Tile } from "./tile";
 
@@ -9,7 +11,7 @@ export class Rock extends Tile {
 
   animation : RockHitAnimation | null = null;
 
-  constructor(private gameStateService: GameStateService) {
+  constructor(private inventoryService: InventoryService, private gameStateService: GameStateService) {
     super('rock', ImageService.getImage(TILE_IMAGES.ROCK), ImageService.getImage(TILE_IMAGES.GRASS));
   }
 
@@ -41,6 +43,17 @@ export class Rock extends Tile {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   override update(tileX: number, tileY: number, player: Player): void {
     return;
+  }
+
+  mine() {
+    this.addRockToInventory();
+  }
+
+  private addRockToInventory() {
+    const randomFloat = Math.random();
+    const qty = (randomFloat <= 0.20) ? 2 : 1;
+    
+    this.inventoryService.addItem(new RockItem(qty));
   }
 
   override draw(ctx: CanvasRenderingContext2D, xPos: number, yPos: number): void {

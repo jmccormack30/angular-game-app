@@ -33,11 +33,11 @@ export class GameStateService {
       }
     }
   
-    const rock1 = new Rock(this);
-    const rock2 = new Rock(this);
-    const rock3 = new Rock(this);
-    const rock4 = new Rock(this);
-    const rock5 = new Rock(this);
+    const rock1 = new Rock(this.inventoryService, this);
+    const rock2 = new Rock(this.inventoryService, this);
+    const rock3 = new Rock(this.inventoryService, this);
+    const rock4 = new Rock(this.inventoryService, this);
+    const rock5 = new Rock(this.inventoryService, this);
     this.map[3][12] = rock1;
     this.map[3][11] = rock2;
     this.map[3][10] = rock3;
