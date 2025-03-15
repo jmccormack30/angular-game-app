@@ -1,4 +1,4 @@
-import { PLAYER_DEFAULT_IMAGES } from "../../config/constants";
+import { PLAYER_DEFAULT_IMAGES, PLAYER_WALK_ANIMATION } from "../../config/constants";
 import { Animation } from "./animation";
 
 enum Action {
@@ -26,16 +26,16 @@ export class PlayerWalkLeftRightAnimation extends Animation<Action> {
     this.addFrameActionForRange(37, 42, Action.WALK_10);
     this.addFrameActionForRange(42, 48, Action.NEUTRAL);
 
-    this.actionImageMapRight.set(Action.WALK_7, 'assets/player_ps_right_walk_7.png');
-    this.actionImageMapRight.set(Action.WALK_8, 'assets/player_ps_right_walk_8.png');
-    this.actionImageMapRight.set(Action.WALK_9, 'assets/player_ps_right_walk_9.png');
-    this.actionImageMapRight.set(Action.WALK_10, 'assets/player_ps_right_walk_10.png');
+    this.actionImageMapRight.set(Action.WALK_7, PLAYER_WALK_ANIMATION.RIGHT_1);
+    this.actionImageMapRight.set(Action.WALK_8, PLAYER_WALK_ANIMATION.RIGHT_2);
+    this.actionImageMapRight.set(Action.WALK_9, PLAYER_WALK_ANIMATION.RIGHT_3);
+    this.actionImageMapRight.set(Action.WALK_10, PLAYER_WALK_ANIMATION.RIGHT_4);
     this.actionImageMapRight.set(Action.NEUTRAL, PLAYER_DEFAULT_IMAGES.RIGHT);
 
-    this.actionImageMapLeft.set(Action.WALK_7, 'assets/player_ps_left_walk_7.png');
-    this.actionImageMapLeft.set(Action.WALK_8, 'assets/player_ps_left_walk_8.png');
-    this.actionImageMapLeft.set(Action.WALK_9, 'assets/player_ps_left_walk_9.png');
-    this.actionImageMapLeft.set(Action.WALK_10, 'assets/player_ps_left_walk_10.png');
+    this.actionImageMapLeft.set(Action.WALK_7, PLAYER_WALK_ANIMATION.LEFT_1);
+    this.actionImageMapLeft.set(Action.WALK_8, PLAYER_WALK_ANIMATION.LEFT_2);
+    this.actionImageMapLeft.set(Action.WALK_9, PLAYER_WALK_ANIMATION.LEFT_3);
+    this.actionImageMapLeft.set(Action.WALK_10, PLAYER_WALK_ANIMATION.LEFT_4);
     this.actionImageMapLeft.set(Action.NEUTRAL, PLAYER_DEFAULT_IMAGES.LEFT);
   }
 

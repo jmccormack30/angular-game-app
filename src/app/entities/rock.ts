@@ -10,7 +10,7 @@ export class Rock extends Tile {
   animation : RockHitAnimation | null = null;
 
   constructor(private gameStateService: GameStateService) {
-    super('rock', ImageService.getImage('assets/rock.png'), ImageService.getImage(TILE_IMAGES.GRASS));
+    super('rock', ImageService.getImage(TILE_IMAGES.ROCK), ImageService.getImage(TILE_IMAGES.GRASS));
   }
 
   override handlePlayerCollision(tileX: number, tileY: number, player: Player): void {

@@ -1,4 +1,4 @@
-import { PLAYER_DEFAULT_IMAGES } from "../../config/constants";
+import { PLAYER_DEFAULT_IMAGES, PLAYER_WALK_ANIMATION } from "../../config/constants";
 import { Animation } from "./animation";
 
 enum Action {
@@ -26,16 +26,16 @@ export class PlayerWalkUpDownAnimation extends Animation<Action> {
     this.addFrameActionForRange(43, 49, Action.WALK_3);
     this.addFrameActionForRange(49, 56, Action.NEUTRAL);
 
-    this.actionImageMapDown.set(Action.WALK_1, 'assets/player_ps_down_run_2.png');
-    this.actionImageMapDown.set(Action.WALK_2, 'assets/player_ps_down_run_3.png');
-    this.actionImageMapDown.set(Action.WALK_3, "assets/player_ps_down_run_4.png");
-    this.actionImageMapDown.set(Action.WALK_4, 'assets/player_ps_down_run_5.png');
+    this.actionImageMapDown.set(Action.WALK_1, PLAYER_WALK_ANIMATION.UP_1);
+    this.actionImageMapDown.set(Action.WALK_2, PLAYER_WALK_ANIMATION.UP_2);
+    this.actionImageMapDown.set(Action.WALK_3, PLAYER_WALK_ANIMATION.UP_3);
+    this.actionImageMapDown.set(Action.WALK_4, PLAYER_WALK_ANIMATION.UP_4);
     this.actionImageMapDown.set(Action.NEUTRAL, PLAYER_DEFAULT_IMAGES.DOWN);
 
-    this.actionImageMapUp.set(Action.WALK_1, 'assets/player_ps_up_run_2.png');
-    this.actionImageMapUp.set(Action.WALK_2, 'assets/player_ps_up_run_3.png');
-    this.actionImageMapUp.set(Action.WALK_3, 'assets/player_ps_up_run_4.png');
-    this.actionImageMapUp.set(Action.WALK_4, 'assets/player_ps_up_run_5.png');
+    this.actionImageMapUp.set(Action.WALK_1, PLAYER_WALK_ANIMATION.DOWN_1);
+    this.actionImageMapUp.set(Action.WALK_2, PLAYER_WALK_ANIMATION.DOWN_1);
+    this.actionImageMapUp.set(Action.WALK_3, PLAYER_WALK_ANIMATION.DOWN_1);
+    this.actionImageMapUp.set(Action.WALK_4, PLAYER_WALK_ANIMATION.DOWN_1);
     this.actionImageMapUp.set(Action.NEUTRAL, PLAYER_DEFAULT_IMAGES.UP);
   }
 
