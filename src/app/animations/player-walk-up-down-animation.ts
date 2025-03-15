@@ -26,16 +26,16 @@ export class PlayerWalkUpDownAnimation extends Animation<Action> {
     this.addFrameActionForRange(43, 49, Action.WALK_3);
     this.addFrameActionForRange(49, 56, Action.NEUTRAL);
 
-    this.actionImageMapDown.set(Action.WALK_1, PLAYER_WALK_ANIMATION.UP_1);
-    this.actionImageMapDown.set(Action.WALK_2, PLAYER_WALK_ANIMATION.UP_2);
-    this.actionImageMapDown.set(Action.WALK_3, PLAYER_WALK_ANIMATION.UP_3);
-    this.actionImageMapDown.set(Action.WALK_4, PLAYER_WALK_ANIMATION.UP_4);
+    this.actionImageMapDown.set(Action.WALK_1, PLAYER_WALK_ANIMATION.DOWN_1);
+    this.actionImageMapDown.set(Action.WALK_2, PLAYER_WALK_ANIMATION.DOWN_2);
+    this.actionImageMapDown.set(Action.WALK_3, PLAYER_WALK_ANIMATION.DOWN_3);
+    this.actionImageMapDown.set(Action.WALK_4, PLAYER_WALK_ANIMATION.DOWN_4);
     this.actionImageMapDown.set(Action.NEUTRAL, PLAYER_DEFAULT_IMAGES.DOWN);
 
-    this.actionImageMapUp.set(Action.WALK_1, PLAYER_WALK_ANIMATION.DOWN_1);
-    this.actionImageMapUp.set(Action.WALK_2, PLAYER_WALK_ANIMATION.DOWN_1);
-    this.actionImageMapUp.set(Action.WALK_3, PLAYER_WALK_ANIMATION.DOWN_1);
-    this.actionImageMapUp.set(Action.WALK_4, PLAYER_WALK_ANIMATION.DOWN_1);
+    this.actionImageMapUp.set(Action.WALK_1, PLAYER_WALK_ANIMATION.UP_1);
+    this.actionImageMapUp.set(Action.WALK_2, PLAYER_WALK_ANIMATION.UP_2);
+    this.actionImageMapUp.set(Action.WALK_3, PLAYER_WALK_ANIMATION.UP_3);
+    this.actionImageMapUp.set(Action.WALK_4, PLAYER_WALK_ANIMATION.UP_4);
     this.actionImageMapUp.set(Action.NEUTRAL, PLAYER_DEFAULT_IMAGES.UP);
   }
 

@@ -10,6 +10,7 @@ import { Item } from "../items/Item";
 import { PickAxeItem } from "../items/PickAxeItem";
 import { GameStateService } from "../service/gamestateservice";
 import { PLAYER_DEFAULT_IMAGES } from "../../config/constants";
+import { PlayerPickAxeUpAnimation } from "../animations/player-pickaxe-up-animation";
 
 enum PlayerAction {
   PICK_AXE_SWING
@@ -24,7 +25,7 @@ export class Player {
   private _action: PlayerAction | null = null;
   private image: HTMLImageElement | null = null;
   private selectedItem: Item | null = null;
-  private animation : PlayerWalkUpDownAnimation | PlayerWalkLeftRightAnimation | PlayerPickAxeLeftRightAnimation | undefined;
+  private animation : PlayerWalkUpDownAnimation | PlayerWalkLeftRightAnimation | PlayerPickAxeLeftRightAnimation | PlayerPickAxeUpAnimation | undefined;
 
   private playerImages: { [key: string]: string } = {};
   private imageCache: { [key: string]: HTMLImageElement } = {};
@@ -87,9 +88,12 @@ export class Player {
     const isXPressed = this.keyService.isKeyPressed('x');
     if (isXPressed && this.action === null && this.selectedItem instanceof PickAxeItem) {
       this.action = PlayerAction.PICK_AXE_SWING;
-      const {col, row} = this.getPickAxeTile();
-      const tile = 
-      this.animation = new PlayerPickAxeLeftRightAnimation();
+      if (this.direction === "left" || this.direction === "right") {
+        this.animation = new PlayerPickAxeLeftRightAnimation();
+      }
+      else if (this.direction === "up") {
+        this.animation = new PlayerPickAxeUpAnimation();
+      }
       return;
     }
     if (this.action === PlayerAction.PICK_AXE_SWING) {
@@ -139,12 +143,18 @@ export class Player {
       }
 
       this.image = ImageService.getImage(source);
+      console.log("image", this.image);
 
       const newXPos = this.x + xOffset;
       const newYPos = this.y + yOffset;
 
       if (this.image) {
+        console.log("Trying to draw image!");
         ctx.drawImage(this.image, newXPos, newYPos);
+        console.log("Finished drawing image!");
+      }
+      else {
+        console.log("Fail to draw image!");
       }
     }
     else {

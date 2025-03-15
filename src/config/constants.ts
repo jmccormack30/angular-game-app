@@ -29,7 +29,11 @@ export const PICK_AXE_ANIMATION = {
   RIGHT_1: 'assets/player_right_axe_1.png',
   RIGHT_2: 'assets/player_right_axe_2.png',
   RIGHT_3: 'assets/player_right_axe_3.png',
-  RIGHT_4: 'assets/player_right_axe_4.png'
+  RIGHT_4: 'assets/player_right_axe_4.png',
+
+  UP_1: 'assets/player_pickaxe_up_1.png',
+  UP_2: 'assets/player_pickaxe_up_2.png',
+  // UP_3: 'assets/player_pickaxe_up_3.png'
 }
 
 export const PLAYER_WALK_ANIMATION = {
